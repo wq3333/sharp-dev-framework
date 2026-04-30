@@ -5,5 +5,5 @@ namespace SharpDevFramework.Demo.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : FrameworkDbContext(options)
 {
-    public DbSet<FileEntity> Files { get; set; }
+    public DbSet<DemoEntity> Demos { get; set; }
 }

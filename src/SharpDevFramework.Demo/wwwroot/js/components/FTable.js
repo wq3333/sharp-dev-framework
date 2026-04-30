@@ -1,45 +1,39 @@
-const { ref, computed } = Vue;
+const { ref } = Vue;
 
 export const FTable = {
     name: 'FTable',
     props: {
-        columns: { type: Array, required: true },
         data: { type: Array, default: () => [] },
-        stripe: { type: Boolean, default: false },
+        columns: { type: Array, default: () => [] },
         border: { type: Boolean, default: false },
-        hover: { type: Boolean, default: true },
+        stripe: { type: Boolean, default: false },
         emptyText: { type: String, default: '暂无数据' }
     },
-    emits: ['row-click'],
     template: `
         <div class="f-table-wrapper">
-            <table class="f-table" :class="{ 'f-table--stripe': stripe, 'f-table--border': border, 'f-table--hover': hover }">
+            <table class="f-table glass-table" :class="{ 'f-table--border': border, 'f-table--stripe': stripe }">
                 <thead>
                     <tr>
-                        <th 
-                            v-for="col in columns" 
-                            :key="col.key"
-                            :style="{ width: col.width || 'auto', textAlign: col.align || 'left' }"
-                        >
+                        <th v-for="col in columns" :key="col.prop" :style="col.width ? {width: col.width} : {}">
                             {{ col.label }}
                         </th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-if="data.length === 0">
+                    <template v-if="data.length > 0">
+                        <tr v-for="(row, index) in data" :key="index">
+                            <td v-for="col in columns" :key="col.prop">
+                                <slot v-if="$slots[col.prop]" :name="col.prop" :row="row" :index="index"></slot>
+                                <template v-else>{{ row[col.prop] }}</template>
+                            </td>
+                        </tr>
+                    </template>
+                    <tr v-else>
                         <td :colspan="columns.length" class="f-table__empty">
-                            {{ emptyText }}
-                        </td>
-                    </tr>
-                    <tr 
-                        v-for="(row, index) in data" 
-                        :key="row.id || index"
-                        @click="$emit('row-click', row, index)"
-                    >
-                        <td v-for="col in columns" :key="col.key" :style="{ textAlign: col.align || 'left' }">
-                            <slot :name="col.key" :row="row" :value="row[col.key]" :index="index">
-                                {{ col.formatter ? col.formatter(row[col.key], row) : row[col.key] }}
-                            </slot>
+                            <div class="empty-state" style="padding: 40px 20px;">
+                                <div class="empty-icon">📋</div>
+                                <div class="empty-text">{{ emptyText }}</div>
+                            </div>
                         </td>
                     </tr>
                 </tbody>

@@ -1,4 +1,5 @@
 import { api } from '../api.js';
+import { setAuth } from '../auth.js';
 import { initSignalR } from '../signalr.js';
 import { FButton, FInput } from '../components/index.js';
 
@@ -38,15 +39,12 @@ export const LoginView = {
             loading.value = true;
             error.value = '';
             try {
-                const data = await api.login(username.value, password.value);
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('userId', data.userId);
-                localStorage.setItem('username', data.username);
-                localStorage.setItem('role', data.role);
+                const data = await api.auth.login(username.value, password.value, (e) => {
+                    error.value = e.message || '登录失败，请检查用户名和密码';
+                });
+                setAuth(data);
                 initSignalR();
                 window.location.hash = '#/tasks';
-            } catch (e) {
-                error.value = e.message || '登录失败，请检查用户名和密码';
             } finally {
                 loading.value = false;
             }

@@ -1,95 +1,134 @@
+import { toast } from './components/Toast.js';
+import { clearAuth } from './auth.js';
+
 const API_BASE = '/api';
 
-function getHeaders() {
+const apiClient = axios.create({
+    baseURL: API_BASE,
+    headers: {
+        'Content-Type': 'application/json'
+    }
+});
+
+apiClient.interceptors.request.use(config => {
     const token = localStorage.getItem('token');
-    return {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-    };
-}
-
-function clearAuth() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userId');
-    localStorage.removeItem('username');
-    localStorage.removeItem('role');
-    window.location.hash = '#/login';
-}
-
-async function request(url, options = {}) {
-    const response = await fetch(`${API_BASE}${url}`, {
-        ...options,
-        headers: {
-            ...getHeaders(),
-            ...options.headers
-        }
-    });
-
-    if (response.status === 401) {
-        clearAuth();
-        throw new Error('Unauthorized');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
     }
+    return config;
+});
 
-    const json = await response.json().catch(() => ({}));
-
-    if (response.ok) {
-        if (json.success === false) {
-            throw new Error(json.message || '请求失败');
+apiClient.interceptors.response.use(
+    response => {
+        const data = response.data;
+        if (data.success === false) {
+            const error = new Error(data.message || '请求失败');
+            toast.error(error.message);
+            throw error;
         }
-        return json;
+        return data;
+    },
+    error => {
+        if (error.response?.status === 401) {
+            clearAuth();
+            window.location.hash = '#/login';
+            const authError = new Error('Unauthorized');
+            toast.error('登录已过期，请重新登录');
+            throw authError;
+        }
+        const message = error.response?.data?.message || error.message || '请求失败';
+        toast.error(message);
+        throw new Error(message);
     }
+);
 
-    throw new Error(json.message || `HTTP ${response.status}: ${response.statusText}`);
+async function request(method, url, data = null, params = null, onerror = null) {
+    try {
+        const config = { method, url };
+        if (data) config.data = data;
+        if (params) config.params = params;
+        return await apiClient(config);
+    } catch (e) {
+        if (onerror) onerror(e);
+        throw e;
+    }
 }
 
 export const api = {
-    login: async (username, password) => {
-        const result = await request('/users/login', {
-            method: 'POST',
-            body: JSON.stringify({ username, password })
-        });
-        return result.data;
+    auth: {
+        login: async (username, password, onerror = null) => {
+            const result = await request('POST', '/users/login', { username, password }, null, onerror);
+            return result.data;
+        }
     },
-    getTasks: async (status, page = 1, size = 20) => {
-        let url = `/tasks?index=${page}&size=${size}`;
-        if (status !== null && status !== '') url += `&status=${status}`;
-        const result = await request(url);
-        return result;
+    
+    tasks: {
+        list: async (status, page = 1, size = 20, onerror = null) => {
+            const params = { index: page, size };
+            if (status && status.length > 0) {
+                params.status = Array.isArray(status) ? status.join(',') : status;
+            }
+            return await request('GET', '/tasks', null, params, onerror);
+        },
+        retry: async (id, onerror = null) => {
+            await request('POST', `/tasks/${id}/retry`, null, null, onerror);
+        },
+        cancel: async (id, onerror = null) => {
+            await request('POST', `/tasks/${id}/cancel`, null, null, onerror);
+        },
+        delete: async (id, onerror = null) => {
+            await request('DELETE', `/tasks/${id}`, null, null, onerror);
+        }
     },
-    retryTask: async (id) => {
-        await request(`/tasks/${id}/retry`, { method: 'POST' });
+    
+    users: {
+        list: async (page = 1, size = 20, onerror = null) => {
+            return await request('GET', '/users', null, { index: page, size }, onerror);
+        },
+        create: async (name, password, role, onerror = null) => {
+            const result = await request('POST', '/users', { name, password, role }, null, onerror);
+            return result.data;
+        },
+        update: async (id, name, password, role, isActive, onerror = null) => {
+            const result = await request('PUT', `/users/${id}`, { name, password, role, isActive }, null, onerror);
+            return result.data;
+        },
+        delete: async (id, onerror = null) => {
+            await request('DELETE', `/users/${id}`, null, null, onerror);
+        }
     },
-    cancelTask: async (id) => {
-        await request(`/tasks/${id}/cancel`, { method: 'POST' });
+    
+    demos: {
+        list: async (name, status, page = 1, size = 20, onerror = null) => {
+            const params = { index: page, size };
+            if (name) params.name = name;
+            if (status && status.length > 0) {
+                params.status = Array.isArray(status) ? status.join(',') : status;
+            }
+            return await request('GET', '/demos', null, params, onerror);
+        },
+        get: async (id, onerror = null) => {
+            const result = await request('GET', `/demos/${id}`, null, null, onerror);
+            return result.data;
+        },
+        create: async (name, description, status, category, onerror = null) => {
+            await request('POST', '/demos', { name, description, status, category }, null, onerror);
+        },
+        update: async (id, name, description, status, category, onerror = null) => {
+            await request('PUT', `/demos/${id}`, { name, description, status, category }, null, onerror);
+        },
+        delete: async (id, onerror = null) => {
+            await request('DELETE', `/demos/${id}`, null, null, onerror);
+        }
     },
-    deleteTask: async (id) => {
-        await request(`/tasks/${id}`, { method: 'DELETE' });
+    
+    enums: {
+        list: async (onerror = null) => {
+            const result = await request('GET', '/enums', null, null, onerror);
+            return result.data;
+        }
     },
-    getUsers: async (page = 1, size = 20) => {
-        const result = await request(`/users?index=${page}&size=${size}`);
-        return result;
-    },
-    createUser: async (name, password, role) => {
-        const result = await request('/users', {
-            method: 'POST',
-            body: JSON.stringify({ name, password, role })
-        });
-        return result.data;
-    },
-    updateUser: async (id, name, password, role, isActive) => {
-        const result = await request(`/users/${id}`, {
-            method: 'PUT',
-            body: JSON.stringify({ name, password, role, isActive })
-        });
-        return result.data;
-    },
-    deleteUser: async (id) => {
-        await request(`/users/${id}`, { method: 'DELETE' });
-    },
-    getEnums: async () => {
-        const result = await request('/enums');
-        return result.data;
-    },
+    
     formatSize(bytes) {
         if (bytes === 0) return '0 B';
         const k = 1024;
@@ -97,6 +136,7 @@ export const api = {
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     },
+    
     formatDate(dateStr) {
         return new Date(dateStr).toLocaleString('zh-CN');
     }

@@ -1,9 +1,11 @@
 export { FButton } from './FButton.js';
 export { FInput } from './FInput.js';
-export { FSelect } from './FSelect.js';
+export { FSingleSelect } from './FSingleSelect.js';
 export { FCheckbox } from './FCheckbox.js';
 export { FModal } from './FModal.js';
 export { FTable } from './FTable.js';
 export { FPagination } from './FPagination.js';
 export { FDropdown, FDropdownItem } from './FDropdown.js';
+export { FMultiSelect } from './FMultiSelect.js';
+export { LayoutComponent } from './Layout.js';
 export { ToastContainer, ToastPlugin, toast } from './Toast.js';

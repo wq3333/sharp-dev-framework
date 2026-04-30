@@ -1,11 +1,11 @@
 import { api } from '../api.js';
 import { enums, loadEnums, getEnumName } from '../enums.js';
-import { FButton, FInput, FSelect, FCheckbox, FModal, FPagination } from '../components/index.js';
+import { FButton, FInput, FSingleSelect, FCheckbox, FModal, FTable, FPagination } from '../components/index.js';
 
 const { ref, onMounted, computed } = Vue;
 
 export const UserManagerView = {
-    components: { FButton, FInput, FSelect, FCheckbox, FModal, FPagination },
+    components: { FButton, FInput, FSingleSelect, FCheckbox, FModal, FTable, FPagination },
     template: `
     <div>
         <div class="page-header">
@@ -14,42 +14,27 @@ export const UserManagerView = {
         </div>
 
         <div class="glass-panel" style="padding: 0; overflow: hidden;">
-            <table class="glass-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>用户名</th>
-                        <th>角色</th>
-                        <th>状态</th>
-                        <th>创建时间</th>
-                        <th>操作</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="user in users" :key="user.id">
-                        <td>{{ user.id }}</td>
-                        <td>{{ user.name }}</td>
-                        <td><span :class="user.role === 'Admin' ? 'badge badge--purple' : 'badge badge--blue'">{{ getEnumName('userRoleTypes', user.role) }}</span></td>
-                        <td><span :class="user.isActive ? 'badge badge--green' : 'badge badge--red'">{{ user.isActive ? '启用' : '禁用' }}</span></td>
-                        <td>{{ api.formatDate(user.createdAt) }}</td>
-                        <td>
-                            <div class="flex gap-2">
-                                <FButton size="sm" @click="editUser(user)">编辑</FButton>
-                                <FButton type="danger" size="sm" @click="deleteUser(user)" v-if="user.id !== currentUserId">删除</FButton>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <div v-if="users.length === 0" class="empty-state">
-                <div class="empty-icon">👥</div>
-                <div class="empty-text">暂无用户</div>
-            </div>
+            <FTable :data="users" :columns="columns" empty-text="暂无用户">
+                <template #role="{ row }">
+                    <span :class="row.role === 'Admin' ? 'badge badge--purple' : 'badge badge--blue'">{{ getEnumName('userRoleTypes', row.role) }}</span>
+                </template>
+                <template #status="{ row }">
+                    <span :class="row.isActive ? 'badge badge--success' : 'badge badge--danger'">{{ row.isActive ? '启用' : '禁用' }}</span>
+                </template>
+                <template #createdAt="{ row }">
+                    {{ api.formatDate(row.createdAt) }}
+                </template>
+                <template #actions="{ row }">
+                    <div class="flex gap-2">
+                        <FButton size="sm" @click="editUser(row)">编辑</FButton>
+                        <FButton type="danger" size="sm" @click="deleteUser(row)" v-if="row.id !== currentUserId">删除</FButton>
+                    </div>
+                </template>
+            </FTable>
             <FPagination 
-                v-if="pageCount > 1"
                 v-model="currentPage"
-                :total="totalCount"
                 :page-size="pageSize"
+                :total="totalCount"
                 @page-change="goToPage"
             />
         </div>
@@ -65,7 +50,7 @@ export const UserManagerView = {
             </div>
             <div class="form-group">
                 <label class="form-label">角色</label>
-                <FSelect v-model="form.role" :options="roleOptions" value-key="value" label-key="displayName" placeholder="选择角色" />
+                <FSingleSelect v-model="form.role" :options="roleOptions" value-key="value" label-key="displayName" placeholder="选择角色" />
             </div>
             <div v-if="showEditModal" class="form-group">
                 <FCheckbox v-model="form.isActive" label="启用账户" />
@@ -90,6 +75,15 @@ export const UserManagerView = {
         const totalCount = ref(0);
         const pageCount = ref(0);
 
+        const columns = [
+            { prop: 'id', label: 'ID', width: '80px' },
+            { prop: 'name', label: '用户名' },
+            { prop: 'role', label: '角色' },
+            { prop: 'status', label: '状态' },
+            { prop: 'createdAt', label: '创建时间' },
+            { prop: 'actions', label: '操作' }
+        ];
+
         const showModal = computed({
             get: () => showCreateModal.value || showEditModal.value,
             set: (val) => { if (!val) closeModal(); }
@@ -98,19 +92,15 @@ export const UserManagerView = {
         const roleOptions = computed(() => enums.userRoleTypes || []);
 
         const loadUsers = async () => {
-            try {
-                const result = await api.getUsers(currentPage.value, pageSize.value);
-                users.value = result.data || [];
-                totalCount.value = result.totalCount || 0;
-                pageCount.value = result.pageCount || 0;
-            } catch (e) {
-                console.error('Failed to load users:', e);
-            }
+            const result = await api.users.list(currentPage.value, pageSize.value);
+            users.value = result.data || [];
+            totalCount.value = result.totalCount || 0;
+            pageCount.value = result.pageCount || 0;
         };
 
-        const goToPage = (page) => {
-            if (page < 1 || page > pageCount.value) return;
+        const goToPage = ({ page, pageSize: newSize }) => {
             currentPage.value = page;
+            pageSize.value = newSize;
             loadUsers();
         };
 
@@ -121,27 +111,19 @@ export const UserManagerView = {
         };
 
         const saveUser = async () => {
-            try {
-                if (showCreateModal.value) {
-                    await api.createUser(form.value.name, form.value.password, form.value.role);
-                } else {
-                    await api.updateUser(editingUserId.value, form.value.name, form.value.password || undefined, form.value.role, form.value.isActive);
-                }
-                closeModal();
-                await loadUsers();
-            } catch (e) {
-                console.error('Failed to save user:', e);
+            if (showCreateModal.value) {
+                await api.users.create(form.value.name, form.value.password, form.value.role);
+            } else {
+                await api.users.update(editingUserId.value, form.value.name, form.value.password || undefined, form.value.role, form.value.isActive);
             }
+            closeModal();
+            await loadUsers();
         };
 
         const deleteUser = async (user) => {
             if (confirm(`确定删除用户 "${user.name}"？`)) {
-                try {
-                    await api.deleteUser(user.id);
-                    await loadUsers();
-                } catch (e) {
-                    console.error('Failed to delete user:', e);
-                }
+                await api.users.delete(user.id);
+                await loadUsers();
             }
         };
 
@@ -160,6 +142,6 @@ export const UserManagerView = {
             await loadUsers();
         });
 
-        return { users, currentUserId, showCreateModal, showEditModal, showModal, form, roleOptions, editUser, saveUser, deleteUser, closeModal, getEnumName, api, currentPage, totalCount, pageCount, goToPage };
+        return { users, columns, currentUserId, showCreateModal, showEditModal, showModal, form, roleOptions, editUser, saveUser, deleteUser, closeModal, getEnumName, api, currentPage, totalCount, pageCount, goToPage };
     }
 };

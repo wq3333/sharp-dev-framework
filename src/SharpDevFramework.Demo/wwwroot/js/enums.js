@@ -6,16 +6,12 @@ function toCamelCase(str) {
 
 export async function loadEnums() {
     const { api } = await import('./api.js');
-    try {
-        const raws = await api.getEnums();
-        const transformed = {};
-        raws.forEach(raw => {
-            transformed[toCamelCase(raw.categoryName)] = raw.items;
-        });
-        Object.assign(enumsCache, transformed);
-    } catch (e) {
-        console.error('Failed to load enums:', e);
-    }
+    const raws = await api.enums.list();
+    const transformed = {};
+    raws.forEach(raw => {
+        transformed[toCamelCase(raw.categoryName)] = raw.items;
+    });
+    Object.assign(enumsCache, transformed);
 }
 
 export function getEnumName(type, value) {
