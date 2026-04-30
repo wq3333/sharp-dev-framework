@@ -141,7 +141,7 @@ public class TaskCenter(ILogger<TaskCenter> logger, IServiceProvider serviceProv
         if (task is null) return;
         task.Status = state;
         if (error.NotNullOrWhiteSpace()) task.ErrorMessage = error;
-        if (state == TaskStates.Completed) task.CompletedAt = DateTime.UtcNow;
+        if (state == TaskStates.Completed) task.CompletedAt = DateTime.Now.ToUtcTimestamp();
         dbContext.Tasks.Update(task);
         dbContext.SaveChanges();
 

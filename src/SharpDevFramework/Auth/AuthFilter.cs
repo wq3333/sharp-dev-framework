@@ -46,29 +46,3 @@ public class AuthFilter(TokenService tokenService) : IAuthorizationFilter
         context.Result = new StatusCodeResult(StatusCodes.Status401Unauthorized);
     }
 }
-
-public class AuthEndpointFilter(TokenService tokenService) : IEndpointFilter
-{
-    public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
-    {
-
-        var authHeader = context.HttpContext.Request.Headers.Authorization.FirstOrDefault();
-        if (authHeader.IsNullOrWhiteSpace())
-        {
-            authHeader = context.HttpContext.Request.Query.TryGetValue("access_token", out var token) ? token : string.Empty;
-            if (authHeader.IsNullOrWhiteSpace()) return Results.Unauthorized();
-        }
-
-        try
-        {
-            var token = authHeader["Bearer ".Length..].Trim();
-            var payload = tokenService.VerifyToken(token);
-            context.HttpContext.Items["payload"] = payload;
-        }
-        catch
-        {
-            return Results.Unauthorized();
-        }
-        return await next(context);
-    }
-}

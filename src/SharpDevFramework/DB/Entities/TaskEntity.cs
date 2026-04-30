@@ -1,3 +1,5 @@
+using SharpDevLib;
+
 namespace SharpDevFramework;
 
 public class TaskEntity
@@ -9,7 +11,7 @@ public class TaskEntity
     public TaskStates Status { get; set; }
     public string? ErrorMessage { get; set; }
     public int RetryCount { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime? CompletedAt { get; set; }
+    public long CreatedAt { get; set; } = DateTime.Now.ToUtcTimestamp();
+    public long? CompletedAt { get; set; }
     public bool IsDeleted { get; set; }
 }

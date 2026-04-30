@@ -1,5 +1,4 @@
-﻿using DocumentFormat.OpenXml.InkML;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
@@ -44,7 +43,6 @@ public static class FrameworkExtensions
 
         app.UseCors()
             .UseSignalR()
-            .UseAuth()
             .UseEnums(assembly);
 
         app.MapControllers();
