@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using DocumentFormat.OpenXml.InkML;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
@@ -58,14 +59,11 @@ public static class FrameworkExtensions
 
     static WebApplicationBuilder AddSerialog(this WebApplicationBuilder builder)
     {
-        var isEnabled = builder.Configuration.GetValue<bool>("FrameworkSettings:Serilog:IsEnabled");
+        var isEnabled = builder.Configuration.GetValue<bool>("Serilog:IsEnabled");
         if (!isEnabled) return builder;
         Environment.SetEnvironmentVariable("Serilog:WriteTo:0:Args:path", Statics.LogsPath);
         builder.Configuration.AddEnvironmentVariables();
-        builder.Host.UseSerilog((context, _, configuration) =>
-        {
-            configuration.ReadFrom.Configuration(context.Configuration.GetSection("FrameworkSettings:Serilog"));
-        });
+        builder.Host.UseSerilog((context, services, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
         return builder;
     }
 

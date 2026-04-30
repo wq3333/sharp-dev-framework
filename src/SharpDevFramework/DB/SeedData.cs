@@ -27,6 +27,7 @@ internal static class SeedData
             user.PasswordHash = passwordHasher.HashPassword(user, password);
             context.Users.Add(user);
             context.SaveChanges();
+            File.WriteAllText(Statics.InitAuthPath, $"{userName}\r\n{password}");
         }
     }
 }
