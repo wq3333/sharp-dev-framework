@@ -42,7 +42,7 @@ export const FPagination = {
                 </div>
                 <button 
                     class="f-pagination__btn" 
-                    :disabled="modelValue >= totalPages"
+                    :disabled="modelValue >= pageCount"
                     @click="goTo(modelValue + 1)"
                 >
                     下一页
@@ -51,12 +51,12 @@ export const FPagination = {
         </div>
     `,
     setup(props, { emit }) {
-        const totalPages = computed(() => Math.ceil(props.total / props.pageSize));
+        const pageCount = computed(() => Math.ceil(props.total / props.pageSize));
 
         const visiblePages = computed(() => {
             const pages = [];
             const current = props.modelValue;
-            const total = totalPages.value;
+            const total = pageCount.value;
 
             if (total <= 7) {
                 for (let i = 1; i <= total; i++) pages.push(i);
@@ -73,11 +73,11 @@ export const FPagination = {
         });
 
         const goTo = (page) => {
-            if (page < 1 || page > totalPages.value || page === props.modelValue) return;
+            if (page < 1 || page > pageCount.value || page === props.modelValue) return;
             emit('update:modelValue', page);
             emit('page-change', page);
         };
 
-        return { totalPages, visiblePages, goTo };
+        return { pageCount, visiblePages, goTo };
     }
 };

@@ -68,6 +68,14 @@ public class UsersController(FrameworkDbContext context, TokenService tokenServi
         return DataReply.Succeed(new LoginResponse { Token = token, UserId = user.Id, Username = user.Name!, Role = user.Role });
     }
 
+    [HttpPost("token")]
+    public DataReply<string> Token()
+    {
+        var payload = HttpContext.GetJwtPayload();
+        var token=tokenService.GenerateToken(payload.UserId, payload.Username, payload.Role);
+        return DataReply.Succeed(token);
+    }
+
     [HttpGet]
     public PageReply<UserDto> GetPage([FromQuery] UserPageRequest request)
     {

@@ -44,50 +44,50 @@ async function request(url, options = {}) {
 
 export const api = {
     login: async (username, password) => {
-        const result = await request('/Auth/login', {
+        const result = await request('/users/login', {
             method: 'POST',
             body: JSON.stringify({ username, password })
         });
         return result.data;
     },
     getTasks: async (status, page = 1, size = 20) => {
-        let url = `/Tasks?index=${page}&size=${size}`;
+        let url = `/tasks?index=${page}&size=${size}`;
         if (status !== null && status !== '') url += `&status=${status}`;
         const result = await request(url);
         return result;
     },
     retryTask: async (id) => {
-        await request(`/Tasks/${id}/retry`, { method: 'POST' });
+        await request(`/tasks/${id}/retry`, { method: 'POST' });
     },
     cancelTask: async (id) => {
-        await request(`/Tasks/${id}/cancel`, { method: 'POST' });
+        await request(`/tasks/${id}/cancel`, { method: 'POST' });
     },
     deleteTask: async (id) => {
-        await request(`/Tasks/${id}`, { method: 'DELETE' });
+        await request(`/tasks/${id}`, { method: 'DELETE' });
     },
     getUsers: async (page = 1, size = 20) => {
-        const result = await request(`/Users?index=${page}&size=${size}`);
+        const result = await request(`/users?index=${page}&size=${size}`);
         return result;
     },
     createUser: async (name, password, role) => {
-        const result = await request('/Users', {
+        const result = await request('/users', {
             method: 'POST',
             body: JSON.stringify({ name, password, role })
         });
         return result.data;
     },
     updateUser: async (id, name, password, role, isActive) => {
-        const result = await request(`/Users/${id}`, {
+        const result = await request(`/users/${id}`, {
             method: 'PUT',
             body: JSON.stringify({ name, password, role, isActive })
         });
         return result.data;
     },
     deleteUser: async (id) => {
-        await request(`/Users/${id}`, { method: 'DELETE' });
+        await request(`/users/${id}`, { method: 'DELETE' });
     },
     getEnums: async () => {
-        const result = await request('/Common/enums');
+        const result = await request('/enums');
         return result.data;
     },
     formatSize(bytes) {

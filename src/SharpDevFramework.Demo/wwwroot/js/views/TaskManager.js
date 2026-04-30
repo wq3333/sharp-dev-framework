@@ -12,7 +12,7 @@ export const TaskManagerView = {
         <div class="page-header">
             <h1 class="page-title">⚙️ 任务管理</h1>
             <div class="flex gap-2">
-                <FSelect v-model="statusFilter" :options="taskStateOptions" value-key="value" label-key="name" placeholder="全部状态" style="width: 150px;" />
+                <FSelect v-model="statusFilter" :options="taskStateOptions" value-key="value" label-key="displayName" placeholder="全部状态" style="width: 150px;" />
                 <FButton size="sm" icon="🔄" @click="loadTasks">刷新</FButton>
             </div>
         </div>
@@ -51,7 +51,7 @@ export const TaskManagerView = {
                 <div class="empty-text">暂无任务</div>
             </div>
             <FPagination 
-                v-if="totalPages > 1"
+                v-if="pageCount > 1"
                 v-model="currentPage"
                 :total="totalCount"
                 :page-size="pageSize"
@@ -66,22 +66,23 @@ export const TaskManagerView = {
         const currentPage = ref(1);
         const pageSize = ref(20);
         const totalCount = ref(0);
+        const pageCount = ref(0);
 
         const taskStateOptions = computed(() => enums.taskStates || []);
-        const totalPages = computed(() => Math.ceil(totalCount.value / pageSize.value));
 
         const loadTasks = async () => {
             try {
                 const result = await api.getTasks(statusFilter.value, currentPage.value, pageSize.value);
                 tasks.value = result.data || [];
                 totalCount.value = result.totalCount || 0;
+                pageCount.value = result.pageCount || 0;
             } catch (e) {
                 console.error('Failed to load tasks:', e);
             }
         };
 
         const goToPage = (page) => {
-            if (page < 1 || page > totalPages.value) return;
+            if (page < 1 || page > pageCount.value) return;
             currentPage.value = page;
             loadTasks();
         };
@@ -116,11 +117,10 @@ export const TaskManagerView = {
         });
 
         onMounted(async () => {
-            await loadEnums();
             await loadTasks();
             onTaskUpdated(handleTaskUpdated);
         });
 
-        return { tasks, statusFilter, taskStateOptions, taskStatusClass: getTaskStatusClass, getEnumName, loadTasks, retryTask, deleteTask, api, currentPage, totalCount, totalPages, goToPage };
+        return { tasks, statusFilter, taskStateOptions, taskStatusClass: getTaskStatusClass, getEnumName, loadTasks, retryTask, deleteTask, api, currentPage, totalCount, pageCount, goToPage };
     }
 };

@@ -35,8 +35,8 @@ namespace SharpDevFramework.Demo.Data.Migrations
                     Status = table.Column<int>(type: "INTEGER", nullable: false),
                     ErrorMessage = table.Column<string>(type: "TEXT", nullable: true),
                     RetryCount = table.Column<int>(type: "INTEGER", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    CompletedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    CreatedAt = table.Column<long>(type: "INTEGER", nullable: false),
+                    CompletedAt = table.Column<long>(type: "INTEGER", nullable: true),
                     IsDeleted = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>

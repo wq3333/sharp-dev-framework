@@ -9,7 +9,7 @@ namespace SharpDevFramework;
 public class TasksController(FrameworkDbContext context, TaskCenter taskCenter) : ControllerBase
 {
     [HttpGet]
-    public PageReply<TaskDto> GetList([FromQuery] TaskRequest request)
+    public PageReply<TaskDto> GetPage([FromQuery] TaskRequest request)
     {
         var query = context.Tasks.AsQueryable();
         if (request.Status.NotNullOrEmpty()) query = query.Where(x => request.Status.Contains(x.Status));

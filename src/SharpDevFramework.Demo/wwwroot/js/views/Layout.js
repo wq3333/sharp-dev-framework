@@ -10,7 +10,7 @@ export const LayoutView = {
     <div class="layout-main">
         <div class="sidebar">
             <div class="sidebar-header">
-                <h1 class="sidebar-title">🚀 File Server</h1>
+                <h1 class="sidebar-title">🚀 Demo</h1>
             </div>
             
             <nav class="sidebar-nav">
@@ -50,9 +50,9 @@ export const LayoutView = {
     </div>
     `,
     setup() {
-        const username = computed(() => localStorage.getItem('name') || '');
+        const username = computed(() => localStorage.getItem('username') || '');
         const isAdmin = computed(() => localStorage.getItem('role') === 'Admin');
-        const adminLabel = computed(() => getEnumName('userRoles', 1));
+        const adminLabel = computed(() => getEnumName('userRoleTypes', 'Admin'));
 
         const handleLogout = async () => {
             stopSignalR();
@@ -62,10 +62,6 @@ export const LayoutView = {
             localStorage.removeItem('role');
             window.location.hash = '#/login';
         };
-
-        onMounted(async () => {
-            await loadEnums();
-        });
 
         return { username, isAdmin, adminLabel, handleLogout };
     }

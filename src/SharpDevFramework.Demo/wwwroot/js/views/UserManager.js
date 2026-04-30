@@ -29,7 +29,7 @@ export const UserManagerView = {
                     <tr v-for="user in users" :key="user.id">
                         <td>{{ user.id }}</td>
                         <td>{{ user.name }}</td>
-                        <td><span :class="user.role === 1 ? 'badge badge--purple' : 'badge badge--blue'">{{ getEnumName('userRoles', user.role) }}</span></td>
+                        <td><span :class="user.role === 'Admin' ? 'badge badge--purple' : 'badge badge--blue'">{{ getEnumName('userRoleTypes', user.role) }}</span></td>
                         <td><span :class="user.isActive ? 'badge badge--green' : 'badge badge--red'">{{ user.isActive ? '启用' : '禁用' }}</span></td>
                         <td>{{ api.formatDate(user.createdAt) }}</td>
                         <td>
@@ -46,7 +46,7 @@ export const UserManagerView = {
                 <div class="empty-text">暂无用户</div>
             </div>
             <FPagination 
-                v-if="totalPages > 1"
+                v-if="pageCount > 1"
                 v-model="currentPage"
                 :total="totalCount"
                 :page-size="pageSize"
@@ -65,7 +65,7 @@ export const UserManagerView = {
             </div>
             <div class="form-group">
                 <label class="form-label">角色</label>
-                <FSelect v-model="form.role" :options="roleOptions" value-key="value" label-key="name" placeholder="选择角色" />
+                <FSelect v-model="form.role" :options="roleOptions" value-key="value" label-key="displayName" placeholder="选择角色" />
             </div>
             <div v-if="showEditModal" class="form-group">
                 <FCheckbox v-model="form.isActive" label="启用账户" />
@@ -84,31 +84,32 @@ export const UserManagerView = {
         const form = ref({ name: '', password: '', role: 0, isActive: true });
         const editingUserId = ref(null);
         const currentUserId = computed(() => parseInt(localStorage.getItem('userId') || '0'));
-        const isAdmin = computed(() => localStorage.getItem('role') === '1');
+        const isAdmin = computed(() => localStorage.getItem('role') === 'Admin');
         const currentPage = ref(1);
         const pageSize = ref(20);
         const totalCount = ref(0);
+        const pageCount = ref(0);
 
         const showModal = computed({
             get: () => showCreateModal.value || showEditModal.value,
             set: (val) => { if (!val) closeModal(); }
         });
 
-        const totalPages = computed(() => Math.ceil(totalCount.value / pageSize.value));
-        const roleOptions = computed(() => enums.userRoles || []);
+        const roleOptions = computed(() => enums.userRoleTypes || []);
 
         const loadUsers = async () => {
             try {
                 const result = await api.getUsers(currentPage.value, pageSize.value);
                 users.value = result.data || [];
                 totalCount.value = result.totalCount || 0;
+                pageCount.value = result.pageCount || 0;
             } catch (e) {
                 console.error('Failed to load users:', e);
             }
         };
 
         const goToPage = (page) => {
-            if (page < 1 || page > totalPages.value) return;
+            if (page < 1 || page > pageCount.value) return;
             currentPage.value = page;
             loadUsers();
         };
@@ -156,10 +157,9 @@ export const UserManagerView = {
                 window.location.hash = '#/tasks';
                 return;
             }
-            await loadEnums();
             await loadUsers();
         });
 
-        return { users, currentUserId, showCreateModal, showEditModal, showModal, form, roleOptions, editUser, saveUser, deleteUser, closeModal, getEnumName, api, currentPage, totalCount, totalPages, goToPage };
+        return { users, currentUserId, showCreateModal, showEditModal, showModal, form, roleOptions, editUser, saveUser, deleteUser, closeModal, getEnumName, api, currentPage, totalCount, pageCount, goToPage };
     }
 };
