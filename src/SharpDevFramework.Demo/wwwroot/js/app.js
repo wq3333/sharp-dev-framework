@@ -36,7 +36,7 @@ function clearAuth() {
     stopSignalR();
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
-    localStorage.removeItem('name');
+    localStorage.removeItem('username');
     localStorage.removeItem('role');
 }
 
@@ -70,7 +70,7 @@ router.beforeEach(async (to, from, next) => {
     if (to.path !== '/login' && !tokenValid) {
         next('/login');
     } else if (to.path === '/login' && tokenValid) {
-        next('/files');
+        next('/tasks');
     } else {
         if (!window._enumsLoaded && tokenValid) {
             try {

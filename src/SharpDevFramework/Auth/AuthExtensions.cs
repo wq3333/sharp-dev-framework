@@ -85,8 +85,7 @@ public static class AuthExtensions
             var reply = DataReply.Succeed(new LoginResponse { Token = token, UserId = user.Id, Username = user.Name!, Role = user.Role });
             httpContext.Response.StatusCode = 200;
             await httpContext.Response.WriteAsJsonAsync(reply);
-
-        }).WithMetadata(new AllowAnonymousAttribute());
+        }).AddEndpointFilter<IEndpointConventionBuilder, ExceptionEndpointFilter>();
     }
 
     static void MapToken(this WebApplication app, string url)
@@ -94,10 +93,11 @@ public static class AuthExtensions
         app.MapPost(url, async (httpContext) =>
         {
             var payload = httpContext.GetJwtPayload();
-            var token = httpContext.RequestServices.GetRequiredService<TokenService>().GenerateToken(payload.Id, payload.Name, payload.Role);
+            var token = httpContext.RequestServices.GetRequiredService<TokenService>().GenerateToken(payload.UserId, payload.Username, payload.Role);
             httpContext.Response.StatusCode = 200;
             await httpContext.Response.WriteAsJsonAsync(DataReply.Succeed(token));
-        });
+        }).AddEndpointFilter<IEndpointConventionBuilder,ExceptionEndpointFilter>()
+        .AddEndpointFilter<IEndpointConventionBuilder, AuthEndpointFilter>();
     }
 }
 

@@ -153,7 +153,7 @@ export const UserManagerView = {
 
         onMounted(async () => {
             if (!isAdmin.value) {
-                window.location.hash = '#/files';
+                window.location.hash = '#/tasks';
                 return;
             }
             await loadEnums();

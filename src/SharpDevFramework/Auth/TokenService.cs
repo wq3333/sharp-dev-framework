@@ -28,8 +28,8 @@ public class TokenService(IConfiguration configuration) : ISingletonService
         var (expire, secret) = GetConfig();
         var payload = new JwtPayload
         {
-            Id = userId,
-            Name = username,
+            UserId = userId,
+            Username = username,
             Role = role,
             Exp = DateTimeOffset.UtcNow.AddMinutes(expire).ToUnixTimeSeconds(),
         };

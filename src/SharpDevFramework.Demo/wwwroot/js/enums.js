@@ -39,6 +39,4 @@ export const enums = {
     get userRoles() { return enumsCache.userRoles || []; },
     get taskStates() { return enumsCache.taskStates || []; },
     get taskTypes() { return enumsCache.taskTypes || []; },
-    get downloadStates() { return enumsCache.downloadStates || []; },
-    get favoriteTypes() { return enumsCache.favoriteTypes || []; }
 };

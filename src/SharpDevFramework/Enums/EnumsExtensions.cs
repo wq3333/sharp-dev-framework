@@ -48,7 +48,7 @@ public static class EnumsExtensions
 
             httpContext.Response.StatusCode = 200;
             await httpContext.Response.WriteAsJsonAsync(DataReply.Succeed(_cache));
-        });
+        }).AddEndpointFilter<IEndpointConventionBuilder, ExceptionEndpointFilter>();
 
         static List<EnumItemsResponse> GetEnumItems(Type type)
         {

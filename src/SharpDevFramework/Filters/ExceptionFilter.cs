@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,5 +22,21 @@ public class ExceptionFilter(IWebHostEnvironment env) : IExceptionFilter
             : "服务器处理请求时发生错误";
 
         context.Result = new JsonResult(EmptyReply.Failed(errorMessage));
+    }
+}
+
+public class ExceptionEndpointFilter(ILogger<ExceptionEndpointFilter> logger) : IEndpointFilter, IScopedService
+{
+    public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
+    {
+        try
+        {
+            return await next(context);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "处理请求失败:{Message},{Trace}", ex.Message, ex.StackTrace);
+            return EmptyReply.Failed(ex.Message);
+        }
     }
 }

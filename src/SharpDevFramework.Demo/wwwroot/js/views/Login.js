@@ -14,7 +14,7 @@ export const LoginView = {
             <form @submit.prevent="handleLogin">
                 <div class="form-group">
                     <label class="form-label">用户名</label>
-                    <FInput v-model="name" placeholder="请输入用户名" />
+                    <FInput v-model="username" placeholder="请输入用户名" />
                 </div>
                 <div class="form-group">
                     <label class="form-label">密码</label>
@@ -29,7 +29,7 @@ export const LoginView = {
     </div>
     `,
     setup() {
-        const name = ref('admin');
+        const username = ref('admin');
         const password = ref('');
         const loading = ref(false);
         const error = ref('');
@@ -38,13 +38,13 @@ export const LoginView = {
             loading.value = true;
             error.value = '';
             try {
-                const data = await api.login(name.value, password.value);
+                const data = await api.login(username.value, password.value);
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('userId', data.userId);
-                localStorage.setItem('name', data.username);
+                localStorage.setItem('username', data.username);
                 localStorage.setItem('role', data.role);
                 initSignalR();
-                window.location.hash = '#/files';
+                window.location.hash = '#/tasks';
             } catch (e) {
                 error.value = e.message || '登录失败，请检查用户名和密码';
             } finally {
@@ -52,6 +52,6 @@ export const LoginView = {
             }
         };
 
-        return { name, password, loading, error, handleLogin };
+        return { username, password, loading, error, handleLogin };
     }
 };

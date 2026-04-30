@@ -35,13 +35,17 @@ public static class FrameworkExtensions
 
     public static WebApplication UseSharpDevFramework(this WebApplication app, Assembly[] assemblies)
     {
+        var assembly = assemblies
+            .Concat([typeof(FrameworkExtensions).Assembly])
+            .Distinct().ToArray();
+
         app.UseDefaultFiles()
             .UseStaticFiles();
 
         app.UseCors()
             .UseSignalR()
             .UseAuth()
-            .UseEnums(assemblies);
+            .UseEnums(assembly);
 
         app.MapControllers();
         app.SeedDatabase();

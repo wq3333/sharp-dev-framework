@@ -14,21 +14,9 @@ export const LayoutView = {
             </div>
             
             <nav class="sidebar-nav">
-                <router-link to="/files" class="nav-item" :class="{ 'nav-item--active': $route.path === '/files' }">
-                    <span>📁</span>
-                    <span>文件管理</span>
-                </router-link>
-                <router-link to="/favorites" class="nav-item" :class="{ 'nav-item--active': $route.path === '/favorites' }">
-                    <span>⭐</span>
-                    <span>我的收藏</span>
-                </router-link>
                 <router-link to="/tasks" class="nav-item" :class="{ 'nav-item--active': $route.path === '/tasks' }">
                     <span>⚙️</span>
                     <span>任务管理</span>
-                </router-link>
-                <router-link to="/downloads" class="nav-item" :class="{ 'nav-item--active': $route.path === '/downloads' }">
-                    <span>⬇️</span>
-                    <span>远程下载</span>
                 </router-link>
                 <router-link 
                     v-if="isAdmin"
@@ -63,14 +51,14 @@ export const LayoutView = {
     `,
     setup() {
         const username = computed(() => localStorage.getItem('name') || '');
-        const isAdmin = computed(() => localStorage.getItem('role') === '1');
+        const isAdmin = computed(() => localStorage.getItem('role') === 'Admin');
         const adminLabel = computed(() => getEnumName('userRoles', 1));
 
         const handleLogout = async () => {
             stopSignalR();
             localStorage.removeItem('token');
             localStorage.removeItem('userId');
-            localStorage.removeItem('name');
+            localStorage.removeItem('username');
             localStorage.removeItem('role');
             window.location.hash = '#/login';
         };
