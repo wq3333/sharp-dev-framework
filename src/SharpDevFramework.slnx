@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="SharpDevFramework.Demo/SharpDevFramework.Demo.csproj" />
+  <Project Path="SharpDevFramework.Tests/SharpDevFramework.Tests.csproj" />
+  <Project Path="SharpDevFramework/SharpDevFramework.csproj" />
+</Solution>
