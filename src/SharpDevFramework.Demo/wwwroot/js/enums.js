@@ -14,9 +14,19 @@ export async function loadEnums() {
     Object.assign(enumsCache, transformed);
 }
 
-export function getEnumName(type, value) {
+export function getEnumName(type, value, isMulti = false) {
     const list = enumsCache[type];
     if (!list || !Array.isArray(list)) return String(value);
+    
+    if (isMulti) {
+        if (!value) return '';
+        const values = String(value).split(',').filter(v => v);
+        return values.map(v => {
+            const item = list.find(x => String(x.value) === v || x.value === Number(v));
+            return item ? item.displayName : v;
+        }).join(', ');
+    }
+    
     const item = list.find(x => x.value === value);
     return item ? item.displayName : String(value);
 }
@@ -30,4 +40,5 @@ export const enums = {
     get userRoleTypes() { return enumsCache.userRoleTypes || []; },
     get taskStates() { return enumsCache.taskStates || []; },
     get taskTypes() { return enumsCache.taskTypes || []; },
+    get demoTypes() { return enumsCache.demoTypes || []; },
 };

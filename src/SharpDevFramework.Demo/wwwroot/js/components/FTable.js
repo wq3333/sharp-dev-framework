@@ -1,14 +1,20 @@
-const { ref } = Vue;
+import { FPagination } from './FPagination.js';
 
 export const FTable = {
     name: 'FTable',
+    components: { FPagination },
     props: {
         data: { type: Array, default: () => [] },
         columns: { type: Array, default: () => [] },
         border: { type: Boolean, default: false },
         stripe: { type: Boolean, default: false },
-        emptyText: { type: String, default: '暂无数据' }
+        emptyText: { type: String, default: '暂无数据' },
+        pagination: { type: Boolean, default: false },
+        currentPage: { type: Number, default: 1 },
+        pageSize: { type: Number, default: 20 },
+        total: { type: Number, default: 0 }
     },
+    emits: ['page-change'],
     template: `
         <div class="f-table-wrapper">
             <table class="f-table glass-table" :class="{ 'f-table--border': border, 'f-table--stripe': stripe }">
@@ -38,6 +44,13 @@ export const FTable = {
                     </tr>
                 </tbody>
             </table>
+            <FPagination 
+                v-if="pagination"
+                v-model="currentPage"
+                :page-size="pageSize"
+                :total="total"
+                @page-change="$emit('page-change', $event)"
+            />
         </div>
     `
 };

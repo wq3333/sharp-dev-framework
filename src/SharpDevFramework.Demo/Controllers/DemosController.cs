@@ -19,7 +19,7 @@ public class DemosController(AppDbContext context) : ControllerBase
         if (request.Type.NotNullOrWhiteSpace())
         {
             var types = request.Type.SplitToList();
-            var predicate = DbHelper.BuildOrLikeExpression<DemoEntity>("Types", [.. types]);
+            var predicate = DbHelper.BuildOrLikeExpression<DemoEntity>("Type", [.. types]);
             query = query.Where(predicate);
         }
         var total = query.Count();

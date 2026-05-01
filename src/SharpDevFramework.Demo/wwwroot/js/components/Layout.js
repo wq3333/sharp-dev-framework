@@ -1,4 +1,6 @@
 import { FButton } from './index.js';
+import { clearAuth } from '../auth.js';
+import { stopSignalR } from '../signalr.js';
 
 const { computed } = Vue;
 
@@ -47,18 +49,20 @@ export const LayoutComponent = {
         
         <div class="layout-content">
             <main class="page-content">
-                <slot />
+                <router-view />
             </main>
         </div>
     </div>
     `,
-    setup(props, { emit }) {
+    setup() {
         const username = computed(() => localStorage.getItem('username') || '');
         const isAdmin = computed(() => localStorage.getItem('role') === 'Admin');
         const adminLabel = computed(() => '管理员');
 
         const handleLogout = () => {
-            emit('logout');
+            stopSignalR();
+            clearAuth();
+            window.location.hash = '#/login';
         };
 
         return { username, isAdmin, adminLabel, handleLogout };

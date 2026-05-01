@@ -1,35 +1,42 @@
 import { api } from '../api.js';
-import { FButton, FInput, FSingleSelect, FModal, FTable, FPagination, FMultiSelect, toast } from '../components/index.js';
+import { formatDate } from '../utils.js';
+import { FButton, FInput, FModal, FTable, FMultiSelect, toast } from '../components/index.js';
+import { enums, getEnumName } from '../enums.js';
 
-const { ref, onMounted } = Vue;
+const { ref, computed, onMounted } = Vue;
 
 export const DemoManagerView = {
-    components: { FButton, FInput, FSingleSelect, FModal, FTable, FPagination, FMultiSelect },
+    components: { FButton, FInput, FModal, FTable, FMultiSelect },
     template: `
     <div>
         <div class="page-header">
             <h1 class="page-title">📋 Demo管理</h1>
             <div class="flex gap-2 flex-wrap">
                 <FInput v-model="nameFilter" placeholder="搜索名称" style="width: 150px;" />
-                <FMultiSelect v-model="typeFilter" :options="demoStatusOptions" value-key="value" label-key="displayName" placeholder="全部状态" style="width: 200px;" />
+                <FMultiSelect v-model="typeFilter" :options="demoTypeOptions" value-key="value" label-key="displayName" placeholder="全部类型" style="width: 200px;" />
                 <FButton type="primary" icon="➕" @click="openCreateModal">新建</FButton>
                 <FButton size="sm" icon="🔄" @click="loadDemos" :loading="loading">刷新</FButton>
             </div>
         </div>
 
         <div class="glass-panel" style="padding: 0; overflow: hidden;">
-            <FTable :data="demos" :columns="columns" empty-text="暂无数据">
-                <template #description="{ row }">
-                    {{ row.description || '-' }}
-                </template>
-                <template #status="{ row }">
-                    <span :class="['badge', getStatusClass(row.status)]">{{ getStatusName(row.status) }}</span>
-                </template>
-                <template #category="{ row }">
-                    {{ row.category || '-' }}
+            <FTable 
+                :data="demos" 
+                :columns="columns" 
+                empty-text="暂无数据"
+                :pagination="true"
+                v-model:current-page="currentPage"
+                :page-size="pageSize"
+                :total="totalCount"
+                @page-change="goToPage"
+            >
+                <template #type="{ row }">
+                    <div class="flex gap-1 flex-wrap">
+                        <span v-for="t in getEnumName('demoTypes', row.type, true).split(', ').filter(x => x)" :key="t" class="badge badge--info">{{ t }}</span>
+                    </div>
                 </template>
                 <template #createdAt="{ row }">
-                    {{ api.formatDate(row.createdAt) }}
+                    {{ formatDate(row.createdAt) }}
                 </template>
                 <template #actions="{ row }">
                     <div class="flex gap-2">
@@ -38,12 +45,6 @@ export const DemoManagerView = {
                     </div>
                 </template>
             </FTable>
-            <FPagination 
-                v-model="currentPage"
-                :page-size="pageSize"
-                :total="totalCount"
-                @page-change="goToPage"
-            />
         </div>
 
         <FModal v-model="modalVisible" :title="isEditing ? '编辑Demo' : '新建Demo'" width="500px">
@@ -52,16 +53,8 @@ export const DemoManagerView = {
                 <FInput v-model="formData.name" placeholder="请输入名称" />
             </div>
             <div class="form-group">
-                <label class="form-label">描述</label>
-                <FInput v-model="formData.description" placeholder="请输入描述" />
-            </div>
-            <div class="form-group">
-                <label class="form-label">状态</label>
-                <FSingleSelect v-model="formData.status" :options="demoStatusOptions" value-key="value" label-key="displayName" />
-            </div>
-            <div class="form-group">
-                <label class="form-label">分类</label>
-                <FInput v-model="formData.category" placeholder="请输入分类" />
+                <label class="form-label">类型</label>
+                <FMultiSelect v-model="formData.typeList" :options="demoTypeOptions" value-key="value" label-key="displayName" placeholder="请选择类型" />
             </div>
             <template #footer>
                 <div class="flex gap-2 justify-end">
@@ -83,32 +76,20 @@ export const DemoManagerView = {
         const saving = ref(false);
         const deletingId = ref(null);
 
+        const demoTypeOptions = computed(() => enums.demoTypes || []);
+
         const columns = [
             { prop: 'id', label: 'ID', width: '80px' },
             { prop: 'name', label: '名称' },
             { prop: 'type', label: '类型' },
             { prop: 'createdAt', label: '创建时间' },
-            { prop: 'actions', label: '操作' }
+            { prop: 'actions', label: '操作', width: '150px' }
         ];
 
         const modalVisible = ref(false);
         const isEditing = ref(false);
         const editingId = ref(null);
-        const formData = ref({ name: '', type: '' });
-
-        const getStatusName = (status) => {
-            const opt = demoStatusOptions.find(o => o.value === status);
-            return opt ? opt.displayName : status;
-        };
-
-        const getStatusClass = (status) => {
-            switch (status) {
-                case 'Active': return 'badge--success';
-                case 'Inactive': return 'badge--danger';
-                case 'Pending': return 'badge--warning';
-                default: return 'badge--info';
-            }
-        };
+        const formData = ref({ name: '', typeList: [] });
 
         const loadDemos = async () => {
             loading.value = true;
@@ -127,7 +108,7 @@ export const DemoManagerView = {
         const openCreateModal = () => {
             isEditing.value = false;
             editingId.value = null;
-            formData.value = { name: '', type: '' };
+            formData.value = { name: '', typeList: [] };
             modalVisible.value = true;
         };
 
@@ -135,8 +116,8 @@ export const DemoManagerView = {
             isEditing.value = true;
             editingId.value = demo.id;
             formData.value = { 
-                name: demo.name, 
-                type: demo.type, 
+                name: demo.name,
+                typeList: demo.type ? demo.type.split(',').map(t => parseInt(t)) : []
             };
             modalVisible.value = true;
         };
@@ -147,11 +128,12 @@ export const DemoManagerView = {
                 return;
             }
             saving.value = true;
+            const typeStr = formData.value.typeList.join(',');
             if (isEditing.value) {
-                await api.demos.update(editingId.value, formData.value.name, formData.value.description, formData.value.status, formData.value.category);
+                await api.demos.update(editingId.value, formData.value.name, typeStr);
                 toast.success('更新成功');
             } else {
-                await api.demos.create(formData.value.name, formData.value.description, formData.value.status, formData.value.category);
+                await api.demos.create(formData.value.name, typeStr);
                 toast.success('创建成功');
             }
             modalVisible.value = false;
@@ -174,10 +156,10 @@ export const DemoManagerView = {
         });
 
         return { 
-            demos, columns, nameFilter, typeFilter, demoStatusOptions, currentPage, totalCount, pageSize, 
+            demos, columns, nameFilter, typeFilter, demoTypeOptions, currentPage, totalCount, pageSize, 
             loading, saving, deletingId, modalVisible, isEditing, formData,
-            getStatusName, getStatusClass, loadDemos, goToPage, 
-            openCreateModal, openEditModal, saveDemo, deleteDemo, api 
+            loadDemos, goToPage,
+            openCreateModal, openEditModal, saveDemo, deleteDemo, formatDate, getEnumName 
         };
     }
 };

@@ -1,12 +1,13 @@
 import { api } from '../api.js';
-import { enums, loadEnums, getEnumName, getTaskStatusClass } from '../enums.js';
+import { enums, getEnumName, getTaskStatusClass } from '../enums.js';
 import { onTaskUpdated } from '../signalr.js';
-import { FButton, FMultiSelect, FTable, FPagination } from '../components/index.js';
+import { formatDate } from '../utils.js';
+import { FButton, FMultiSelect, FTable } from '../components/index.js';
 
 const { ref, onMounted, computed, watch } = Vue;
 
 export const TaskManagerView = {
-    components: { FButton, FMultiSelect, FTable, FPagination },
+    components: { FButton, FMultiSelect, FTable },
     template: `
     <div>
         <div class="page-header">
@@ -18,7 +19,16 @@ export const TaskManagerView = {
         </div>
 
         <div class="glass-panel" style="padding: 0; overflow: hidden;">
-            <FTable :data="tasks" :columns="columns" empty-text="暂无任务">
+            <FTable 
+                :data="tasks" 
+                :columns="columns" 
+                empty-text="暂无任务"
+                :pagination="true"
+                v-model:current-page="currentPage"
+                :page-size="pageSize"
+                :total="totalCount"
+                @page-change="goToPage"
+            >
                 <template #status="{ row }">
                     <span :class="['badge', taskStatusClass(row.status)]">{{ getEnumName('taskStates', row.status) }}</span>
                     <span v-if="row.errorMessage" style="margin-left: 8px; font-size: 12px; color: #94a3b8;" :title="row.errorMessage">(有错误)</span>
@@ -27,7 +37,7 @@ export const TaskManagerView = {
                     {{ getEnumName('taskTypes', row.type) }}
                 </template>
                 <template #createdAt="{ row }">
-                    {{ api.formatDate(row.createdAt) }}
+                    {{ formatDate(row.createdAt) }}
                 </template>
                 <template #actions="{ row }">
                     <div class="flex gap-2">
@@ -36,12 +46,6 @@ export const TaskManagerView = {
                     </div>
                 </template>
             </FTable>
-            <FPagination 
-                v-model="currentPage"
-                :page-size="pageSize"
-                :total="totalCount"
-                @page-change="goToPage"
-            />
         </div>
     </div>
     `,
@@ -105,6 +109,6 @@ export const TaskManagerView = {
             onTaskUpdated(handleTaskUpdated);
         });
 
-        return { tasks, columns, statusFilter, taskStateOptions, taskStatusClass: getTaskStatusClass, getEnumName, loadTasks, retryTask, deleteTask, api, currentPage, totalCount, pageCount, goToPage, loading };
+        return { tasks, columns, statusFilter, taskStateOptions, taskStatusClass: getTaskStatusClass, getEnumName, loadTasks, retryTask, deleteTask, formatDate, currentPage, totalCount, pageCount, goToPage, loading };
     }
 };

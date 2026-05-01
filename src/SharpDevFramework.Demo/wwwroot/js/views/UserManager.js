@@ -1,5 +1,5 @@
 import { api } from '../api.js';
-import { enums, loadEnums, getEnumName } from '../enums.js';
+import { enums, getEnumName } from '../enums.js';
 import { FButton, FInput, FSingleSelect, FCheckbox, FModal, FTable, FPagination } from '../components/index.js';
 
 const { ref, onMounted, computed } = Vue;

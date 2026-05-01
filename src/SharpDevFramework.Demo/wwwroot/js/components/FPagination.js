@@ -1,7 +1,10 @@
+import { FSingleSelect } from './FSingleSelect.js';
+
 const { ref, computed, watch } = Vue;
 
 export const FPagination = {
     name: 'FPagination',
+    components: { FSingleSelect },
     props: {
         modelValue: { type: Number, default: 1 },
         total: { type: Number, default: 0 },
@@ -16,9 +19,14 @@ export const FPagination = {
                 共 {{ total }} 条，共 {{ pageCount }} 页
             </div>
             <div class="f-pagination__sizes" v-if="layout.includes('sizes')">
-                <select :value="currentPageSize" @change="handleSizeChange" class="f-pagination__size-select">
-                    <option v-for="size in pageSizes" :key="size" :value="size">{{ size }}条/页</option>
-                </select>
+                <FSingleSelect 
+                    v-model="currentPageSize" 
+                    :options="pageSizeOptions" 
+                    value-key="value" 
+                    label-key="label"
+                    @change="handleSizeChange"
+                    class="f-pagination__size-select"
+                />
             </div>
             <div class="f-pagination__controls">
                 <button 
@@ -68,6 +76,8 @@ export const FPagination = {
         const currentPageSize = ref(props.pageSize);
         const jumperValue = ref(props.modelValue);
 
+        const pageSizeOptions = computed(() => props.pageSizes.map(size => ({ value: size, label: `${size}条/页` })));
+
         const pageCount = computed(() => Math.ceil(props.total / currentPageSize.value));
 
         const visiblePages = computed(() => {
@@ -97,9 +107,7 @@ export const FPagination = {
             emit('page-change', { page, pageSize: currentPageSize.value });
         };
 
-        const handleSizeChange = (e) => {
-            const newSize = Number(e.target.value);
-            currentPageSize.value = newSize;
+        const handleSizeChange = (newSize) => {
             jumperValue.value = 1;
             currentPage.value = 1;
             emit('update:pageSize', newSize);
@@ -127,6 +135,6 @@ export const FPagination = {
             currentPageSize.value = val;
         });
 
-        return { pageCount, visiblePages, currentPage, currentPageSize, jumperValue, goTo, handleSizeChange, handleJumperInput, handleJumper };
+        return { pageCount, visiblePages, currentPage, currentPageSize, pageSizeOptions, jumperValue, goTo, handleSizeChange, handleJumperInput, handleJumper };
     }
 };
