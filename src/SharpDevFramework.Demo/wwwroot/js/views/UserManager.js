@@ -1,6 +1,7 @@
 import { api } from '../api.js';
 import { enums, getEnumName } from '../enums.js';
 import { FButton, FInput, FSingleSelect, FCheckbox, FModal, FTable, FPagination } from '../components/index.js';
+import { formatDate } from '../utils.js';
 
 const { ref, onMounted, computed } = Vue;
 
@@ -22,7 +23,7 @@ export const UserManagerView = {
                     <span :class="row.isActive ? 'badge badge--success' : 'badge badge--danger'">{{ row.isActive ? '启用' : '禁用' }}</span>
                 </template>
                 <template #createdAt="{ row }">
-                    {{ api.formatDate(row.createdAt) }}
+                    {{ formatDate(row.createdAt) }}
                 </template>
                 <template #actions="{ row }">
                     <div class="flex gap-2">
@@ -142,6 +143,6 @@ export const UserManagerView = {
             await loadUsers();
         });
 
-        return { users, columns, currentUserId, showCreateModal, showEditModal, showModal, form, roleOptions, editUser, saveUser, deleteUser, closeModal, getEnumName, api, currentPage, totalCount, pageCount, goToPage };
+        return { users, columns, currentUserId, showCreateModal, showEditModal, showModal, form, roleOptions, editUser, saveUser, deleteUser, closeModal, getEnumName, api, currentPage, totalCount, pageCount, goToPage, formatDate };
     }
 };

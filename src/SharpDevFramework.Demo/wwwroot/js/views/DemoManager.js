@@ -115,7 +115,7 @@ export const DemoManagerView = {
         const openEditModal = (demo) => {
             isEditing.value = true;
             editingId.value = demo.id;
-            formData.value = { 
+            formData.value = {
                 name: demo.name,
                 typeList: demo.type ? demo.type.split(',').map(t => parseInt(t)) : []
             };
@@ -130,16 +130,20 @@ export const DemoManagerView = {
             saving.value = true;
             const typeStr = formData.value.typeList.join(',');
             if (isEditing.value) {
-                await api.demos.update(editingId.value, formData.value.name, typeStr);
+                await api.demos.update(editingId.value, formData.value.name, typeStr, hideModal);
                 toast.success('更新成功');
             } else {
-                await api.demos.create(formData.value.name, typeStr);
+                await api.demos.create(formData.value.name, typeStr, hideModal);
                 toast.success('创建成功');
             }
-            modalVisible.value = false;
             loadDemos();
-            saving.value = false;
+            hideModal();
         };
+
+        const hideModal = () => {
+            modalVisible.value = false;
+            saving.value = false;
+        }
 
         const deleteDemo = async (demo) => {
             if (confirm(`确定删除 ${demo.name}？`)) {
@@ -155,11 +159,11 @@ export const DemoManagerView = {
             loadDemos();
         });
 
-        return { 
-            demos, columns, nameFilter, typeFilter, demoTypeOptions, currentPage, totalCount, pageSize, 
+        return {
+            demos, columns, nameFilter, typeFilter, demoTypeOptions, currentPage, totalCount, pageSize,
             loading, saving, deletingId, modalVisible, isEditing, formData,
             loadDemos, goToPage,
-            openCreateModal, openEditModal, saveDemo, deleteDemo, formatDate, getEnumName 
+            openCreateModal, openEditModal, saveDemo, deleteDemo, formatDate, getEnumName
         };
     }
 };
