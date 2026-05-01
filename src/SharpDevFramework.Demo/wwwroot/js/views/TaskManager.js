@@ -81,7 +81,7 @@ export const TaskManagerView = {
 
         const loadTasks = async () => {
             loading.value = true;
-            const result = await api.tasks.list(statusFilter.value, typeFilter.value, currentPage.value, pageSize.value);
+            const result = await api.tasks.page(statusFilter.value, typeFilter.value, currentPage.value, pageSize.value);
             tasks.value = result.data || [];
             totalCount.value = result.totalCount || 0;
             pageCount.value = result.pageCount || 0;

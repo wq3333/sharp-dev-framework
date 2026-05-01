@@ -63,7 +63,7 @@ export const api = {
     },
     
     tasks: {
-        list: async (status, type, page = 1, size = 20, onerror = null) => {
+        page: async (status, type, page = 1, size = 20, onerror = null) => {
             const params = { index: page, size };
             if (status && status.length > 0) {
                 params.status = Array.isArray(status) ? status.join(',') : status;
@@ -72,6 +72,10 @@ export const api = {
                 params.type = Array.isArray(type) ? type.join(',') : type;
             }
             return await request('GET', '/tasks', null, params, onerror);
+        },
+        get: async (id, onerror = null) => {
+            const result = await request('GET', `/tasks/${id}`, null, null, onerror);
+            return result.data;
         },
         retry: async (id, onerror = null) => {
             await request('POST', `/tasks/${id}/retry`, null, null, onerror);
@@ -85,7 +89,7 @@ export const api = {
     },
     
     users: {
-        list: async (name, role, page = 1, size = 20, onerror = null) => {
+        page: async (name, role, page = 1, size = 20, onerror = null) => {
             const params = { index: page, size };
             if (name) params.name = name;
             if (role && role.length > 0) {

@@ -41,7 +41,7 @@ export const UserManagerView = {
         <FModal v-model="showModal" :title="showCreateModal ? '新增用户' : '编辑用户'">
             <div class="mb-4"><label class="block text-[13px] font-medium mb-1.5 text-[var(--text-secondary)]">用户名</label><FInput v-model="form.name" placeholder="请输入用户名" /></div>
             <div class="mb-4"><label class="block text-[13px] font-medium mb-1.5 text-[var(--text-secondary)]">密码{{ showEditModal ? '（不修改留空）' : '' }}</label><FInput v-model="form.password" type="password" placeholder="请输入密码" /></div>
-            <div class="mb-4"><label class="block text-[13px] font-medium mb-1.5 text-[var(--text-secondary)]">角色</label><FMultiSelect v-model="form.roleList" :options="roleOptions" value-key="value" label-key="displayName" placeholder="选择角色" placement="top" /></div>
+            <div class="mb-4"><label class="block text-[13px] font-medium mb-1.5 text-[var(--text-secondary)]">角色</label><FMultiSelect v-model="form.roleList" :options="roleOptions" value-key="value" label-key="displayName" placeholder="选择角色" /></div>
             <div v-if="showEditModal" class="mb-4"><FCheckbox v-model="form.isActive" label="启用账户" /></div>
             <template #footer>
                 <FButton @click="closeModal">取消</FButton>
@@ -80,7 +80,7 @@ export const UserManagerView = {
 
         const loadUsers = async () => {
             loading.value = true;
-            const result = await api.users.list(nameFilter.value, roleFilter.value, currentPage.value, pageSize.value);
+            const result = await api.users.page(nameFilter.value, roleFilter.value, currentPage.value, pageSize.value);
             users.value = result.data || [];
             totalCount.value = result.totalCount || 0;
             pageCount.value = result.pageCount || 0;

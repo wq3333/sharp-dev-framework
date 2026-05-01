@@ -12,7 +12,7 @@ export const LayoutComponent = {
     template: `
     <div class="flex h-screen">
         <div class="w-60 bg-[var(--bg-surface)] border-r border-[var(--border-subtle)] flex flex-col shrink-0">
-            <div class="flex items-center gap-2.5 px-4 py-4 border-b border-[var(--border-subtle)]">
+            <div class="h-[60px] flex items-center gap-2.5 px-4 py-4 border-b border-[var(--border-subtle)]">
                 <div class="w-8 h-8 rounded-md bg-[var(--accent)] text-[var(--text-inverse)] flex items-center justify-center text-xs font-bold tracking-wider shrink-0">SD</div>
                 <div class="text-[15px] font-semibold text-[var(--text-primary)] tracking-tight">SharpDev</div>
             </div>
@@ -36,7 +36,7 @@ export const LayoutComponent = {
             </nav>
         </div>
         <div class="flex-1 overflow-hidden flex flex-col min-w-0">
-            <header class="h-14 flex items-center justify-between px-6 bg-[var(--bg-surface)] border-b border-[var(--border-subtle)] shrink-0">
+            <header class="h-[60px] flex items-center justify-between px-6 bg-[var(--bg-surface)] border-b border-[var(--border-subtle)] shrink-0">
                 <h1 class="text-lg font-semibold text-[var(--text-primary)] tracking-tight leading-snug">
                     <template v-if="$route.path.startsWith('/tasks')">任务管理</template>
                     <template v-else-if="$route.path.startsWith('/users')">用户管理</template>
