@@ -1,7 +1,7 @@
 ﻿namespace SharpDevFramework;
 
 [AttributeUsage(AttributeTargets.Class)]
-public class TaskRegisterAttribute : Attribute
+public class TaskRegisterAttribute(string type) : Attribute
 {
-    public TaskTypes Type { get; set; } = null!;
+    public string Type { get; set; } = type;
 }

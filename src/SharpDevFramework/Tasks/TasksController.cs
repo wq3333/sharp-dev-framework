@@ -48,7 +48,7 @@ public class TasksController(FrameworkDbContext context, TaskCenter taskCenter) 
         task.ErrorMessage = null;
         task.RetryCount = 0;
         context.SaveChanges();
-        await taskCenter.PublishAsync(task.Type, task.Id);
+        await taskCenter.PublishAsync(task.Id);
         return EmptyReply.Succeed();
     }
 

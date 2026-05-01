@@ -1,7 +1,10 @@
-﻿namespace SharpDevFramework.Demo.Enums;
+﻿using System.ComponentModel;
 
-[UserRoleTypesEnum]
+namespace SharpDevFramework.Demo.Enums;
+
+[MockEnum("UserRoleTypes")]
 public class UserRoleTypesExtend
 {
-    public static readonly UserRoleTypes Programmer = new(nameof(Programmer), "程序员");
+    [Description("程序员")]
+    public const string Programmer = nameof(Programmer);
 }

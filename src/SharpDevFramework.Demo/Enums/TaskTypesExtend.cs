@@ -1,7 +1,10 @@
-﻿namespace SharpDevFramework.Demo.Enums;
+﻿using System.ComponentModel;
 
-[TaskTypesEnum]
-public class TaskTypesExtend
+namespace SharpDevFramework.Demo.Enums;
+
+[MockEnum(nameof(TaskTypes))]
+public class TaskTypes
 {
-    public static readonly TaskTypes Encrypt = new(nameof(Encrypt), "加密");
+    [Description("演示任务")]
+    public const string Demo = nameof(Demo);
 }

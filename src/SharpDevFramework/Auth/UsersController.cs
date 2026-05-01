@@ -1,5 +1,4 @@
-﻿using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
-using Mapster;
+﻿using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -15,7 +14,7 @@ public class UsersController(FrameworkDbContext context, TokenService tokenServi
 {
     void CheckAdmin()
     {
-        if (!HttpContext.GetJwtPayload().Role.SplitToList().Any(x=>x==UserRoleTypes.Admin.Id)) throw new UnauthorizedAccessException("没有权限执行此操作");
+        if (!HttpContext.GetJwtPayload().Role.SplitToList().Any(x => x == UserRoleTypes.Admin)) throw new UnauthorizedAccessException("没有权限执行此操作");
     }
 
     [HttpPost("login")]

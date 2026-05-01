@@ -3,5 +3,5 @@
 public class TaskData
 {
     public int TaskId { get; set; }
-    public TaskTypes Type { get; set; } = null!;
+    public string Type { get; set; } = null!;
 }

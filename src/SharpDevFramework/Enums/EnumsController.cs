@@ -1,7 +1,6 @@
 using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using SharpDevLib;
-using System.ComponentModel;
 using System.Reflection;
 
 namespace SharpDevFramework;
@@ -20,38 +19,21 @@ public class EnumsController : ControllerBase
         {
             _cache = [];
             var types = Assemblies.SelectMany(x => x.GetTypes()).Distinct().ToList();
-            var enumTypes = types.Where(x => x.IsPublic && x.IsEnum);
-            foreach (var item in enumTypes)
-            {
-                _cache.Add(new EnumsResponse { CategoryName = item.Name, Items = GetEnumItems(item) });
-            }
 
-            var userRoleTypesExtend = types.Where(x => x.IsPublic && !x.IsAbstract && x.GetCustomAttribute<UserRoleTypesEnumAttribute>() is not null)
-                .SelectMany(x => x.GetFields(BindingFlags.Public | BindingFlags.Static).Where(f => f.IsInitOnly)
-                .Select(y => y.GetValue(null) is not UserRoleTypes value ? null! : new EnumItemsResponse { DisplayName = value.DisplayName, Value = value.Id }));
-            _cache.Add(new EnumsResponse { CategoryName = nameof(UserRoleTypes), Items = [.. userRoleTypesExtend.Where(x => x is not null)] });
+            var enumTypes = types.Where(x => x.IsPublic && x.IsEnum).Select(x => new EnumsResponse { CategoryName = x.Name, Items = x.GetEnumItems() });
+            _cache.AddRange(enumTypes);
 
-            var taskTypesExtend = types.Where(x => x.IsPublic && !x.IsAbstract && x.GetCustomAttribute<TaskTypesEnumAttribute>() is not null)
-                .SelectMany(x => x.GetFields(BindingFlags.Public | BindingFlags.Static).Where(f => f.IsInitOnly)
-                .Select(y => y.GetValue(null) is not TaskTypes value ? null! : new EnumItemsResponse { DisplayName = value.DisplayName, Value = value.Id }));
-            _cache.Add(new EnumsResponse { CategoryName = nameof(TaskTypes), Items = [.. taskTypesExtend.Where(x => x is not null)] });
+            var mockTypes = types.Where(x => x.IsPublic && !x.IsAbstract && x.GetCustomAttribute<MockEnumAttribute>() is not null)
+                .Select(x =>
+                {
+                    var categoryName = x.GetCustomAttribute<MockEnumAttribute>()!.MockEnumName;
+                    var items = x.GetFields(BindingFlags.Public | BindingFlags.Static)
+                        .Select(y => new EnumItemsResponse { DisplayName = y.GetDescription(), Value = y.GetValue(null) });
+                    return new { categoryName, items };
+                });
+            _cache.AddRange(mockTypes.GroupBy(x => x.categoryName).Select(x => new EnumsResponse { CategoryName = x.Key, Items = [.. x.SelectMany(y => y.items)] }));
         }
         return DataReply.Succeed(_cache);
-    }
-    static List<EnumItemsResponse> GetEnumItems(Type type)
-    {
-        return [.. type.GetFields(BindingFlags.Public | BindingFlags.Static)
-                .Select(x=>new EnumItemsResponse
-                {
-                    DisplayName=GetDescription(x)??x.Name,
-                    Value=x.GetValue(null)
-                })];
-    }
-
-    static string? GetDescription(FieldInfo fieldInfo)
-    {
-        var attr = fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false).FirstOrDefault() as DescriptionAttribute;
-        return attr?.Description;
     }
 }
 

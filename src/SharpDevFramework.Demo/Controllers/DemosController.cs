@@ -3,13 +3,15 @@ using Microsoft.AspNetCore.Mvc;
 using SharpDevFramework.DB;
 using SharpDevFramework.Demo.Data;
 using SharpDevFramework.Demo.Data.Entities;
+using SharpDevFramework.Demo.Enums;
 using SharpDevLib;
+using System.Threading.Tasks;
 
 namespace SharpDevFramework.Demo.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class DemosController(AppDbContext context) : ControllerBase
+public class DemosController(AppDbContext context, TaskCenter taskCenter) : ControllerBase
 {
     [HttpGet]
     public PageReply<DemoDto> GetPage([FromQuery] DemoPageRequest request)
@@ -52,7 +54,7 @@ public class DemosController(AppDbContext context) : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public EmptyReply Update(int id, [FromBody] UpdateDemoRequest request)
+    public async Task<EmptyReply> Update(int id, [FromBody] UpdateDemoRequest request)
     {
         if (request.Name.IsNullOrWhiteSpace()) throw new Exception("名称不能为空");
         if (request.Type.IsNullOrWhiteSpace()) throw new Exception("类型不能为空");
@@ -62,7 +64,10 @@ public class DemosController(AppDbContext context) : ControllerBase
         demo.Type = request.Type;
         demo.UpdatedAt = DateTime.Now.ToUtcTimestamp();
         context.Demos.Update(demo);
+        var task = new TaskEntity { Type = TaskTypes.Demo };
+        context.Tasks.Add(task);
         context.SaveChanges();
+        await taskCenter.PublishAsync(task.Id);
         return EmptyReply.Succeed();
     }
 

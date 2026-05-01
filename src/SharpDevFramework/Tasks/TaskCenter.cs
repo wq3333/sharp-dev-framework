@@ -10,23 +10,17 @@ namespace SharpDevFramework;
 
 public class TaskCenter(ILogger<TaskCenter> logger, IServiceProvider serviceProvider, IConfiguration configuration, NotificationService notificationService) : ISingletonService
 {
-    Channel<TaskData>? _channel;
+    Channel<int>? _channel;
     bool _started;
     Task? _consumerTask;
     CancellationTokenSource? _stoppingTokenSource;
     readonly Dictionary<int, CancellationTokenSource> _cancleTokens = [];
-    readonly Dictionary<TaskTypes, Type> _handlerTypes = [];
+    readonly Dictionary<string, Type> _handlerTypes = [];
 
-    public async Task PublishAsync(string type, int taskId)
-    {
-        var handlerType = _handlerTypes.Keys.FirstOrDefault(x => x.Id == type) ?? throw new Exception($"type '{type}' not registered");
-        await PublishAsync(handlerType, taskId);
-    }
-
-    public async Task PublishAsync(TaskTypes type, int taskId)
+    public async Task PublishAsync(int taskId)
     {
         if (!_started || _channel is null) throw new Exception($"{nameof(TaskCenter)} not started");
-        await _channel.Writer.WriteAsync(new TaskData { TaskId = taskId, Type = type });
+        await _channel.Writer.WriteAsync(taskId);
     }
 
     public Task StartAsync(Assembly[] assemblies, CancellationToken cancellationToken)
@@ -35,7 +29,7 @@ public class TaskCenter(ILogger<TaskCenter> logger, IServiceProvider serviceProv
         _started = true;
         RegisterHandlerTypes(assemblies);
         cancellationToken.Register(async () => await StopAsync());
-        _channel = Channel.CreateUnbounded<TaskData>();
+        _channel = Channel.CreateUnbounded<int>();
         _stoppingTokenSource = new CancellationTokenSource();
         _consumerTask = RunConsumerAsync(_stoppingTokenSource.Token);
         if (logger.IsEnabled(LogLevel.Information)) logger.LogInformation("{TaskCenter} started", nameof(TaskCenter));
@@ -56,7 +50,7 @@ public class TaskCenter(ILogger<TaskCenter> logger, IServiceProvider serviceProv
                    if (logger.IsEnabled(LogLevel.Warning)) logger.LogWarning("type '{Type}' missing TaskRegisterAttribute", x.FullName);
                    return;
                }
-               if (_handlerTypes.TryGetValue(attribute.Type, out _)) throw new Exception($"Task type '{attribute.Type.Id}' is already registered");
+               if (_handlerTypes.TryGetValue(attribute.Type, out _)) throw new Exception($"Task type '{attribute.Type}' is already registered");
                _handlerTypes[attribute.Type] = x;
            });
     }
@@ -67,10 +61,10 @@ public class TaskCenter(ILogger<TaskCenter> logger, IServiceProvider serviceProv
         {
             var maxProcessCount = configuration.GetValue<int>("FrameworkSettings:Tasks:MaxProcessCount");
             var semaphore = new SemaphoreSlim(maxProcessCount, maxProcessCount);
-            await foreach (var taskData in _channel!.Reader.ReadAllAsync(stoppingToken))
+            await foreach (var taskId in _channel!.Reader.ReadAllAsync(stoppingToken))
             {
                 await semaphore.WaitAsync(stoppingToken);
-                _ = ProcessSingleTask(taskData, semaphore).ContinueWith(t =>
+                _ = ProcessSingleTask(taskId, semaphore).ContinueWith(t =>
                 {
                     if (t.IsFaulted)
                     {
@@ -110,18 +104,22 @@ public class TaskCenter(ILogger<TaskCenter> logger, IServiceProvider serviceProv
         if (logger.IsEnabled(LogLevel.Information)) logger.LogInformation("{TaskCenter} stopped", nameof(TaskCenter));
     }
 
-    async Task ProcessSingleTask(TaskData taskData, SemaphoreSlim semaphore)
+    async Task ProcessSingleTask(int taskId, SemaphoreSlim semaphore)
     {
         try
         {
-            if (!_handlerTypes.TryGetValue(taskData.Type, out var handlerType))
+            var dbContext = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<FrameworkDbContext>();
+            var task = dbContext.Tasks.Find(taskId);
+            if (task is null) return;
+
+            if (!_handlerTypes.TryGetValue(task.Type, out var handlerType))
             {
-                if (logger.IsEnabled(LogLevel.Warning)) logger.LogWarning("{Message} ignored", taskData.Type);
+                if (logger.IsEnabled(LogLevel.Warning)) logger.LogWarning("{Message} ignored", task.Type);
                 return;
             }
             var handler = serviceProvider.CreateScope().ServiceProvider.GetRequiredService(handlerType) as BaseTask ?? throw new Exception($"Task type '{handlerType.FullName}' must inherit from {nameof(BaseTask)}");
-            _cancleTokens[taskData.TaskId] = new CancellationTokenSource();
-            await handler.HandleAsync(taskData, _cancleTokens[taskData.TaskId].Token);
+            _cancleTokens[taskId] = new CancellationTokenSource();
+            await handler.HandleAsync(taskId, _cancleTokens[taskId].Token);
         }
         catch (Exception ex)
         {
@@ -129,7 +127,7 @@ public class TaskCenter(ILogger<TaskCenter> logger, IServiceProvider serviceProv
         }
         finally
         {
-            _cancleTokens.Remove(taskData.TaskId);
+            _cancleTokens.Remove(taskId);
             semaphore.Release();
         }
     }
@@ -139,6 +137,8 @@ public class TaskCenter(ILogger<TaskCenter> logger, IServiceProvider serviceProv
         var dbContext = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<FrameworkDbContext>();
         var task = dbContext.Tasks.Find(taskId);
         if (task is null) return;
+        if (task.Status == TaskStates.Completed) return;
+
         task.Status = state;
         if (error.NotNullOrWhiteSpace()) task.ErrorMessage = error;
         if (state == TaskStates.Completed) task.CompletedAt = DateTime.Now.ToUtcTimestamp();
@@ -156,7 +156,7 @@ public class TaskCenter(ILogger<TaskCenter> logger, IServiceProvider serviceProv
                 task.RetryCount += 1;
                 dbContext.Tasks.Update(task);
                 dbContext.SaveChanges();
-                await PublishAsync(task.Type, task.Id);
+                await PublishAsync(task.Id);
                 if (logger.IsEnabled(LogLevel.Warning)) logger.LogWarning("Process {TaskType} task {TaskId} Failed, retrying... (RetryCount: {RetryCount})", task.Type, task.Id, task.RetryCount);
             }
             else

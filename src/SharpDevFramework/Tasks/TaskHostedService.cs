@@ -18,7 +18,7 @@ public class TaskHostedService(TaskCenter taskCenter, IServiceProvider servicePr
         var notFinishedTasks = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<FrameworkDbContext>().Tasks.Where(t => t.Status != TaskStates.Completed && t.RetryCount < maxRetryCount).ToList();
         foreach (var item in notFinishedTasks)
         {
-            await taskCenter.PublishAsync(item.Type, item.Id);
+            await taskCenter.PublishAsync(item.Id);
         }
     }
 }

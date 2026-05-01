@@ -6,3 +6,4 @@
 using System.Diagnostics.CodeAnalysis;
 
 [assembly: SuppressMessage("Style", "IDE0130:命名空间与文件夹结构不匹配", Justification = "<挂起>", Scope = "namespace", Target = "~N:SharpDevFramework")]
+[assembly: SuppressMessage("Performance", "CA1822:将成员标记为 static", Justification = "<挂起>", Scope = "member", Target = "~M:SharpDevFramework.EnumsController.Get~SharpDevLib.DataReply{System.Collections.Generic.List{SharpDevFramework.EnumsResponse}}")]

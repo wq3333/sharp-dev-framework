@@ -15,7 +15,7 @@ public class ExceptionFilter(IWebHostEnvironment env) : IExceptionFilter
         var logger = context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger<ExceptionFilter>();
         logger.LogError(context.Exception, "处理请求失败:{Message},{Trace}", context.Exception?.Message, context.Exception?.StackTrace);
 
-        if(context.Exception is UnauthorizedAccessException)
+        if (context.Exception is UnauthorizedAccessException)
         {
             context.HttpContext.Response.StatusCode = 403;
             var errorMessage = env.IsDevelopment()

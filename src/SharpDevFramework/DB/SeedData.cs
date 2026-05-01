@@ -22,7 +22,7 @@ internal static class SeedData
             var user = new UserEntity
             {
                 Name = userName,
-                Role = UserRoleTypes.Admin.Id,
+                Role = UserRoleTypes.Admin,
             };
             user.PasswordHash = passwordHasher.HashPassword(user, password);
             context.Users.Add(user);
