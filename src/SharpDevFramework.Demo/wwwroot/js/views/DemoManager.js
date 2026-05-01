@@ -130,10 +130,10 @@ export const DemoManagerView = {
             saving.value = true;
             const typeStr = formData.value.typeList.join(',');
             if (isEditing.value) {
-                await api.demos.update(editingId.value, formData.value.name, typeStr, hideModal);
+                await api.demos.update(editingId.value, formData.value.name, typeStr);
                 toast.success('更新成功');
             } else {
-                await api.demos.create(formData.value.name, typeStr, hideModal);
+                await api.demos.create(formData.value.name, typeStr);
                 toast.success('创建成功');
             }
             loadDemos();

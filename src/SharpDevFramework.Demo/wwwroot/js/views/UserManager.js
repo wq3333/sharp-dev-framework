@@ -1,23 +1,39 @@
 import { api } from '../api.js';
 import { enums, getEnumName } from '../enums.js';
-import { FButton, FInput, FSingleSelect, FCheckbox, FModal, FTable, FPagination } from '../components/index.js';
+import { FButton, FInput, FMultiSelect, FCheckbox, FModal, FTable } from '../components/index.js';
 import { formatDate } from '../utils.js';
 
 const { ref, onMounted, computed } = Vue;
 
 export const UserManagerView = {
-    components: { FButton, FInput, FSingleSelect, FCheckbox, FModal, FTable, FPagination },
+    components: { FButton, FInput, FMultiSelect, FCheckbox, FModal, FTable },
     template: `
     <div>
         <div class="page-header">
             <h1 class="page-title">👥 用户管理</h1>
-            <FButton type="success" icon="➕" @click="showCreateModal = true">新增用户</FButton>
+            <div class="flex gap-2 flex-wrap">
+                <FInput v-model="nameFilter" placeholder="搜索名称" style="width: 150px;" />
+                <FMultiSelect v-model="roleFilter" :options="roleOptions" value-key="value" label-key="displayName" placeholder="全部角色" style="width: 200px;" />
+                <FButton icon="🔄" @click="loadUsers" :loading="loading">刷新</FButton>
+                <FButton type="success" icon="➕" @click="showCreateModal = true">新增用户</FButton>
+            </div>
         </div>
 
         <div class="glass-panel" style="padding: 0; overflow: hidden;">
-            <FTable :data="users" :columns="columns" empty-text="暂无用户">
+            <FTable 
+                :data="users" 
+                :columns="columns" 
+                empty-text="暂无用户"
+                :pagination="true"
+                v-model:current-page="currentPage"
+                :page-size="pageSize"
+                :total="totalCount"
+                @page-change="goToPage"
+            >
                 <template #role="{ row }">
-                    <span :class="row.role === 'Admin' ? 'badge badge--purple' : 'badge badge--blue'">{{ getEnumName('userRoleTypes', row.role) }}</span>
+                    <div class="flex gap-1 flex-wrap">
+                        <span v-for="r in getEnumName('userRoleTypes', row.role, true).split(', ').filter(x => x)" :key="r" :class="r.includes('Admin') ? 'badge badge--purple' : 'badge badge--blue'">{{ r }}</span>
+                    </div>
                 </template>
                 <template #status="{ row }">
                     <span :class="row.isActive ? 'badge badge--success' : 'badge badge--danger'">{{ row.isActive ? '启用' : '禁用' }}</span>
@@ -32,12 +48,6 @@ export const UserManagerView = {
                     </div>
                 </template>
             </FTable>
-            <FPagination 
-                v-model="currentPage"
-                :page-size="pageSize"
-                :total="totalCount"
-                @page-change="goToPage"
-            />
         </div>
 
         <FModal v-model="showModal" :title="showCreateModal ? '👤 新增用户' : '✏️ 编辑用户'">
@@ -51,7 +61,7 @@ export const UserManagerView = {
             </div>
             <div class="form-group">
                 <label class="form-label">角色</label>
-                <FSingleSelect v-model="form.role" :options="roleOptions" value-key="value" label-key="displayName" placeholder="选择角色" />
+                <FMultiSelect v-model="form.roleList" :options="roleOptions" value-key="value" label-key="displayName" placeholder="选择角色" />
             </div>
             <div v-if="showEditModal" class="form-group">
                 <FCheckbox v-model="form.isActive" label="启用账户" />
@@ -67,14 +77,17 @@ export const UserManagerView = {
         const users = ref([]);
         const showCreateModal = ref(false);
         const showEditModal = ref(false);
-        const form = ref({ name: '', password: '', role: 0, isActive: true });
+        const form = ref({ name: '', password: '', roleList: [], isActive: true });
         const editingUserId = ref(null);
         const currentUserId = computed(() => parseInt(localStorage.getItem('userId') || '0'));
-        const isAdmin = computed(() => localStorage.getItem('role') === 'Admin');
+        const isAdmin = computed(() => localStorage.getItem('role').split(',').filter(x => x === 'Admin').length > 0);
         const currentPage = ref(1);
         const pageSize = ref(20);
         const totalCount = ref(0);
         const pageCount = ref(0);
+        const roleFilter = ref([]);
+        const nameFilter = ref('');
+        const loading = ref(false);
 
         const columns = [
             { prop: 'id', label: 'ID', width: '80px' },
@@ -93,10 +106,12 @@ export const UserManagerView = {
         const roleOptions = computed(() => enums.userRoleTypes || []);
 
         const loadUsers = async () => {
-            const result = await api.users.list(currentPage.value, pageSize.value);
+            loading.value = true;
+            const result = await api.users.list(nameFilter.value, roleFilter.value, currentPage.value, pageSize.value);
             users.value = result.data || [];
             totalCount.value = result.totalCount || 0;
             pageCount.value = result.pageCount || 0;
+            loading.value = false;
         };
 
         const goToPage = ({ page, pageSize: newSize }) => {
@@ -107,15 +122,21 @@ export const UserManagerView = {
 
         const editUser = (user) => {
             editingUserId.value = user.id;
-            form.value = { name: user.name, password: '', role: user.role, isActive: user.isActive };
+            form.value = {
+                name: user.name,
+                password: '',
+                roleList: user.role ? user.role.split(',') : [],
+                isActive: user.isActive
+            };
             showEditModal.value = true;
         };
 
         const saveUser = async () => {
+            const roleStr = form.value.roleList.join(',');
             if (showCreateModal.value) {
-                await api.users.create(form.value.name, form.value.password, form.value.role);
+                await api.users.create(form.value.name, form.value.password, roleStr);
             } else {
-                await api.users.update(editingUserId.value, form.value.name, form.value.password || undefined, form.value.role, form.value.isActive);
+                await api.users.update(editingUserId.value, form.value.name, form.value.password || undefined, roleStr, form.value.isActive);
             }
             closeModal();
             await loadUsers();
@@ -132,7 +153,7 @@ export const UserManagerView = {
             showCreateModal.value = false;
             showEditModal.value = false;
             editingUserId.value = null;
-            form.value = { name: '', password: '', role: 0, isActive: true };
+            form.value = { name: '', password: '', roleList: [], isActive: true };
         };
 
         onMounted(async () => {
@@ -143,6 +164,6 @@ export const UserManagerView = {
             await loadUsers();
         });
 
-        return { users, columns, currentUserId, showCreateModal, showEditModal, showModal, form, roleOptions, editUser, saveUser, deleteUser, closeModal, getEnumName, api, currentPage, totalCount, pageCount, goToPage, formatDate };
+        return { users, columns, currentUserId, nameFilter, roleFilter, showCreateModal, showEditModal, showModal, form, roleOptions, editUser, saveUser, deleteUser, closeModal, getEnumName, currentPage, totalCount, pageCount, goToPage, formatDate, loading, loadUsers };
     }
 };

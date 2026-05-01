@@ -15,11 +15,21 @@ public class ExceptionFilter(IWebHostEnvironment env) : IExceptionFilter
         var logger = context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger<ExceptionFilter>();
         logger.LogError(context.Exception, "处理请求失败:{Message},{Trace}", context.Exception?.Message, context.Exception?.StackTrace);
 
-        context.HttpContext.Response.StatusCode = 500;
-        var errorMessage = env.IsDevelopment()
-            ? context.Exception?.InnerException?.Message ?? context.Exception?.Message
-            : "服务器处理请求时发生错误";
-
-        context.Result = new JsonResult(EmptyReply.Failed(errorMessage));
+        if(context.Exception is UnauthorizedAccessException)
+        {
+            context.HttpContext.Response.StatusCode = 403;
+            var errorMessage = env.IsDevelopment()
+                ? context.Exception?.InnerException?.Message ?? context.Exception?.Message
+                : "服务器处理请求时发生错误";
+            context.Result = new JsonResult(EmptyReply.Failed(errorMessage));
+        }
+        else
+        {
+            context.HttpContext.Response.StatusCode = 500;
+            var errorMessage = env.IsDevelopment()
+                ? context.Exception?.InnerException?.Message ?? context.Exception?.Message
+                : "服务器处理请求时发生错误";
+            context.Result = new JsonResult(EmptyReply.Failed(errorMessage));
+        }
     }
 }

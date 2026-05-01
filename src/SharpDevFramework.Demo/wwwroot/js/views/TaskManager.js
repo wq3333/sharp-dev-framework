@@ -14,6 +14,7 @@ export const TaskManagerView = {
             <h1 class="page-title">⚙️ 任务管理</h1>
             <div class="flex gap-2 flex-wrap">
                 <FMultiSelect v-model="statusFilter" :options="taskStateOptions" value-key="value" label-key="displayName" placeholder="全部状态" style="width: 200px;" />
+                <FMultiSelect v-model="typeFilter" :options="taskTypeOptions" value-key="value" label-key="displayName" placeholder="全部类型" style="width: 200px;" />
                 <FButton size="sm" icon="🔄" @click="loadTasks" :loading="loading">刷新</FButton>
             </div>
         </div>
@@ -34,7 +35,9 @@ export const TaskManagerView = {
                     <span v-if="row.errorMessage" style="margin-left: 8px; font-size: 12px; color: #94a3b8;" :title="row.errorMessage">(有错误)</span>
                 </template>
                 <template #type="{ row }">
-                    {{ getEnumName('taskTypes', row.type) }}
+                    <div class="flex gap-1 flex-wrap">
+                        <span v-for="t in getEnumName('taskTypes', row.type, true).split(', ').filter(x => x)" :key="t" class="badge badge--info">{{ t }}</span>
+                    </div>
                 </template>
                 <template #createdAt="{ row }">
                     {{ formatDate(row.createdAt) }}
@@ -52,6 +55,7 @@ export const TaskManagerView = {
     setup() {
         const tasks = ref([]);
         const statusFilter = ref([]);
+        const typeFilter = ref([]);
         const loading = ref(false);
         const currentPage = ref(1);
         const pageSize = ref(20);
@@ -67,10 +71,11 @@ export const TaskManagerView = {
         ];
 
         const taskStateOptions = computed(() => enums.taskStates || []);
+        const taskTypeOptions = computed(() => enums.taskTypes || []);
 
         const loadTasks = async () => {
             loading.value = true;
-            const result = await api.tasks.list(statusFilter.value, currentPage.value, pageSize.value);
+            const result = await api.tasks.list(statusFilter.value, typeFilter.value, currentPage.value, pageSize.value);
             tasks.value = result.data || [];
             totalCount.value = result.totalCount || 0;
             pageCount.value = result.pageCount || 0;
@@ -99,7 +104,7 @@ export const TaskManagerView = {
             }
         };
 
-        watch(statusFilter, () => {
+        watch([statusFilter, typeFilter], () => {
             currentPage.value = 1;
             loadTasks();
         });
@@ -109,6 +114,6 @@ export const TaskManagerView = {
             onTaskUpdated(handleTaskUpdated);
         });
 
-        return { tasks, columns, statusFilter, taskStateOptions, taskStatusClass: getTaskStatusClass, getEnumName, loadTasks, retryTask, deleteTask, formatDate, currentPage, totalCount, pageCount, goToPage, loading };
+        return { tasks, columns, statusFilter, typeFilter, taskStateOptions, taskTypeOptions, taskStatusClass: getTaskStatusClass, getEnumName, loadTasks, retryTask, deleteTask, formatDate, currentPage, totalCount, pageCount, goToPage, loading };
     }
 };

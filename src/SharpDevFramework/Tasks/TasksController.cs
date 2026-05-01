@@ -1,5 +1,6 @@
 using Mapster;
 using Microsoft.AspNetCore.Mvc;
+using SharpDevFramework.DB;
 using SharpDevLib;
 
 namespace SharpDevFramework;
@@ -13,6 +14,13 @@ public class TasksController(FrameworkDbContext context, TaskCenter taskCenter) 
     {
         var query = context.Tasks.AsQueryable();
         if (request.Status.NotNullOrEmpty()) query = query.Where(x => request.Status.Contains(x.Status));
+        if (request.Type.NotNullOrWhiteSpace())
+        {
+            var types = request.Type.SplitToList();
+            var predicate = DbHelper.BuildOrLikeExpression<TaskEntity>("Type", [.. types]);
+            query = query.Where(predicate);
+        }
+
         var total = query.Count();
         var items = query.OrderByDescending(x => x.CreatedAt)
                          .Skip((request.Index - 1) * request.Size)
@@ -57,6 +65,7 @@ public class TasksController(FrameworkDbContext context, TaskCenter taskCenter) 
 public class TaskRequest : PageRequest
 {
     public List<TaskStates> Status { get; set; } = [];
+    public string? Type { get; set; }
 }
 
 public class TaskDto

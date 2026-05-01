@@ -1,6 +1,7 @@
 import { FButton } from './index.js';
 import { clearAuth } from '../auth.js';
 import { stopSignalR } from '../signalr.js';
+import { enums, getEnumName } from '../enums.js';
 
 const { computed } = Vue;
 
@@ -38,7 +39,7 @@ export const LayoutComponent = {
                 <div class="user-info">
                     <div>
                         <div class="user-name">{{ username }}</div>
-                        <div v-if="isAdmin" class="user-role">{{ adminLabel }}</div>
+                        <div class="user-role">{{ role }}</div>
                     </div>
                 </div>
                 <FButton type="danger" block icon="🚪" @click="handleLogout" style="width: 100%;">
@@ -56,8 +57,8 @@ export const LayoutComponent = {
     `,
     setup() {
         const username = computed(() => localStorage.getItem('username') || '');
-        const isAdmin = computed(() => localStorage.getItem('role') === 'Admin');
-        const adminLabel = computed(() => '管理员');
+        const isAdmin = computed(() => localStorage.getItem('role').split(',').filter(x => x === 'Admin').length > 0);
+        const role = computed(() => getEnumName('userRoleTypes', localStorage.getItem('role'), true));
 
         const handleLogout = () => {
             stopSignalR();
@@ -65,6 +66,6 @@ export const LayoutComponent = {
             window.location.hash = '#/login';
         };
 
-        return { username, isAdmin, adminLabel, handleLogout };
+        return { username, role, isAdmin, handleLogout };
     }
 };

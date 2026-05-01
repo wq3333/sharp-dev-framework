@@ -1,8 +1,10 @@
-﻿using Mapster;
+﻿using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
+using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using SharpDevFramework.DB;
 using SharpDevLib;
 
 namespace SharpDevFramework;
@@ -13,7 +15,7 @@ public class UsersController(FrameworkDbContext context, TokenService tokenServi
 {
     void CheckAdmin()
     {
-        if (HttpContext.GetJwtPayload().Role != UserRoleTypes.Admin.Id) throw new UnauthorizedAccessException("没有权限执行此操作");
+        if (!HttpContext.GetJwtPayload().Role.SplitToList().Any(x=>x==UserRoleTypes.Admin.Id)) throw new UnauthorizedAccessException("没有权限执行此操作");
     }
 
     [HttpPost("login")]
@@ -82,6 +84,12 @@ public class UsersController(FrameworkDbContext context, TokenService tokenServi
         CheckAdmin();
         var query = context.Users.Where(x => !x.IsDeleted);
         if (request.Name.NotNullOrWhiteSpace()) query = query.Where(x => x.Name!.Contains(request.Name));
+        if (request.Role.NotNullOrWhiteSpace())
+        {
+            var roles = request.Role.SplitToList();
+            var predicate = DbHelper.BuildOrLikeExpression<UserEntity>("Role", [.. roles]);
+            query = query.Where(predicate);
+        }
         var total = query.Count();
         var items = query.OrderByDescending(u => u.CreatedAt).Skip((request.Index - 1) * request.Size).Take(request.Size).ToList();
         return PageReply.Succeed(items.Adapt<List<UserDto>>(), total, request);
@@ -101,6 +109,7 @@ public class UsersController(FrameworkDbContext context, TokenService tokenServi
         CheckAdmin();
         if (request.Name.IsNullOrWhiteSpace()) throw new Exception("用户名不能为空");
         if (request.Password.IsNullOrWhiteSpace()) throw new Exception("密码不能为空");
+        if (request.Role.IsNullOrWhiteSpace()) throw new Exception("角色不能为空");
         if (context.Users.Any(u => u.Name == request.Name && !u.IsDeleted)) throw new Exception("用户名已存在");
 
         var user = new UserEntity
@@ -118,20 +127,15 @@ public class UsersController(FrameworkDbContext context, TokenService tokenServi
     public EmptyReply Update(int id, [FromBody] UpdateUserRequest request)
     {
         CheckAdmin();
+        if (request.Name.IsNullOrWhiteSpace()) throw new Exception("用户名不能为空");
+        if (request.Role.IsNullOrWhiteSpace()) throw new Exception("角色不能为空");
         var user = context.Users.Find(id) ?? throw new Exception("data not found");
         if (id == HttpContext.GetJwtPayload().UserId && request.Role != user.Role) throw new Exception("不能修改自己的角色");
-
-        if (request.Name.NotNullOrWhiteSpace() && request.Name != user.Name)
-        {
-            if (context.Users.Any(u => u.Name == request.Name && u.Id != id && !u.IsDeleted)) throw new Exception("用户名已存在");
-            user.Name = request.Name;
-        }
-
+        if (context.Users.Any(u => u.Name == request.Name && u.Id != id && !u.IsDeleted)) throw new Exception("用户名已存在");
         if (request.Password.NotNullOrWhiteSpace())
         {
             user.PasswordHash = new PasswordHasher<UserEntity>().HashPassword(user, request.Password);
         }
-
         user.Role = request.Role;
         user.IsActive = request.IsActive;
 
@@ -156,6 +160,7 @@ public class UsersController(FrameworkDbContext context, TokenService tokenServi
 public class UserPageRequest : PageRequest
 {
     public string? Name { get; set; }
+    public string? Role { get; set; }
 }
 
 public class CreateUserRequest
