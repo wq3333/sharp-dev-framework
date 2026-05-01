@@ -9,6 +9,7 @@ public class DemoTask(IServiceProvider serviceProvider) : BaseTask(serviceProvid
 {
     protected override async Task ProcessAsync(int id, CancellationToken cancellationToken)
     {
+        await Task.Delay(TimeSpan.FromSeconds(10));
         if (_logger.IsEnabled(LogLevel.Information)) _logger.LogInformation("demotask processed with id:{id}", id);
         await Task.CompletedTask;
     }

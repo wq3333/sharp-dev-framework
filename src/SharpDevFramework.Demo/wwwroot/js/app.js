@@ -10,7 +10,7 @@ import {
 const { createApp } = Vue;
 
 const app = createApp({
-    template: '<router-view /><ToastContainer />'
+    template: '<router-view v-slot="{ Component }"><keep-alive><component :is="Component" /></keep-alive></router-view><ToastContainer />'
 });
 
 app.use(router);

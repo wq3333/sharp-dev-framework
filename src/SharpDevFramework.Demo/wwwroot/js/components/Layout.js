@@ -1,7 +1,7 @@
 import { FButton } from './index.js';
 import { clearAuth } from '../auth.js';
 import { stopSignalR } from '../signalr.js';
-import { enums, getEnumName } from '../enums.js';
+import { getEnumName } from '../enums.js';
 
 const { computed } = Vue;
 
@@ -50,7 +50,11 @@ export const LayoutComponent = {
         
         <div class="layout-content">
             <main class="page-content">
-                <router-view />
+                <router-view v-slot="{ Component }">
+                    <keep-alive>
+                        <component :is="Component" />
+                    </keep-alive>
+                </router-view>
             </main>
         </div>
     </div>
