@@ -1,4 +1,4 @@
-const { ref, computed } = Vue;
+const { computed } = Vue;
 
 export const FButton = {
     name: 'FButton',
@@ -12,25 +12,43 @@ export const FButton = {
     },
     emits: ['click'],
     template: `
-        <button 
+        <button
             :class="buttonClasses"
             :disabled="disabled || loading"
-            @click="$emit('click', $event)"
-        >
-            <span v-if="loading" class="btn-spinner"></span>
-            <span v-else-if="icon" class="btn-icon">{{ icon }}</span>
+            @click="$emit('click', $event)">
+            <span v-if="loading" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-[spin_0.8s_linear_infinite]"></span>
+            <span v-else-if="icon" class="text-sm leading-none">{{ icon }}</span>
             <slot />
         </button>
     `,
     setup(props) {
+        const baseClasses = 'inline-flex items-center justify-center gap-1.5 font-medium whitespace-nowrap cursor-pointer transition-all duration-150 ease-out disabled:opacity-40 disabled:cursor-not-allowed';
+
+        const sizeClasses = computed(() => {
+            switch (props.size) {
+                case 'sm': return 'px-2.5 py-1 text-xs rounded-md';
+                case 'lg': return 'px-5 py-2.5 text-base rounded-xl';
+                default: return 'px-4 py-2 text-sm rounded-md';
+            }
+        });
+
+        const typeClasses = computed(() => {
+            switch (props.type) {
+                case 'primary': return 'bg-[var(--accent)] text-[var(--text-inverse)] border border-[var(--accent)] hover:bg-[var(--accent-hover)] hover:border-[var(--accent-hover)]';
+                case 'success': return 'bg-[var(--success)] text-[var(--text-inverse)] border border-[var(--success)] hover:bg-[#15803d] hover:border-[#15803d]';
+                case 'danger': return 'bg-[var(--danger)] text-[var(--text-inverse)] border border-[var(--danger)] hover:bg-[#991b1b] hover:border-[#991b1b]';
+                case 'warning': return 'bg-[var(--warning)] text-[var(--text-inverse)] border border-[var(--warning)] hover:bg-[#a16207] hover:border-[#a16207]';
+                default: return 'bg-transparent text-[var(--text-primary)] border border-transparent hover:bg-[var(--bg-hover)]';
+            }
+        });
+
         const buttonClasses = computed(() => [
-            'f-btn',
-            `f-btn--${props.type}`,
-            `f-btn--${props.size}`,
-            { 'f-btn--disabled': props.disabled || props.loading },
-            { 'f-btn--loading': props.loading },
-            { 'f-btn--block': props.block }
-        ]);
+            baseClasses,
+            sizeClasses.value,
+            typeClasses.value,
+            props.block ? 'flex w-full' : '',
+            props.loading ? 'relative text-transparent' : ''
+        ].filter(Boolean).join(' '));
 
         return { buttonClasses };
     }

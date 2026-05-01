@@ -8,9 +8,8 @@ const { ref, computed, onMounted } = Vue;
 export const DemoManagerView = {
     components: { FButton, FInput, FModal, FTable, FMultiSelect },
     template: `
-    <div>
-        <div class="page-header">
-            <h1 class="page-title">Demo管理</h1>
+    <div class="h-full flex flex-col">
+        <div class="flex items-center justify-between mb-4 gap-4">
             <div class="flex gap-2 flex-wrap">
                 <FInput v-model="nameFilter" placeholder="搜索名称" style="width: 150px;" />
                 <FMultiSelect v-model="typeFilter" :options="demoTypeOptions" value-key="value" label-key="displayName" placeholder="全部类型" style="width: 200px;" />
@@ -18,26 +17,15 @@ export const DemoManagerView = {
                 <FButton size="sm" @click="loadDemos" :loading="loading">刷新</FButton>
             </div>
         </div>
-
-        <div class="glass-panel" style="padding: 0; overflow: hidden;">
-            <FTable 
-                :data="demos" 
-                :columns="columns" 
-                empty-text="暂无数据"
-                :pagination="true"
-                :current-page="currentPage"
-                :page-size="pageSize"
-                :total="totalCount"
-                @page-change="goToPage"
-            >
+        <div class="flex-1 min-h-0 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg flex flex-col overflow-hidden">
+            <FTable :data="demos" :columns="columns" empty-text="暂无数据" :pagination="true"
+                :current-page="currentPage" :page-size="pageSize" :total="totalCount" @page-change="goToPage">
                 <template #type="{ row }">
                     <div class="flex gap-1 flex-wrap">
-                        <span v-for="t in getEnumName('demoTypes', row.type, true).split(', ').filter(x => x)" :key="t" class="badge badge--info">{{ t }}</span>
+                        <span v-for="t in getEnumName('demoTypes', row.type, true).split(', ').filter(x => x)" :key="t" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[rgba(79,70,229,0.1)] text-[var(--accent)]">{{ t }}</span>
                     </div>
                 </template>
-                <template #createdAt="{ row }">
-                    {{ formatDate(row.createdAt) }}
-                </template>
+                <template #createdAt="{ row }">{{ formatDate(row.createdAt) }}</template>
                 <template #actions="{ row }">
                     <div class="flex gap-2">
                         <FButton size="sm" @click="openEditModal(row)">编辑</FButton>
@@ -46,16 +34,9 @@ export const DemoManagerView = {
                 </template>
             </FTable>
         </div>
-
         <FModal v-model="modalVisible" :title="isEditing ? '编辑Demo' : '新建Demo'" width="500px">
-            <div class="form-group">
-                <label class="form-label">名称</label>
-                <FInput v-model="formData.name" placeholder="请输入名称" />
-            </div>
-            <div class="form-group">
-                <label class="form-label">类型</label>
-                <FMultiSelect v-model="formData.typeList" :options="demoTypeOptions" value-key="value" label-key="displayName" placeholder="请选择类型" />
-            </div>
+            <div class="mb-4"><label class="block text-[13px] font-medium mb-1.5 text-[var(--text-secondary)]">名称</label><FInput v-model="formData.name" placeholder="请输入名称" /></div>
+            <div class="mb-4"><label class="block text-[13px] font-medium mb-1.5 text-[var(--text-secondary)]">类型</label><FMultiSelect v-model="formData.typeList" :options="demoTypeOptions" value-key="value" label-key="displayName" placeholder="请选择类型" placement="top" /></div>
             <template #footer>
                 <div class="flex gap-2 justify-end">
                     <FButton @click="modalVisible = false">取消</FButton>
@@ -77,7 +58,6 @@ export const DemoManagerView = {
         const deletingId = ref(null);
 
         const demoTypeOptions = computed(() => enums.demoTypes || []);
-
         const columns = [
             { prop: 'id', label: 'ID', width: '80px' },
             { prop: 'name', label: '名称' },
@@ -99,51 +79,22 @@ export const DemoManagerView = {
             loading.value = false;
         };
 
-        const goToPage = ({ page, pageSize: newSize }) => {
-            currentPage.value = page;
-            pageSize.value = newSize;
-            loadDemos();
-        };
+        const goToPage = ({ page, pageSize: newSize }) => { currentPage.value = page; pageSize.value = newSize; loadDemos(); };
 
-        const openCreateModal = () => {
-            isEditing.value = false;
-            editingId.value = null;
-            formData.value = { name: '', typeList: [] };
-            modalVisible.value = true;
-        };
-
-        const openEditModal = (demo) => {
-            isEditing.value = true;
-            editingId.value = demo.id;
-            formData.value = {
-                name: demo.name,
-                typeList: demo.type ? demo.type.split(',').map(t => parseInt(t)) : []
-            };
-            modalVisible.value = true;
-        };
+        const openCreateModal = () => { isEditing.value = false; editingId.value = null; formData.value = { name: '', typeList: [] }; modalVisible.value = true; };
+        const openEditModal = (demo) => { isEditing.value = true; editingId.value = demo.id; formData.value = { name: demo.name, typeList: demo.type ? demo.type.split(',').map(t => parseInt(t)) : [] }; modalVisible.value = true; };
 
         const saveDemo = async () => {
-            if (!formData.value.name) {
-                toast.error('请输入名称');
-                return;
-            }
+            if (!formData.value.name) { toast.error('请输入名称'); return; }
             saving.value = true;
             const typeStr = formData.value.typeList.join(',');
-            if (isEditing.value) {
-                await api.demos.update(editingId.value, formData.value.name, typeStr);
-                toast.success('更新成功');
-            } else {
-                await api.demos.create(formData.value.name, typeStr);
-                toast.success('创建成功');
-            }
+            if (isEditing.value) { await api.demos.update(editingId.value, formData.value.name, typeStr); toast.success('更新成功'); }
+            else { await api.demos.create(formData.value.name, typeStr); toast.success('创建成功'); }
             loadDemos();
             hideModal();
         };
 
-        const hideModal = () => {
-            modalVisible.value = false;
-            saving.value = false;
-        }
+        const hideModal = () => { modalVisible.value = false; saving.value = false; };
 
         const deleteDemo = async (demo) => {
             if (confirm(`确定删除 ${demo.name}？`)) {
@@ -155,15 +106,8 @@ export const DemoManagerView = {
             }
         };
 
-        onMounted(() => {
-            loadDemos();
-        });
+        onMounted(() => { loadDemos(); });
 
-        return {
-            demos, columns, nameFilter, typeFilter, demoTypeOptions, currentPage, totalCount, pageSize,
-            loading, saving, deletingId, modalVisible, isEditing, formData,
-            loadDemos, goToPage,
-            openCreateModal, openEditModal, saveDemo, deleteDemo, formatDate, getEnumName
-        };
+        return { demos, columns, nameFilter, typeFilter, demoTypeOptions, currentPage, totalCount, pageSize, loading, saving, deletingId, modalVisible, isEditing, formData, loadDemos, goToPage, openCreateModal, openEditModal, saveDemo, deleteDemo, formatDate, getEnumName };
     }
 };

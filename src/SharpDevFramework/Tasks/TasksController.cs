@@ -13,7 +13,7 @@ public class TasksController(FrameworkDbContext context, TaskCenter taskCenter) 
     public PageReply<TaskDto> GetPage([FromQuery] TaskRequest request)
     {
         var query = context.Tasks.AsQueryable();
-        if (request.Status.NotNullOrEmpty()) query = query.Where(x => request.Status.Contains(x.Status));
+        if (request.StatusList.NotNullOrEmpty()) query = query.Where(x => request.StatusList.Contains(x.Status));
         if (request.Type.NotNullOrWhiteSpace())
         {
             var types = request.Type.SplitToList();
@@ -27,6 +27,13 @@ public class TasksController(FrameworkDbContext context, TaskCenter taskCenter) 
                          .Take(request.Size)
                          .ToList();
         return PageReply.Succeed(items.Adapt<List<TaskDto>>(), total, request);
+    }
+
+    [HttpGet("{id}")]
+    public DataReply<TaskDto> Get(int id)
+    {
+        var task = context.Tasks.FirstOrDefault(x => x.Id == id) ?? throw new Exception("任务不存在");
+        return DataReply.Succeed(task.Adapt<TaskDto>());
     }
 
     [HttpDelete("{id}")]
@@ -64,7 +71,8 @@ public class TasksController(FrameworkDbContext context, TaskCenter taskCenter) 
 
 public class TaskRequest : PageRequest
 {
-    public List<TaskStates> Status { get; set; } = [];
+    public string? Status { get; set; }
+    public List<TaskStates> StatusList => Status.IsNullOrWhiteSpace() ? [] : [.. Status.SplitToList().Select(x => x.ToEnum<TaskStates>())];
     public string? Type { get; set; }
 }
 

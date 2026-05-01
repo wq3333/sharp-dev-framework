@@ -1,4 +1,4 @@
-const { ref, watch, onMounted, onUnmounted } = Vue;
+const { ref, onMounted, onUnmounted } = Vue;
 
 export const FModal = {
     name: 'FModal',
@@ -13,16 +13,16 @@ export const FModal = {
     template: `
         <Teleport to="body">
             <Transition name="modal">
-                <div v-if="modelValue" class="f-modal-overlay" @click.self="handleOverlayClick">
-                    <div class="f-modal" :style="{ width: width }">
-                        <div class="f-modal__header">
-                            <h3 class="f-modal__title">{{ title }}</h3>
-                            <button v-if="showClose" @click="handleClose" class="f-modal__close">&times;</button>
+                <div v-if="modelValue" class="fixed inset-0 bg-black/50 flex items-center justify-center z-[2000] p-5" @click.self="handleOverlayClick">
+                    <div class="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl max-h-[90vh] overflow-y-auto w-full shadow-[0_4px_24px_rgba(0,0,0,0.08)]" :style="{ width: width }">
+                        <div class="flex items-center justify-between px-5 pt-5">
+                            <h3 class="text-base font-semibold text-[var(--text-primary)] leading-snug">{{ title }}</h3>
+                            <button v-if="showClose" @click="handleClose" class="bg-none border-none text-[var(--text-tertiary)] text-xl cursor-pointer p-1 leading-none transition-colors duration-150 ease-out hover:text-[var(--text-primary)]">&times;</button>
                         </div>
-                        <div class="f-modal__body">
+                        <div class="px-5 py-4 text-[var(--text-secondary)]">
                             <slot />
                         </div>
-                        <div class="f-modal__footer" v-if="$slots.footer">
+                        <div class="flex justify-end gap-2 px-5 pb-5" v-if="$slots.footer">
                             <slot name="footer" />
                         </div>
                     </div>
@@ -31,30 +31,12 @@ export const FModal = {
         </Teleport>
     `,
     setup(props, { emit }) {
-        const handleOverlayClick = () => {
-            if (props.closeOnOverlay) {
-                handleClose();
-            }
-        };
+        const handleOverlayClick = () => { if (props.closeOnOverlay) handleClose(); };
+        const handleClose = () => { emit('update:modelValue', false); emit('close'); };
+        const handleEscKey = (e) => { if (e.key === 'Escape' && props.modelValue) handleClose(); };
 
-        const handleClose = () => {
-            emit('update:modelValue', false);
-            emit('close');
-        };
-
-        const handleEscKey = (e) => {
-            if (e.key === 'Escape' && props.modelValue) {
-                handleClose();
-            }
-        };
-
-        onMounted(() => {
-            document.addEventListener('keydown', handleEscKey);
-        });
-
-        onUnmounted(() => {
-            document.removeEventListener('keydown', handleEscKey);
-        });
+        onMounted(() => document.addEventListener('keydown', handleEscKey));
+        onUnmounted(() => document.removeEventListener('keydown', handleEscKey));
 
         return { handleOverlayClick, handleClose };
     }

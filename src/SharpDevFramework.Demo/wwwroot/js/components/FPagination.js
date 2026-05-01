@@ -14,59 +14,31 @@ export const FPagination = {
     },
     emits: ['update:modelValue', 'update:pageSize', 'page-change', 'size-change'],
     template: `
-        <div class="f-pagination">
-            <div class="f-pagination__info" v-if="layout.includes('total')">
+        <div class="flex items-center justify-end gap-4 px-4 py-3 border-t border-[var(--border-subtle)]">
+            <div class="text-[13px] text-[var(--text-secondary)]" v-if="layout.includes('total')">
                 共 {{ total }} 条，共 {{ pageCount }} 页
             </div>
-            <div class="f-pagination__sizes" v-if="layout.includes('sizes')">
-                <FSingleSelect 
-                    v-model="currentPageSize" 
-                    :options="pageSizeOptions" 
-                    value-key="value" 
-                    label-key="label"
-                    @change="handleSizeChange"
-                    class="f-pagination__size-select"
-                />
+            <div class="flex items-center" v-if="layout.includes('sizes')">
+                <FSingleSelect v-model="currentPageSize" :options="pageSizeOptions" value-key="value" label-key="label"
+                    placement="top" @change="handleSizeChange" class="cursor-pointer" />
             </div>
-            <div class="f-pagination__controls">
-                <button 
-                    class="f-pagination__btn" 
-                    :disabled="currentPage <= 1"
-                    @click="goTo(currentPage - 1)"
-                >
-                    上一页
-                </button>
-                <div class="f-pagination__pagers">
-                    <button 
-                        v-for="page in visiblePages" 
-                        :key="page"
-                        class="f-pagination__pager"
-                        :class="{ 'f-pagination__pager--active': page === currentPage, 'f-pagination__pager--more': page === '...' }"
-                        :disabled="page === '...'"
-                        @click="page !== '...' && goTo(page)"
-                    >
-                        {{ page }}
-                    </button>
+            <div class="flex items-center gap-2">
+                <button class="min-w-[80px] h-[34px] px-3.5 bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)] rounded-md cursor-pointer text-[13px] transition-all duration-150 ease-out hover:bg-[var(--bg-hover)] hover:border-[var(--border-strong)] disabled:opacity-40 disabled:cursor-not-allowed"
+                    :disabled="currentPage <= 1" @click="goTo(currentPage - 1)">上一页</button>
+                <div class="flex gap-1">
+                    <button v-for="page in visiblePages" :key="page"
+                        class="min-w-[34px] h-[34px] px-2 bg-transparent border border-transparent text-[var(--text-secondary)] rounded-md cursor-pointer text-[13px] transition-all duration-150 ease-out hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
+                        :class="{ 'bg-[var(--accent)] text-[var(--text-inverse)] border-[var(--accent)] hover:bg-[var(--accent)] hover:text-[var(--text-inverse)]': page === currentPage, 'cursor-default': page === '...' }"
+                        :disabled="page === '...'" @click="page !== '...' && goTo(page)">{{ page }}</button>
                 </div>
-                <button 
-                    class="f-pagination__btn" 
-                    :disabled="currentPage >= pageCount"
-                    @click="goTo(currentPage + 1)"
-                >
-                    下一页
-                </button>
+                <button class="min-w-[80px] h-[34px] px-3.5 bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)] rounded-md cursor-pointer text-[13px] transition-all duration-150 ease-out hover:bg-[var(--bg-hover)] hover:border-[var(--border-strong)] disabled:opacity-40 disabled:cursor-not-allowed"
+                    :disabled="currentPage >= pageCount" @click="goTo(currentPage + 1)">下一页</button>
             </div>
-            <div class="f-pagination__jumper" v-if="layout.includes('jumper')">
+            <div class="flex items-center gap-2 text-[13px] text-[var(--text-secondary)]" v-if="layout.includes('jumper')">
                 <span>跳至</span>
-                <input 
-                    type="number" 
-                    :value="jumperValue" 
-                    @input="handleJumperInput"
-                    @keyup.enter="handleJumper"
-                    class="f-pagination__jumper-input"
-                    min="1"
-                    :max="pageCount"
-                />
+                <input type="number" :value="jumperValue" @input="handleJumperInput" @blur="handleJumper" @keyup.enter="handleJumper"
+                    class="w-[50px] px-2 py-1.5 border border-[var(--border-subtle)] rounded-md text-[13px] text-center bg-[var(--bg-surface)] text-[var(--text-primary)] outline-none focus:border-[var(--border-focus)] focus:shadow-[0_0_0_2px_var(--accent-subtle)]"
+                    min="1" :max="pageCount" />
                 <span>页</span>
             </div>
         </div>
@@ -77,22 +49,17 @@ export const FPagination = {
         const jumperValue = ref(props.modelValue);
 
         const pageSizeOptions = computed(() => props.pageSizes.map(size => ({ value: size, label: `${size}条/页` })));
-
         const pageCount = computed(() => Math.ceil(props.total / currentPageSize.value));
 
         const visiblePages = computed(() => {
             const pages = [];
             const current = currentPage.value;
             const total = pageCount.value;
-
-            if (total <= 7) {
-                for (let i = 1; i <= total; i++) pages.push(i);
-            } else {
+            if (total <= 7) { for (let i = 1; i <= total; i++) pages.push(i); }
+            else {
                 pages.push(1);
                 if (current > 3) pages.push('...');
-                for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) {
-                    pages.push(i);
-                }
+                for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) pages.push(i);
                 if (current < total - 2) pages.push('...');
                 pages.push(total);
             }
@@ -108,32 +75,16 @@ export const FPagination = {
         };
 
         const handleSizeChange = (newSize) => {
-            jumperValue.value = 1;
-            currentPage.value = 1;
-            emit('update:pageSize', newSize);
-            emit('update:modelValue', 1);
-            emit('size-change', newSize);
-            emit('page-change', { page: 1, pageSize: newSize });
+            jumperValue.value = 1; currentPage.value = 1;
+            emit('update:pageSize', newSize); emit('update:modelValue', 1);
+            emit('size-change', newSize); emit('page-change', { page: 1, pageSize: newSize });
         };
 
-        const handleJumperInput = (e) => {
-            jumperValue.value = Number(e.target.value);
-        };
+        const handleJumperInput = (e) => { jumperValue.value = Number(e.target.value); };
+        const handleJumper = () => { let page = Math.round(jumperValue.value); if (isNaN(page)) page = 1; goTo(page); };
 
-        const handleJumper = () => {
-            let page = Math.round(jumperValue.value);
-            if (isNaN(page)) page = 1;
-            goTo(page);
-        };
-
-        watch(() => props.modelValue, (val) => {
-            currentPage.value = val;
-            jumperValue.value = val;
-        });
-
-        watch(() => props.pageSize, (val) => {
-            currentPageSize.value = val;
-        });
+        watch(() => props.modelValue, (val) => { currentPage.value = val; jumperValue.value = val; });
+        watch(() => props.pageSize, (val) => { currentPageSize.value = val; });
 
         return { pageCount, visiblePages, currentPage, currentPageSize, pageSizeOptions, jumperValue, goTo, handleSizeChange, handleJumperInput, handleJumper };
     }

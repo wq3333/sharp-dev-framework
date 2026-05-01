@@ -8,9 +8,8 @@ const { ref, onMounted, computed } = Vue;
 export const UserManagerView = {
     components: { FButton, FInput, FMultiSelect, FCheckbox, FModal, FTable },
     template: `
-    <div>
-        <div class="page-header">
-            <h1 class="page-title">用户管理</h1>
+    <div class="h-full flex flex-col">
+        <div class="flex items-center justify-between mb-4 gap-4">
             <div class="flex gap-2 flex-wrap">
                 <FInput v-model="nameFilter" placeholder="搜索名称" style="width: 150px;" />
                 <FMultiSelect v-model="roleFilter" :options="roleOptions" value-key="value" label-key="displayName" placeholder="全部角色" style="width: 200px;" />
@@ -18,29 +17,19 @@ export const UserManagerView = {
                 <FButton type="success" @click="showCreateModal = true">新增用户</FButton>
             </div>
         </div>
-
-        <div class="glass-panel" style="padding: 0; overflow: hidden;">
-            <FTable 
-                :data="users" 
-                :columns="columns" 
-                empty-text="暂无用户"
-                :pagination="true"
-                :current-page="currentPage"
-                :page-size="pageSize"
-                :total="totalCount"
-                @page-change="goToPage"
-            >
+        <div class="flex-1 min-h-0 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg flex flex-col overflow-hidden">
+            <FTable :data="users" :columns="columns" empty-text="暂无用户" :pagination="true"
+                :current-page="currentPage" :page-size="pageSize" :total="totalCount" @page-change="goToPage">
                 <template #role="{ row }">
                     <div class="flex gap-1 flex-wrap">
-                        <span v-for="r in getEnumName('userRoleTypes', row.role, true).split(', ').filter(x => x)" :key="r" :class="r.includes('Admin') ? 'badge badge--purple' : 'badge badge--blue'">{{ r }}</span>
+                        <span v-for="r in getEnumName('userRoleTypes', row.role, true).split(', ').filter(x => x)" :key="r"
+                            :class="r.includes('Admin') ? 'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[rgba(168,85,247,0.1)] text-[#a855f7]' : 'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[rgba(79,70,229,0.1)] text-[var(--accent)]'">{{ r }}</span>
                     </div>
                 </template>
                 <template #status="{ row }">
-                    <span :class="row.isActive ? 'badge badge--success' : 'badge badge--danger'">{{ row.isActive ? '启用' : '禁用' }}</span>
+                    <span :class="row.isActive ? 'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[rgba(22,163,74,0.1)] text-[var(--success)]' : 'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[rgba(220,38,38,0.1)] text-[var(--danger)]'">{{ row.isActive ? '启用' : '禁用' }}</span>
                 </template>
-                <template #createdAt="{ row }">
-                    {{ formatDate(row.createdAt) }}
-                </template>
+                <template #createdAt="{ row }">{{ formatDate(row.createdAt) }}</template>
                 <template #actions="{ row }">
                     <div class="flex gap-2">
                         <FButton size="sm" @click="editUser(row)">编辑</FButton>
@@ -49,23 +38,11 @@ export const UserManagerView = {
                 </template>
             </FTable>
         </div>
-
         <FModal v-model="showModal" :title="showCreateModal ? '新增用户' : '编辑用户'">
-            <div class="form-group">
-                <label class="form-label">用户名</label>
-                <FInput v-model="form.name" placeholder="请输入用户名" />
-            </div>
-            <div class="form-group">
-                <label class="form-label">密码{{ showEditModal ? '（不修改留空）' : '' }}</label>
-                <FInput v-model="form.password" type="password" placeholder="请输入密码" />
-            </div>
-            <div class="form-group">
-                <label class="form-label">角色</label>
-                <FMultiSelect v-model="form.roleList" :options="roleOptions" value-key="value" label-key="displayName" placeholder="选择角色" />
-            </div>
-            <div v-if="showEditModal" class="form-group">
-                <FCheckbox v-model="form.isActive" label="启用账户" />
-            </div>
+            <div class="mb-4"><label class="block text-[13px] font-medium mb-1.5 text-[var(--text-secondary)]">用户名</label><FInput v-model="form.name" placeholder="请输入用户名" /></div>
+            <div class="mb-4"><label class="block text-[13px] font-medium mb-1.5 text-[var(--text-secondary)]">密码{{ showEditModal ? '（不修改留空）' : '' }}</label><FInput v-model="form.password" type="password" placeholder="请输入密码" /></div>
+            <div class="mb-4"><label class="block text-[13px] font-medium mb-1.5 text-[var(--text-secondary)]">角色</label><FMultiSelect v-model="form.roleList" :options="roleOptions" value-key="value" label-key="displayName" placeholder="选择角色" placement="top" /></div>
+            <div v-if="showEditModal" class="mb-4"><FCheckbox v-model="form.isActive" label="启用账户" /></div>
             <template #footer>
                 <FButton @click="closeModal">取消</FButton>
                 <FButton type="success" @click="saveUser">保存</FButton>
@@ -98,11 +75,7 @@ export const UserManagerView = {
             { prop: 'actions', label: '操作' }
         ];
 
-        const showModal = computed({
-            get: () => showCreateModal.value || showEditModal.value,
-            set: (val) => { if (!val) closeModal(); }
-        });
-
+        const showModal = computed({ get: () => showCreateModal.value || showEditModal.value, set: (val) => { if (!val) closeModal(); } });
         const roleOptions = computed(() => enums.userRoleTypes || []);
 
         const loadUsers = async () => {
@@ -114,39 +87,24 @@ export const UserManagerView = {
             loading.value = false;
         };
 
-        const goToPage = ({ page, pageSize: newSize }) => {
-            currentPage.value = page;
-            pageSize.value = newSize;
-            loadUsers();
-        };
+        const goToPage = ({ page, pageSize: newSize }) => { currentPage.value = page; pageSize.value = newSize; loadUsers(); };
 
         const editUser = (user) => {
             editingUserId.value = user.id;
-            form.value = {
-                name: user.name,
-                password: '',
-                roleList: user.role ? user.role.split(',') : [],
-                isActive: user.isActive
-            };
+            form.value = { name: user.name, password: '', roleList: user.role ? user.role.split(',') : [], isActive: user.isActive };
             showEditModal.value = true;
         };
 
         const saveUser = async () => {
             const roleStr = form.value.roleList.join(',');
-            if (showCreateModal.value) {
-                await api.users.create(form.value.name, form.value.password, roleStr);
-            } else {
-                await api.users.update(editingUserId.value, form.value.name, form.value.password || undefined, roleStr, form.value.isActive);
-            }
+            if (showCreateModal.value) await api.users.create(form.value.name, form.value.password, roleStr);
+            else await api.users.update(editingUserId.value, form.value.name, form.value.password || undefined, roleStr, form.value.isActive);
             closeModal();
             await loadUsers();
         };
 
         const deleteUser = async (user) => {
-            if (confirm(`确定删除用户 "${user.name}"？`)) {
-                await api.users.delete(user.id);
-                await loadUsers();
-            }
+            if (confirm(`确定删除用户 "${user.name}"？`)) { await api.users.delete(user.id); await loadUsers(); }
         };
 
         const closeModal = () => {
@@ -156,13 +114,7 @@ export const UserManagerView = {
             form.value = { name: '', password: '', roleList: [], isActive: true };
         };
 
-        onMounted(async () => {
-            if (!isAdmin.value) {
-                window.location.hash = '#/tasks';
-                return;
-            }
-            await loadUsers();
-        });
+        onMounted(async () => { if (!isAdmin.value) { window.location.hash = '#/tasks'; return; } await loadUsers(); });
 
         return { users, columns, currentUserId, nameFilter, roleFilter, showCreateModal, showEditModal, showModal, form, roleOptions, editUser, saveUser, deleteUser, closeModal, getEnumName, currentPage, totalCount, pageCount, goToPage, formatDate, loading, loadUsers };
     }
