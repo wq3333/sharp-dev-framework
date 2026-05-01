@@ -2,7 +2,7 @@
 
 namespace SharpDevFramework.Demo.Enums;
 
-public enum SomeTypes
+public enum DemoTypes
 {
     [Description("甲")]
     Foo,

@@ -72,7 +72,7 @@ public class UsersController(FrameworkDbContext context, TokenService tokenServi
     public DataReply<string> Token()
     {
         var payload = HttpContext.GetJwtPayload();
-        var token=tokenService.GenerateToken(payload.UserId, payload.Username, payload.Role);
+        var token = tokenService.GenerateToken(payload.UserId, payload.Username, payload.Role);
         return DataReply.Succeed(token);
     }
 

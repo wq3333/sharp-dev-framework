@@ -1,13 +1,7 @@
 import { api } from '../api.js';
 import { FButton, FInput, FSingleSelect, FModal, FTable, FPagination, FMultiSelect, toast } from '../components/index.js';
 
-const { ref, onMounted, computed } = Vue;
-
-const demoStatusOptions = [
-    { value: 'Active', displayName: '激活' },
-    { value: 'Inactive', displayName: '禁用' },
-    { value: 'Pending', displayName: '待处理' }
-];
+const { ref, onMounted } = Vue;
 
 export const DemoManagerView = {
     components: { FButton, FInput, FSingleSelect, FModal, FTable, FPagination, FMultiSelect },
@@ -17,7 +11,7 @@ export const DemoManagerView = {
             <h1 class="page-title">📋 Demo管理</h1>
             <div class="flex gap-2 flex-wrap">
                 <FInput v-model="nameFilter" placeholder="搜索名称" style="width: 150px;" />
-                <FMultiSelect v-model="statusFilter" :options="demoStatusOptions" value-key="value" label-key="displayName" placeholder="全部状态" style="width: 200px;" />
+                <FMultiSelect v-model="typeFilter" :options="demoStatusOptions" value-key="value" label-key="displayName" placeholder="全部状态" style="width: 200px;" />
                 <FButton type="primary" icon="➕" @click="openCreateModal">新建</FButton>
                 <FButton size="sm" icon="🔄" @click="loadDemos" :loading="loading">刷新</FButton>
             </div>
@@ -81,7 +75,7 @@ export const DemoManagerView = {
     setup() {
         const demos = ref([]);
         const nameFilter = ref('');
-        const statusFilter = ref([]);
+        const typeFilter = ref([]);
         const currentPage = ref(1);
         const pageSize = ref(20);
         const totalCount = ref(0);
@@ -92,9 +86,7 @@ export const DemoManagerView = {
         const columns = [
             { prop: 'id', label: 'ID', width: '80px' },
             { prop: 'name', label: '名称' },
-            { prop: 'description', label: '描述' },
-            { prop: 'status', label: '状态' },
-            { prop: 'category', label: '分类' },
+            { prop: 'type', label: '类型' },
             { prop: 'createdAt', label: '创建时间' },
             { prop: 'actions', label: '操作' }
         ];
@@ -102,7 +94,7 @@ export const DemoManagerView = {
         const modalVisible = ref(false);
         const isEditing = ref(false);
         const editingId = ref(null);
-        const formData = ref({ name: '', description: '', status: 'Active', category: '' });
+        const formData = ref({ name: '', type: '' });
 
         const getStatusName = (status) => {
             const opt = demoStatusOptions.find(o => o.value === status);
@@ -120,7 +112,7 @@ export const DemoManagerView = {
 
         const loadDemos = async () => {
             loading.value = true;
-            const result = await api.demos.list(nameFilter.value, statusFilter.value, currentPage.value, pageSize.value);
+            const result = await api.demos.page(nameFilter.value, typeFilter.value, currentPage.value, pageSize.value);
             demos.value = result.data || [];
             totalCount.value = result.totalCount || 0;
             loading.value = false;
@@ -135,7 +127,7 @@ export const DemoManagerView = {
         const openCreateModal = () => {
             isEditing.value = false;
             editingId.value = null;
-            formData.value = { name: '', description: '', status: 'Active', category: '' };
+            formData.value = { name: '', type: '' };
             modalVisible.value = true;
         };
 
@@ -144,9 +136,7 @@ export const DemoManagerView = {
             editingId.value = demo.id;
             formData.value = { 
                 name: demo.name, 
-                description: demo.description || '', 
-                status: demo.status, 
-                category: demo.category || '' 
+                type: demo.type, 
             };
             modalVisible.value = true;
         };
@@ -184,7 +174,7 @@ export const DemoManagerView = {
         });
 
         return { 
-            demos, columns, nameFilter, statusFilter, demoStatusOptions, currentPage, totalCount, pageSize, 
+            demos, columns, nameFilter, typeFilter, demoStatusOptions, currentPage, totalCount, pageSize, 
             loading, saving, deletingId, modalVisible, isEditing, formData,
             getStatusName, getStatusClass, loadDemos, goToPage, 
             openCreateModal, openEditModal, saveDemo, deleteDemo, api 

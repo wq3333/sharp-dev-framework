@@ -10,7 +10,7 @@ using SharpDevFramework.Demo.Data;
 namespace SharpDevFramework.Demo.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260430132234_InitialCreate")]
+    [Migration("20260501024335_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -25,14 +25,8 @@ namespace SharpDevFramework.Demo.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Category")
-                        .HasColumnType("TEXT");
-
                     b.Property<long>("CreatedAt")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("TEXT");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("INTEGER");
@@ -41,7 +35,7 @@ namespace SharpDevFramework.Demo.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Status")
+                    b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("TEXT");
 

@@ -99,11 +99,11 @@ export const api = {
     },
     
     demos: {
-        list: async (name, status, page = 1, size = 20, onerror = null) => {
+        page: async (name, type, page = 1, size = 20, onerror = null) => {
             const params = { index: page, size };
             if (name) params.name = name;
-            if (status && status.length > 0) {
-                params.status = Array.isArray(status) ? status.join(',') : status;
+            if (type && type.length > 0) {
+                params.type = Array.isArray(type) ? type.join(',') : type;
             }
             return await request('GET', '/demos', null, params, onerror);
         },
@@ -111,11 +111,11 @@ export const api = {
             const result = await request('GET', `/demos/${id}`, null, null, onerror);
             return result.data;
         },
-        create: async (name, description, status, category, onerror = null) => {
-            await request('POST', '/demos', { name, description, status, category }, null, onerror);
+        create: async (name, type, onerror = null) => {
+            await request('POST', '/demos', { name, type }, null, onerror);
         },
-        update: async (id, name, description, status, category, onerror = null) => {
-            await request('PUT', `/demos/${id}`, { name, description, status, category }, null, onerror);
+        update: async (id, name,type, onerror = null) => {
+            await request('PUT', `/demos/${id}`, { name, type }, null, onerror);
         },
         delete: async (id, onerror = null) => {
             await request('DELETE', `/demos/${id}`, null, null, onerror);
@@ -127,17 +127,5 @@ export const api = {
             const result = await request('GET', '/enums', null, null, onerror);
             return result.data;
         }
-    },
-    
-    formatSize(bytes) {
-        if (bytes === 0) return '0 B';
-        const k = 1024;
-        const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    },
-    
-    formatDate(dateStr) {
-        return new Date(dateStr).toLocaleString('zh-CN');
     }
 };

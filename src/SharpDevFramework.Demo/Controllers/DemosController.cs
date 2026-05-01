@@ -1,6 +1,6 @@
 ﻿using Mapster;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SharpDevFramework.DB;
 using SharpDevFramework.Demo.Data;
 using SharpDevFramework.Demo.Data.Entities;
 using SharpDevLib;
@@ -16,8 +16,12 @@ public class DemosController(AppDbContext context) : ControllerBase
     {
         var query = context.Demos.Where(x => !x.IsDeleted);
         if (request.Name.NotNullOrWhiteSpace()) query = query.Where(x => x.Name.Contains(request.Name));
-        if (request.Status.NotNullOrWhiteSpace()) query = query.Where(x => request.Status.Split(',').Contains(x.Status));
-        if (request.Category.NotNullOrWhiteSpace()) query = query.Where(x => x.Category == request.Category);
+        if (request.Type.NotNullOrWhiteSpace())
+        {
+            var types = request.Type.SplitToList();
+            var predicate = DbHelper.BuildOrLikeExpression<DemoEntity>("Types", [.. types]);
+            query = query.Where(predicate);
+        }
         var total = query.Count();
         var items = query.OrderByDescending(x => x.CreatedAt).Skip((request.Index - 1) * request.Size).Take(request.Size).ToList();
         return PageReply.Succeed(items.Adapt<List<DemoDto>>(), total, request);
@@ -34,14 +38,13 @@ public class DemosController(AppDbContext context) : ControllerBase
     public EmptyReply Create([FromBody] CreateDemoRequest request)
     {
         if (request.Name.IsNullOrWhiteSpace()) throw new Exception("名称不能为空");
+        if (request.Type.IsNullOrWhiteSpace()) throw new Exception("类型不能为空");
         if (context.Demos.Any(x => x.Name == request.Name && !x.IsDeleted)) throw new Exception("名称已存在");
 
         var demo = new DemoEntity
         {
             Name = request.Name,
-            Description = request.Description,
-            Status = request.Status,
-            Category = request.Category
+            Type = request.Type,
         };
         context.Demos.Add(demo);
         context.SaveChanges();
@@ -51,15 +54,12 @@ public class DemosController(AppDbContext context) : ControllerBase
     [HttpPut("{id}")]
     public EmptyReply Update(int id, [FromBody] UpdateDemoRequest request)
     {
+        if (request.Name.IsNullOrWhiteSpace()) throw new Exception("名称不能为空");
+        if (request.Type.IsNullOrWhiteSpace()) throw new Exception("类型不能为空");
         var demo = context.Demos.Find(id) ?? throw new Exception("data not found");
-        if (request.Name.NotNullOrWhiteSpace() && request.Name != demo.Name)
-        {
-            if (context.Demos.Any(x => x.Name == request.Name && x.Id != id && !x.IsDeleted)) throw new Exception("名称已存在");
-            demo.Name = request.Name;
-        }
-        demo.Description = request.Description;
-        demo.Status = request.Status;
-        demo.Category = request.Category;
+        if (context.Demos.Any(x => x.Name == request.Name && x.Id != id && !x.IsDeleted)) throw new Exception("名称已存在");
+        demo.Name = request.Name;
+        demo.Type = request.Type;
         demo.UpdatedAt = DateTime.Now.ToUtcTimestamp();
         context.Demos.Update(demo);
         context.SaveChanges();
@@ -80,33 +80,27 @@ public class DemosController(AppDbContext context) : ControllerBase
 public class DemoPageRequest : PageRequest
 {
     public string? Name { get; set; }
-    public string? Status { get; set; }
-    public string? Category { get; set; }
+    public string? Type { get; set; }
 }
 
 public class CreateDemoRequest
 {
     public string Name { get; set; } = string.Empty;
-    public string? Description { get; set; }
-    public string Status { get; set; } = "Active";
-    public string? Category { get; set; }
+    public string Type { get; set; } = string.Empty;
 }
 
 public class UpdateDemoRequest
 {
     public string? Name { get; set; }
-    public string? Description { get; set; }
-    public string Status { get; set; } = string.Empty;
-    public string? Category { get; set; }
+    public string Type { get; set; } = string.Empty;
 }
 
 public class DemoDto
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
-    public string? Description { get; set; }
-    public string Status { get; set; } = string.Empty;
-    public string? Category { get; set; }
+    public string Type { get; set; } = string.Empty;
     public long CreatedAt { get; set; }
     public long? UpdatedAt { get; set; }
+    public bool IsDeleted { get; set; }
 }
