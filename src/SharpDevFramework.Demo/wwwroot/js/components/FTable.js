@@ -17,7 +17,7 @@ export const FTable = {
     emits: ['page-change'],
     template: `
         <div class="f-table-wrapper">
-            <table class="f-table glass-table" :class="{ 'f-table--border': border, 'f-table--stripe': stripe }">
+            <table class="f-table" :class="{ 'f-table--border': border, 'f-table--stripe': stripe }">
                 <thead>
                     <tr>
                         <th v-for="col in columns" :key="col.prop" :style="col.width ? {width: col.width} : {}">

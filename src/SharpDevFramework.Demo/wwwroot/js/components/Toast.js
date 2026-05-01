@@ -60,14 +60,14 @@ export const ToastContainer = {
     `,
     setup() {
         const icons = {
-            success: '✓',
-            error: '✕',
-            warning: '⚠',
-            info: 'ℹ'
+            success: '●',
+            error: '●',
+            warning: '●',
+            info: '●'
         };
-        
+
         const remove = (id) => removeToast(id);
-        
+
         return { toasts: state.toasts, icons, remove };
     }
 };

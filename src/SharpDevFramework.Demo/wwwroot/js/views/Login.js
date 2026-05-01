@@ -10,8 +10,8 @@ export const LoginView = {
     template: `
     <div class="login-page">
         <div class="glass-panel login-card">
-            <h1 class="login-title">🚀 File Server</h1>
-            <p class="login-subtitle">登录以继续访问文件管理系统</p>
+            <h1 class="login-title">SharpDevFramework</h1>
+            <p class="login-subtitle">登录以继续访问管理后台</p>
             <form @submit.prevent="handleLogin">
                 <div class="form-group">
                     <label class="form-label">用户名</label>

@@ -11,11 +11,11 @@ export const TaskManagerView = {
     template: `
     <div>
         <div class="page-header">
-            <h1 class="page-title">⚙️ 任务管理</h1>
+            <h1 class="page-title">任务管理</h1>
             <div class="flex gap-2 flex-wrap">
                 <FMultiSelect v-model="statusFilter" :options="taskStateOptions" value-key="value" label-key="displayName" placeholder="全部状态" style="width: 200px;" />
                 <FMultiSelect v-model="typeFilter" :options="taskTypeOptions" value-key="value" label-key="displayName" placeholder="全部类型" style="width: 200px;" />
-                <FButton size="sm" icon="🔄" @click="loadTasks" :loading="loading">刷新</FButton>
+                <FButton size="sm" @click="loadTasks" :loading="loading">刷新</FButton>
             </div>
         </div>
 
@@ -32,7 +32,7 @@ export const TaskManagerView = {
             >
                 <template #status="{ row }">
                     <span :class="['badge', taskStatusClass(row.status)]">{{ getEnumName('taskStates', row.status) }}</span>
-                    <span v-if="row.errorMessage" style="margin-left: 8px; font-size: 12px; color: #94a3b8;" :title="row.errorMessage">(有错误)</span>
+                    <span v-if="row.errorMessage" style="margin-left: 8px; font-size: 12px; color: var(--text-tertiary);" :title="row.errorMessage">(有错误)</span>
                 </template>
                 <template #type="{ row }">
                     <div class="flex gap-1 flex-wrap">

@@ -10,12 +10,12 @@ export const UserManagerView = {
     template: `
     <div>
         <div class="page-header">
-            <h1 class="page-title">👥 用户管理</h1>
+            <h1 class="page-title">用户管理</h1>
             <div class="flex gap-2 flex-wrap">
                 <FInput v-model="nameFilter" placeholder="搜索名称" style="width: 150px;" />
                 <FMultiSelect v-model="roleFilter" :options="roleOptions" value-key="value" label-key="displayName" placeholder="全部角色" style="width: 200px;" />
-                <FButton icon="🔄" @click="loadUsers" :loading="loading">刷新</FButton>
-                <FButton type="success" icon="➕" @click="showCreateModal = true">新增用户</FButton>
+                <FButton @click="loadUsers" :loading="loading">刷新</FButton>
+                <FButton type="success" @click="showCreateModal = true">新增用户</FButton>
             </div>
         </div>
 
@@ -50,7 +50,7 @@ export const UserManagerView = {
             </FTable>
         </div>
 
-        <FModal v-model="showModal" :title="showCreateModal ? '👤 新增用户' : '✏️ 编辑用户'">
+        <FModal v-model="showModal" :title="showCreateModal ? '新增用户' : '编辑用户'">
             <div class="form-group">
                 <label class="form-label">用户名</label>
                 <FInput v-model="form.name" placeholder="请输入用户名" />

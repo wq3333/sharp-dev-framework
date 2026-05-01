@@ -7,10 +7,57 @@ import {
     FDropdown, FDropdownItem, FMultiSelect, ToastContainer, ToastPlugin
 } from './components/index.js';
 
-const { createApp } = Vue;
+const { createApp, ref, provide, readonly } = Vue;
+
+const ThemeSymbol = Symbol('theme');
+
+function createThemeManager() {
+    const theme = ref(localStorage.getItem('theme') || 'system');
+    const systemDark = ref(window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+    const effectiveTheme = () => {
+        if (theme.value === 'system') {
+            return systemDark.value ? 'dark' : 'light';
+        }
+        return theme.value;
+    };
+
+    const apply = () => {
+        const t = effectiveTheme();
+        document.documentElement.setAttribute('data-theme', t);
+    };
+
+    const set = (value) => {
+        theme.value = value;
+        if (value !== 'system') {
+            localStorage.setItem('theme', value);
+        } else {
+            localStorage.removeItem('theme');
+        }
+        apply();
+    };
+
+    const toggle = () => {
+        set(effectiveTheme() === 'dark' ? 'light' : 'dark');
+    };
+
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        systemDark.value = e.matches;
+        if (theme.value === 'system') apply();
+    });
+
+    apply();
+
+    return { theme: readonly(theme), effectiveTheme, set, toggle };
+}
 
 const app = createApp({
-    template: '<router-view v-slot="{ Component }"><keep-alive><component :is="Component" /></keep-alive></router-view><ToastContainer />'
+    template: '<router-view v-slot="{ Component }"><keep-alive><component :is="Component" /></keep-alive></router-view><ToastContainer />',
+    setup() {
+        const themeManager = createThemeManager();
+        provide(ThemeSymbol, themeManager);
+        return {};
+    }
 });
 
 app.use(router);
@@ -32,13 +79,13 @@ setStopSignalR(stopSignalR);
 router.beforeEach(async (to, from, next) => {
     const hasToken = localStorage.getItem('token');
     const tokenValid = isTokenValid();
-    
+
     if (hasToken && !tokenValid) {
         clearAuth();
         next('/login');
         return;
     }
-    
+
     if (to.path !== '/login' && !tokenValid) {
         next('/login');
     } else if (to.path === '/login' && tokenValid) {
@@ -55,3 +102,5 @@ router.beforeEach(async (to, from, next) => {
 app.mount('#app');
 
 initSignalR();
+
+export { ThemeSymbol };

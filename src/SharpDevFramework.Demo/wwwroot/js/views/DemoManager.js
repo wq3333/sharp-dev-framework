@@ -10,12 +10,12 @@ export const DemoManagerView = {
     template: `
     <div>
         <div class="page-header">
-            <h1 class="page-title">📋 Demo管理</h1>
+            <h1 class="page-title">Demo管理</h1>
             <div class="flex gap-2 flex-wrap">
                 <FInput v-model="nameFilter" placeholder="搜索名称" style="width: 150px;" />
                 <FMultiSelect v-model="typeFilter" :options="demoTypeOptions" value-key="value" label-key="displayName" placeholder="全部类型" style="width: 200px;" />
-                <FButton type="primary" icon="➕" @click="openCreateModal">新建</FButton>
-                <FButton size="sm" icon="🔄" @click="loadDemos" :loading="loading">刷新</FButton>
+                <FButton type="primary" @click="openCreateModal">新建</FButton>
+                <FButton size="sm" @click="loadDemos" :loading="loading">刷新</FButton>
             </div>
         </div>
 
