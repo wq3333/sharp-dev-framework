@@ -8,6 +8,9 @@ using System.Threading.Channels;
 
 namespace SharpDevFramework;
 
+/// <summary>
+/// 任务中心，负责管理后台任务的发布、消费、重试和状态更新
+/// </summary>
 public class TaskCenter(ILogger<TaskCenter> logger, IServiceProvider serviceProvider, IConfiguration configuration, NotificationService notificationService) : ISingletonService
 {
     Channel<int>? _channel;
@@ -17,12 +20,22 @@ public class TaskCenter(ILogger<TaskCenter> logger, IServiceProvider serviceProv
     readonly Dictionary<int, CancellationTokenSource> _cancleTokens = [];
     readonly Dictionary<string, Type> _handlerTypes = [];
 
+    /// <summary>
+    /// 发布任务到队列
+    /// </summary>
+    /// <param name="taskId">任务 ID</param>
     public async Task PublishAsync(int taskId)
     {
         if (!_started || _channel is null) throw new Exception($"{nameof(TaskCenter)} not started");
         await _channel.Writer.WriteAsync(taskId);
     }
 
+    /// <summary>
+    /// 启动任务中心
+    /// </summary>
+    /// <param name="assemblies">需要扫描的程序集</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>Task</returns>
     public Task StartAsync(Assembly[] assemblies, CancellationToken cancellationToken)
     {
         if (_started) throw new InvalidOperationException($"{nameof(TaskCenter)} already started");
@@ -36,6 +49,10 @@ public class TaskCenter(ILogger<TaskCenter> logger, IServiceProvider serviceProv
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// 注册任务处理器类型
+    /// </summary>
+    /// <param name="assemblies">需要扫描的程序集</param>
     void RegisterHandlerTypes(Assembly[] assemblies)
     {
         assemblies
@@ -55,6 +72,10 @@ public class TaskCenter(ILogger<TaskCenter> logger, IServiceProvider serviceProv
            });
     }
 
+    /// <summary>
+    /// 运行任务消费者
+    /// </summary>
+    /// <param name="stoppingToken">停止令牌</param>
     async Task RunConsumerAsync(CancellationToken stoppingToken)
     {
         try
@@ -83,11 +104,20 @@ public class TaskCenter(ILogger<TaskCenter> logger, IServiceProvider serviceProv
         }
     }
 
+    /// <summary>
+    /// 取消指定任务
+    /// </summary>
+    /// <param name="taskId">任务 ID</param>
+    /// <returns>Task</returns>
     public async Task CancelTaskAsync(int taskId)
     {
         if (_cancleTokens.TryGetValue(taskId, out var cts)) await cts.CancelAsync();
     }
 
+    /// <summary>
+    /// 停止任务中心
+    /// </summary>
+    /// <returns>Task</returns>
     public async Task StopAsync()
     {
         if (!_started) return;
@@ -104,6 +134,11 @@ public class TaskCenter(ILogger<TaskCenter> logger, IServiceProvider serviceProv
         if (logger.IsEnabled(LogLevel.Information)) logger.LogInformation("{TaskCenter} stopped", nameof(TaskCenter));
     }
 
+    /// <summary>
+    /// 处理单个任务
+    /// </summary>
+    /// <param name="taskId">任务 ID</param>
+    /// <param name="semaphore">信号量</param>
     async Task ProcessSingleTask(int taskId, SemaphoreSlim semaphore)
     {
         try
@@ -132,6 +167,13 @@ public class TaskCenter(ILogger<TaskCenter> logger, IServiceProvider serviceProv
         }
     }
 
+    /// <summary>
+    /// 更改任务状态
+    /// </summary>
+    /// <param name="taskId">任务 ID</param>
+    /// <param name="state">新状态</param>
+    /// <param name="error">错误信息（可选）</param>
+    /// <returns>Task</returns>
     public async Task ChangeTaskState(int taskId, TaskStates state, string? error = null)
     {
         var dbContext = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<FrameworkDbContext>();

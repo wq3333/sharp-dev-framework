@@ -2,16 +2,38 @@
 
 	<PropertyGroup>
 		<TargetFramework>net10.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<LangVersion>12.0</LangVersion>
+		<Authors>yibei333</Authors>
+		<Description>基于net10.0的Web开发框架扩展.</Description>
+		<Copyright>yibei333</Copyright>
+		<PackageId>SharpDevFramework</PackageId>
+		<PackageProjectUrl>https://github.com/yibei333/sharp-dev-framework</PackageProjectUrl>
+		<PackageIcon>c-sharp.png</PackageIcon>
+		<RepositoryUrl>https://github.com/yibei333/sharp-dev-framework</RepositoryUrl>
+		<PackageTags>framework web aspnetcore</PackageTags>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<Version>1.0.0</Version>
+		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+		<PackageReadmeFile>nuget.md</PackageReadmeFile>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Content Include="framework.json">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-		</Content>
+		<None Include="../../assets/c-sharp.png" Link="Assets\c-sharp.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="../../LICENSE" Link="Assets\LICENSE">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="../../nuget.md" Link="Assets/nuget.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
 	</ItemGroup>
 
 	<ItemGroup>

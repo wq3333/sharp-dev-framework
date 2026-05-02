@@ -8,8 +8,15 @@ using SharpDevLib;
 
 namespace SharpDevFramework;
 
+/// <summary>
+/// 全局异常过滤器，统一处理未捕获的异常
+/// </summary>
 public class ExceptionFilter(IWebHostEnvironment env) : IExceptionFilter
 {
+    /// <summary>
+    /// 异常处理逻辑
+    /// </summary>
+    /// <param name="context">异常上下文</param>
     public void OnException(ExceptionContext context)
     {
         var logger = context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger<ExceptionFilter>();
@@ -17,6 +24,7 @@ public class ExceptionFilter(IWebHostEnvironment env) : IExceptionFilter
 
         if (context.Exception is UnauthorizedAccessException)
         {
+            // 权限异常返回 403
             context.HttpContext.Response.StatusCode = 403;
             var errorMessage = env.IsDevelopment()
                 ? context.Exception?.InnerException?.Message ?? context.Exception?.Message
@@ -25,6 +33,7 @@ public class ExceptionFilter(IWebHostEnvironment env) : IExceptionFilter
         }
         else
         {
+            // 其他异常返回 500
             context.HttpContext.Response.StatusCode = 500;
             var errorMessage = env.IsDevelopment()
                 ? context.Exception?.InnerException?.Message ?? context.Exception?.Message

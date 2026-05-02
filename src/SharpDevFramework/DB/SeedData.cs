@@ -6,8 +6,15 @@ using SharpDevLib;
 
 namespace SharpDevFramework;
 
+/// <summary>
+/// 数据库初始化数据管理
+/// </summary>
 internal static class SeedData
 {
+    /// <summary>
+    /// 初始化数据库，创建默认管理员账号
+    /// </summary>
+    /// <param name="app">WebApplication 实例</param>
     public static void SeedDatabase(this WebApplication app)
     {
         using var scope = app.Services.CreateScope();

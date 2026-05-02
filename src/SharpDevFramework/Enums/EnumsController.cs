@@ -5,6 +5,9 @@ using System.Reflection;
 
 namespace SharpDevFramework;
 
+/// <summary>
+/// 枚举值控制器，提供系统中所有枚举值的查询
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class EnumsController : ControllerBase
@@ -12,6 +15,10 @@ public class EnumsController : ControllerBase
     internal static Assembly[] Assemblies = [];
     static List<EnumsResponse>? _cache = null;
 
+    /// <summary>
+    /// 获取所有枚举值列表
+    /// </summary>
+    /// <returns>枚举响应列表</returns>
     [HttpGet]
     public DataReply<List<EnumsResponse>> Get()
     {
@@ -37,14 +44,34 @@ public class EnumsController : ControllerBase
     }
 }
 
+/// <summary>
+/// 枚举响应
+/// </summary>
 public class EnumsResponse
 {
+    /// <summary>
+    /// 枚举类别名称
+    /// </summary>
     public string CategoryName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 枚举项列表
+    /// </summary>
     public List<EnumItemsResponse> Items { get; set; } = [];
 }
 
+/// <summary>
+/// 枚举项响应
+/// </summary>
 public class EnumItemsResponse
 {
+    /// <summary>
+    /// 显示名称
+    /// </summary>
     public string DisplayName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 枚举值
+    /// </summary>
     public object? Value { get; set; }
 }

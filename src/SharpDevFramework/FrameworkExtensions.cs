@@ -11,8 +11,18 @@ using System.Reflection;
 
 namespace SharpDevFramework;
 
+/// <summary>
+/// SharpDevFramework 框架扩展方法集合
+/// </summary>
 public static class FrameworkExtensions
 {
+    /// <summary>
+    /// 添加 SharpDevFramework 框架服务
+    /// </summary>
+    /// <typeparam name="TDbContext">数据库上下文类型，必须继承自 FrameworkDbContext</typeparam>
+    /// <param name="builder">WebApplicationBuilder 实例</param>
+    /// <param name="assemblies">需要扫描的程序集数组</param>
+    /// <returns>WebApplicationBuilder 实例，用于链式调用</returns>
     public static WebApplicationBuilder AddSharpDevFramework<TDbContext>(this WebApplicationBuilder builder, Assembly[] assemblies) where TDbContext : FrameworkDbContext
     {
         var assembly = assemblies
@@ -32,6 +42,12 @@ public static class FrameworkExtensions
         return builder;
     }
 
+    /// <summary>
+    /// 使用 SharpDevFramework 框架中间件
+    /// </summary>
+    /// <param name="app">WebApplication 实例</param>
+    /// <param name="assemblies">需要扫描的程序集数组</param>
+    /// <returns>WebApplication 实例，用于链式调用</returns>
     public static WebApplication UseSharpDevFramework(this WebApplication app, Assembly[] assemblies)
     {
         var assembly = assemblies
@@ -50,6 +66,11 @@ public static class FrameworkExtensions
         return app;
     }
 
+    /// <summary>
+    /// 添加配置文件，支持 appsettings.json、appsettings.local.json、framework.json、framework.local.json
+    /// </summary>
+    /// <param name="builder">WebApplicationBuilder 实例</param>
+    /// <returns>WebApplicationBuilder 实例</returns>
     static WebApplicationBuilder AddSettings(this WebApplicationBuilder builder)
     {
         builder.Configuration.AddJsonFile(AppDomain.CurrentDomain.BaseDirectory.CombinePath("appsettings.json"), optional: false, reloadOnChange: true);
@@ -59,6 +80,11 @@ public static class FrameworkExtensions
         return builder;
     }
 
+    /// <summary>
+    /// 配置 Serilog 日志
+    /// </summary>
+    /// <param name="builder">WebApplicationBuilder 实例</param>
+    /// <returns>WebApplicationBuilder 实例</returns>
     static WebApplicationBuilder AddSerialog(this WebApplicationBuilder builder)
     {
         var isEnabled = builder.Configuration.GetValue<bool>("Serilog:IsEnabled");
@@ -69,6 +95,11 @@ public static class FrameworkExtensions
         return builder;
     }
 
+    /// <summary>
+    /// 配置请求大小限制
+    /// </summary>
+    /// <param name="builder">WebApplicationBuilder 实例</param>
+    /// <returns>WebApplicationBuilder 实例</returns>
     static WebApplicationBuilder ConfigSizeLimit(this WebApplicationBuilder builder)
     {
         var maxSize = builder.Configuration.GetValue<long>("FrameworkSettings:RequestSizeLimit");
@@ -82,6 +113,11 @@ public static class FrameworkExtensions
         return builder;
     }
 
+    /// <summary>
+    /// 配置 CORS 跨域策略
+    /// </summary>
+    /// <param name="builder">WebApplicationBuilder 实例</param>
+    /// <returns>WebApplicationBuilder 实例</returns>
     static WebApplicationBuilder AddCors(this WebApplicationBuilder builder)
     {
         var isEnabled = builder.Configuration.GetValue<bool>("FrameworkSettings:Cors:IsEnabled");
@@ -110,6 +146,11 @@ public static class FrameworkExtensions
         return builder;
     }
 
+    /// <summary>
+    /// 添加过滤器（认证过滤器、异常过滤器）
+    /// </summary>
+    /// <param name="builder">WebApplicationBuilder 实例</param>
+    /// <returns>WebApplicationBuilder 实例</returns>
     static WebApplicationBuilder AddFilters(this WebApplicationBuilder builder)
     {
         var useAuthFilter = builder.Configuration.GetValue<bool>("FrameworkSettings:Auth:IsEnabled");
@@ -127,6 +168,11 @@ public static class FrameworkExtensions
         return builder;
     }
 
+    /// <summary>
+    /// 添加 Windows Service 支持
+    /// </summary>
+    /// <param name="builder">WebApplicationBuilder 实例</param>
+    /// <returns>WebApplicationBuilder 实例</returns>
     static WebApplicationBuilder AddWindowsService(this WebApplicationBuilder builder)
     {
         var useWindowsService = builder.Configuration.GetValue<bool>("FrameworkSettings:UseWindowsService");
@@ -135,6 +181,12 @@ public static class FrameworkExtensions
         return builder;
     }
 
+    /// <summary>
+    /// 添加数据库上下文
+    /// </summary>
+    /// <typeparam name="TDbContext">数据库上下文类型</typeparam>
+    /// <param name="builder">WebApplicationBuilder 实例</param>
+    /// <returns>WebApplicationBuilder 实例</returns>
     static WebApplicationBuilder AddDbContext<TDbContext>(this WebApplicationBuilder builder) where TDbContext : FrameworkDbContext
     {
         builder.Services.AddDbContext<TDbContext>(options => options.UseSqlite($"Data Source={Statics.DatabasePath}"));
@@ -142,6 +194,12 @@ public static class FrameworkExtensions
         return builder;
     }
 
+    /// <summary>
+    /// 添加服务注册（单例、作用域、瞬态）
+    /// </summary>
+    /// <param name="builder">WebApplicationBuilder 实例</param>
+    /// <param name="assemblies">需要扫描的程序集数组</param>
+    /// <returns>WebApplicationBuilder 实例</returns>
     static WebApplicationBuilder AddServices(this WebApplicationBuilder builder, Assembly[] assemblies)
     {
         builder.Services.AddImplementationsOf(assemblies);
@@ -150,6 +208,11 @@ public static class FrameworkExtensions
         return builder;
     }
 
+    /// <summary>
+    /// 添加 SignalR 实时通信服务
+    /// </summary>
+    /// <param name="builder">WebApplicationBuilder 实例</param>
+    /// <returns>WebApplicationBuilder 实例</returns>
     static WebApplicationBuilder AddSignalR(this WebApplicationBuilder builder)
     {
         var useSignalR = builder.Configuration.GetValue<bool>("FrameworkSettings:UseSignalR");
@@ -158,6 +221,12 @@ public static class FrameworkExtensions
         return builder;
     }
 
+    /// <summary>
+    /// 添加后台任务服务
+    /// </summary>
+    /// <param name="builder">WebApplicationBuilder 实例</param>
+    /// <param name="assemblies">需要扫描的程序集数组</param>
+    /// <returns>WebApplicationBuilder 实例</returns>
     static WebApplicationBuilder AddTasks(this WebApplicationBuilder builder, Assembly[] assemblies)
     {
         var isEnabled = builder.Configuration.GetValue<bool>("FrameworkSettings:Tasks:IsEnabled");
@@ -167,6 +236,11 @@ public static class FrameworkExtensions
         return builder;
     }
 
+    /// <summary>
+    /// 使用 CORS 跨域中间件
+    /// </summary>
+    /// <param name="app">WebApplication 实例</param>
+    /// <returns>WebApplication 实例</returns>
     static WebApplication UseCors(this WebApplication app)
     {
         var isEnabled = app.Configuration.GetValue<bool>("FrameworkSettings:Cors:IsEnabled");
@@ -177,6 +251,11 @@ public static class FrameworkExtensions
         return app;
     }
 
+    /// <summary>
+    /// 使用 SignalR Hub
+    /// </summary>
+    /// <param name="app">WebApplication 实例</param>
+    /// <returns>WebApplication 实例</returns>
     static WebApplication UseSignalR(this WebApplication app)
     {
         var useSignalR = app.Configuration.GetValue<bool>("FrameworkSettings:UseSignalR");

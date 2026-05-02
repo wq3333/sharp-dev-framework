@@ -8,15 +8,27 @@ using SharpDevLib;
 
 namespace SharpDevFramework;
 
+/// <summary>
+/// 用户控制器，提供用户登录、CRUD 等功能
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class UsersController(FrameworkDbContext context, TokenService tokenService, IConfiguration configuration) : ControllerBase
 {
+    /// <summary>
+    /// 检查是否为管理员
+    /// </summary>
+    /// <exception cref="UnauthorizedAccessException">非管理员时抛出异常</exception>
     void CheckAdmin()
     {
         if (!HttpContext.GetJwtPayload().Role.SplitToList().Any(x => x == UserRoleTypes.Admin)) throw new UnauthorizedAccessException("没有权限执行此操作");
     }
 
+    /// <summary>
+    /// 用户登录
+    /// </summary>
+    /// <param name="request">登录请求（用户名、密码）</param>
+    /// <returns>登录响应（Token、用户信息）</returns>
     [HttpPost("login")]
     [AllowAnonymous]
     public async Task<DataReply<LoginResponse>> Login([FromBody] LoginRequest request)
@@ -69,6 +81,10 @@ public class UsersController(FrameworkDbContext context, TokenService tokenServi
         return DataReply.Succeed(new LoginResponse { Token = token, UserId = user.Id, Username = user.Name!, Role = user.Role });
     }
 
+    /// <summary>
+    /// 刷新 Token
+    /// </summary>
+    /// <returns>新的 Token</returns>
     [HttpPost("token")]
     public DataReply<string> Token()
     {
@@ -77,6 +93,11 @@ public class UsersController(FrameworkDbContext context, TokenService tokenServi
         return DataReply.Succeed(token);
     }
 
+    /// <summary>
+    /// 分页查询用户列表（仅管理员）
+    /// </summary>
+    /// <param name="request">查询参数</param>
+    /// <returns>用户分页列表</returns>
     [HttpGet]
     public PageReply<UserDto> GetPage([FromQuery] UserPageRequest request)
     {
@@ -94,6 +115,11 @@ public class UsersController(FrameworkDbContext context, TokenService tokenServi
         return PageReply.Succeed(items.Adapt<List<UserDto>>(), total, request);
     }
 
+    /// <summary>
+    /// 获取单个用户详情（仅管理员）
+    /// </summary>
+    /// <param name="id">用户 ID</param>
+    /// <returns>用户详情</returns>
     [HttpGet("{id}")]
     public DataReply<UserDto> Get(int id)
     {
@@ -102,6 +128,11 @@ public class UsersController(FrameworkDbContext context, TokenService tokenServi
         return DataReply.Succeed(user.Adapt<UserDto>());
     }
 
+    /// <summary>
+    /// 创建用户（仅管理员）
+    /// </summary>
+    /// <param name="request">创建用户请求</param>
+    /// <returns>操作结果</returns>
     [HttpPost]
     public EmptyReply Create([FromBody] CreateUserRequest request)
     {
@@ -122,6 +153,12 @@ public class UsersController(FrameworkDbContext context, TokenService tokenServi
         return EmptyReply.Succeed();
     }
 
+    /// <summary>
+    /// 更新用户（仅管理员）
+    /// </summary>
+    /// <param name="id">用户 ID</param>
+    /// <param name="request">更新用户请求</param>
+    /// <returns>操作结果</returns>
     [HttpPut("{id}")]
     public EmptyReply Update(int id, [FromBody] UpdateUserRequest request)
     {
@@ -143,6 +180,11 @@ public class UsersController(FrameworkDbContext context, TokenService tokenServi
         return EmptyReply.Succeed();
     }
 
+    /// <summary>
+    /// 删除用户（仅管理员）
+    /// </summary>
+    /// <param name="id">用户 ID</param>
+    /// <returns>操作结果</returns>
     [HttpDelete("{id}")]
     public EmptyReply Delete(int id)
     {
@@ -156,51 +198,163 @@ public class UsersController(FrameworkDbContext context, TokenService tokenServi
     }
 }
 
+/// <summary>
+/// 用户分页查询请求
+/// </summary>
 public class UserPageRequest : PageRequest
 {
+    /// <summary>
+    /// 用户名（模糊查询）
+    /// </summary>
     public string? Name { get; set; }
+
+    /// <summary>
+    /// 角色
+    /// </summary>
     public string? Role { get; set; }
 }
 
+/// <summary>
+/// 创建用户请求
+/// </summary>
 public class CreateUserRequest
 {
+    /// <summary>
+    /// 用户名
+    /// </summary>
     public string Name { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 密码
+    /// </summary>
     public string Password { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 角色
+    /// </summary>
     public string Role { get; set; } = string.Empty;
 }
 
+/// <summary>
+/// 更新用户请求
+/// </summary>
 public class UpdateUserRequest
 {
+    /// <summary>
+    /// 用户名
+    /// </summary>
     public string? Name { get; set; }
+
+    /// <summary>
+    /// 密码（可选）
+    /// </summary>
     public string? Password { get; set; }
+
+    /// <summary>
+    /// 角色
+    /// </summary>
     public string Role { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 是否激活
+    /// </summary>
     public bool IsActive { get; set; }
 }
 
+/// <summary>
+/// 用户数据传输对象
+/// </summary>
 public class UserDto
 {
+    /// <summary>
+    /// 用户 ID
+    /// </summary>
     public int Id { get; set; }
+
+    /// <summary>
+    /// 用户名
+    /// </summary>
     public string Name { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 创建时间戳
+    /// </summary>
     public long CreatedAt { get; set; }
+
+    /// <summary>
+    /// 是否激活
+    /// </summary>
     public bool IsActive { get; set; } = true;
+
+    /// <summary>
+    /// 连续登录失败次数
+    /// </summary>
     public int FailedLoginAttempts { get; set; }
+
+    /// <summary>
+    /// 锁定截止时间戳
+    /// </summary>
     public long? LockoutUntil { get; set; }
+
+    /// <summary>
+    /// 上次登录失败时间戳
+    /// </summary>
     public long? LastFailedLoginTime { get; set; }
+
+    /// <summary>
+    /// 上次登录时间戳
+    /// </summary>
     public long? LastLoginAt { get; set; }
+
+    /// <summary>
+    /// 上次登录 IP 地址
+    /// </summary>
     public string? LastLoginIp { get; set; }
+
+    /// <summary>
+    /// 角色
+    /// </summary>
     public string Role { get; set; } = string.Empty;
 }
 
+/// <summary>
+/// 登录请求
+/// </summary>
 public class LoginRequest
 {
+    /// <summary>
+    /// 用户名
+    /// </summary>
     public string? Username { get; set; }
+
+    /// <summary>
+    /// 密码
+    /// </summary>
     public string? Password { get; set; }
 }
 
+/// <summary>
+/// 登录响应
+/// </summary>
 public class LoginResponse
 {
+    /// <summary>
+    /// 用户 ID
+    /// </summary>
     public int UserId { get; set; }
+
+    /// <summary>
+    /// 用户名
+    /// </summary>
     public string Username { get; set; } = string.Empty;
+
+    /// <summary>
+    /// JWT Token
+    /// </summary>
     public string Token { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 角色
+    /// </summary>
     public string Role { get; set; } = string.Empty;
 }

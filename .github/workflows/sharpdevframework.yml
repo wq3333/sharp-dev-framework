@@ -1,0 +1,81 @@
+name: sharpdevframework-release
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "src/SharpDevFramework/SharpDevFramework.csproj"
+
+jobs:
+  build:
+    permissions: write-all
+    runs-on: windows-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Install .NET Core
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: GetVersionFromCsproj
+      id: GetVersionFromCsproj
+      run: |
+        $content = Get-Content "src/SharpDevFramework/SharpDevFramework.csproj" -Raw
+        if ($content -match '<Version>(.*?)<\/Version>') {
+          $localVersion = $matches[1].Trim()
+          echo "local_version=$localVersion" >> $ENV:GITHUB_OUTPUT
+          echo "Local version: $localVersion"
+        } else {
+          echo "Failed to extract version from csproj file"
+          exit 1
+        }
+
+    - name: CheckNuGetVersion
+      id: CheckNuGetVersion
+      run: |
+        $packageId = "SharpDevFramework"
+        $localVersion = "${{ steps.GetVersionFromCsproj.outputs.local_version }}"
+        $nugetUrl = "https://api.nuget.org/v3-flatcontainer/$packageId/index.json"
+
+        try {
+          $response = Invoke-RestMethod -Uri $nugetUrl -Method Get
+          $latestVersion = $response.versions[-1]
+          echo "latest_version=$latestVersion" >> $ENV:GITHUB_OUTPUT
+          echo "Latest NuGet version: $latestVersion"
+        } catch {
+          echo "latest_version=not_found" >> $ENV:GITHUB_OUTPUT
+          echo "Package not found on NuGet"
+        }
+
+    - name: CompareVersions
+      id: CompareVersions
+      run: |
+        $localVersion = "${{ steps.GetVersionFromCsproj.outputs.local_version }}"
+        $nugetVersion = "${{ steps.CheckNuGetVersion.outputs.latest_version }}"
+
+        echo "Local version: $localVersion"
+        echo "NuGet version: $nugetVersion"
+
+        if ($nugetVersion -eq "not_found" -or $localVersion -ne $nugetVersion) {
+          echo "should_build=true" >> $ENV:GITHUB_OUTPUT
+          echo "Versions differ, will build and push package"
+        } else {
+          echo "should_build=false" >> $ENV:GITHUB_OUTPUT
+          echo "Versions are the same, skipping build"
+        }
+
+    - name: Build
+      if: steps.CompareVersions.outputs.should_build == 'true'
+      run: dotnet build --configuration Release "src/SharpDevFramework/SharpDevFramework.csproj"
+
+    - name: Pack
+      if: steps.CompareVersions.outputs.should_build == 'true'
+      run: dotnet pack --configuration Release --output "pack" "src/SharpDevFramework/SharpDevFramework.csproj"
+
+    - name: Push
+      if: steps.CompareVersions.outputs.should_build == 'true'
+      run: dotnet nuget push "pack/SharpDevFramework.${{steps.GetVersionFromCsproj.outputs.local_version}}.nupkg" --api-key "${{ secrets.NUGET_APIKEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate

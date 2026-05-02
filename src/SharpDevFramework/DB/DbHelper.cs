@@ -3,8 +3,18 @@ using System.Linq.Expressions;
 
 namespace SharpDevFramework.DB;
 
+/// <summary>
+/// 数据库操作辅助类
+/// </summary>
 public static class DbHelper
 {
+    /// <summary>
+    /// 构建多条件 OR LIKE 查询表达式
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <param name="propertyName">属性名称</param>
+    /// <param name="filters">过滤条件数组</param>
+    /// <returns>查询表达式</returns>
     public static Expression<Func<TEntity, bool>> BuildOrLikeExpression<TEntity>(string propertyName, string[] filters) where TEntity : class
     {
         var parameter = Expression.Parameter(typeof(TEntity), "u");
