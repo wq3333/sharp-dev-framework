@@ -139,7 +139,7 @@ export const LayoutComponent = {
         const theme = inject(ThemeSymbol, null);
         const isDark = computed(() => theme ? theme.effectiveTheme() === 'dark' : false);
         const toggleTheme = () => { if (theme) theme.toggle(); };
-        const handleLogout = () => { stopSignalR(); clearAuth(); window.location.hash = '#/login'; };
+        const handleLogout = () => { stopSignalR(); clearAuth(); window.location.hash = '#/login'; window.location.reload(); };
 
         return { sidebarOpen, mobileOpen, isMobile, closeSidebar, openSidebar, onNavClick, username, role, isAdmin, handleLogout, isDark, toggleTheme };
     }

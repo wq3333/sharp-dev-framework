@@ -15,21 +15,21 @@ export const LoginView = {
             <div class="login-orb login-orb--3"></div>
             <div class="login-grid"></div>
         </div>
-        <div class="login-card">
-            <div class="flex flex-col items-center mb-8">
-                <IconLogo :size="44" />
+        <div class="login-card m-6">
+            <div class="flex flex-col items-center mb-4">
+                <IconLogo :size="40" />
             </div>
             <form @submit.prevent="handleLogin">
-                <div class="mb-4">
-                    <label class="block text-[13px] font-medium mb-1.5 text-[var(--text-secondary)]">用户名</label>
+                <div class="mb-5">
+                    <label class="block text-[13px] font-medium mb-1.5 text-gray-400">用户名</label>
                     <FInput v-model="username" placeholder="请输入用户名" />
                 </div>
-                <div class="mb-4">
-                    <label class="block text-[13px] font-medium mb-1.5 text-[var(--text-secondary)]">密码</label>
+                <div class="mb-5">
+                    <label class="block text-[13px] font-medium mb-1.5 text-gray-400">密码</label>
                     <FInput v-model="password" type="password" placeholder="请输入密码" />
                 </div>
-                <div v-if="error" class="text-[13px] text-[var(--danger)] mt-2">{{ error }}</div>
-                <FButton type="primary" :loading="loading" block @click="handleLogin" class="mt-6">
+                <div v-if="error" class="text-[13px] text-red-400 mt-2">{{ error }}</div>
+                <FButton type="primary" :loading="loading" block @click="handleLogin" class="mt-7">
                     {{ loading ? '登录中...' : '登 录' }}
                 </FButton>
             </form>
