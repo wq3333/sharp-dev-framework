@@ -20,25 +20,25 @@ export const FSingleSelect = {
                 <span class="text-[var(--text-tertiary)] text-[10px] ml-2">{{ visible ? '▲' : '▼' }}</span>
             </div>
             <Teleport to="body">
-                <Transition name="dropdown">
-                    <div v-if="visible" ref="panelRef" class="fixed bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg flex flex-col gap-2 p-2 z-[9999] shadow-[0_4px_24px_rgba(0,0,0,0.08)] max-h-[300px] overflow-y-auto"
-                        :style="panelStyle">
-                        <div
-                            v-for="option in options"
-                            :key="option[valueKey]"
-                            class="flex items-center gap-2 px-2.5 py-2 rounded-md text-sm text-[var(--text-primary)] cursor-pointer transition-colors duration-150 ease-out hover:bg-[var(--bg-hover)] text-nowrap"
-                            :class="{ 'bg-[var(--bg-active)] text-[var(--accent)]': isSelected(option) }"
-                            @click="selectOption(option)"
-                        >
-                            {{ option[labelKey] }}
-                        </div>
+                <div v-if="visible" ref="panelRef" class="fixed bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg flex flex-col gap-2 p-2 z-[9999] shadow-[0_4px_24px_rgba(0,0,0,0.08)] max-h-[300px] overflow-y-auto"
+                    :style="panelStyle"
+                    :class="{ 'f-dropdown--enter': !ready, 'f-dropdown--visible': ready }">
+                    <div
+                        v-for="option in options"
+                        :key="option[valueKey]"
+                        class="flex items-center gap-2 px-2.5 py-2 rounded-md text-sm text-[var(--text-primary)] cursor-pointer transition-colors duration-150 ease-out hover:bg-[var(--bg-hover)] text-nowrap"
+                        :class="{ 'bg-[var(--bg-active)] text-[var(--accent)]': isSelected(option) }"
+                        @click="selectOption(option)"
+                    >
+                        {{ option[labelKey] }}
                     </div>
-                </Transition>
+                </div>
             </Teleport>
         </div>
     `,
     setup(props, { emit }) {
         const visible = ref(false);
+        const ready = ref(false);
         const selectRef = ref(null);
         const panelRef = ref(null);
         const panelStyle = ref({});
@@ -54,11 +54,12 @@ export const FSingleSelect = {
         const selectOption = (option) => {
             emit('update:modelValue', option[props.valueKey]);
             emit('change', option[props.valueKey]);
+            ready.value = false;
             visible.value = false;
         };
 
         const updatePosition = () => {
-            if (!selectRef.value || !visible.value) return;
+            if (!selectRef.value) return;
             const rect = selectRef.value.getBoundingClientRect();
             const viewH = window.innerHeight;
             const isTop = props.placement === 'top';
@@ -85,8 +86,15 @@ export const FSingleSelect = {
 
         const toggle = () => {
             if (props.disabled) return;
-            visible.value = !visible.value;
-            if (visible.value) nextTick(updatePosition);
+            if (!visible.value) {
+                updatePosition();
+                visible.value = true;
+                ready.value = false;
+                nextTick(() => { ready.value = true; });
+            } else {
+                ready.value = false;
+                visible.value = false;
+            }
         };
 
         const handleClickOutside = (e) => {
@@ -94,6 +102,7 @@ export const FSingleSelect = {
             const target = e.target;
             if (selectRef.value && selectRef.value.contains(target)) return;
             if (panelRef.value && panelRef.value.contains(target)) return;
+            ready.value = false;
             visible.value = false;
         };
 
@@ -102,7 +111,6 @@ export const FSingleSelect = {
 
         watch(visible, (val) => {
             if (val) {
-                nextTick(updatePosition);
                 document.addEventListener('scroll', handleScroll, true);
                 window.addEventListener('resize', handleResize);
             } else {
@@ -118,6 +126,6 @@ export const FSingleSelect = {
             window.removeEventListener('resize', handleResize);
         });
 
-        return { visible, selectRef, panelRef, panelStyle, selectedLabel, isSelected, selectOption, toggle };
+        return { visible, ready, selectRef, panelRef, panelStyle, selectedLabel, isSelected, selectOption, toggle };
     }
 };

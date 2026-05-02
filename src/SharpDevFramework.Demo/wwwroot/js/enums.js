@@ -32,7 +32,7 @@ export function getEnumName(type, value, isMulti = false) {
 }
 
 export function getTaskStatusClass(status) {
-    const classes = { 0: 'badge--yellow', 1: 'badge--blue', 2: 'badge--green', 3: 'badge--red' };
+    const classes = { 0: 'badge--yellow', 1: 'badge--blue', 2: 'badge--green', 3: 'badge--red', 4: 'badge--gray' };
     return classes[status] || '';
 }
 

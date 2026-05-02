@@ -20,26 +20,26 @@ export const FMultiSelect = {
                 <span class="text-[var(--text-tertiary)] text-[10px] ml-2">{{ visible ? '▲' : '▼' }}</span>
             </div>
             <Teleport to="body">
-                <Transition name="dropdown">
-                    <div v-if="visible" ref="panelRef" class="fixed bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg flex flex-col gap-2 p-2 z-[9999] shadow-[0_4px_24px_rgba(0,0,0,0.08)] max-h-[300px] overflow-y-auto"
-                        :style="panelStyle">
-                        <div v-for="option in options" :key="option[valueKey]"
-                            class="flex text-nowrap items-center gap-2 px-2.5 py-2 rounded-md text-sm text-[var(--text-primary)] cursor-pointer transition-colors duration-150 ease-out hover:bg-[var(--bg-hover)]"
-                            :class="{ 'bg-[var(--bg-active)] text-[var(--accent)]': isSelected(option) }"
-                            @click="toggleOption(option)">
-                            <span class="w-4 h-4 border-[1.5px] border-[var(--border-strong)] rounded-[3px] flex items-center justify-center shrink-0 text-[10px] transition-all duration-150 ease-out"
-                                :class="{ 'f-multi-select__option--selected': isSelected(option) }">
-                                {{ isSelected(option) ? '✓' : '' }}
-                            </span>
-                            <span>{{ option[labelKey] }}</span>
-                        </div>
+                <div v-if="visible" ref="panelRef" class="fixed bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg flex flex-col gap-2 p-2 z-[9999] shadow-[0_4px_24px_rgba(0,0,0,0.08)] max-h-[300px] overflow-y-auto"
+                    :style="panelStyle"
+                    :class="{ 'f-dropdown--enter': !ready, 'f-dropdown--visible': ready }">
+                    <div v-for="option in options" :key="option[valueKey]"
+                        class="flex text-nowrap items-center gap-2 px-2.5 py-2 rounded-md text-sm text-[var(--text-primary)] cursor-pointer transition-colors duration-150 ease-out hover:bg-[var(--bg-hover)]"
+                        :class="{ 'bg-[var(--bg-active)] text-[var(--accent)]': isSelected(option) }"
+                        @click="toggleOption(option)">
+                        <span class="w-4 h-4 border-[1.5px] border-[var(--border-strong)] rounded-[3px] flex items-center justify-center shrink-0 text-[10px] transition-all duration-150 ease-out"
+                            :class="{ 'f-multi-select__option--selected': isSelected(option) }">
+                            {{ isSelected(option) ? '✓' : '' }}
+                        </span>
+                        <span>{{ option[labelKey] }}</span>
                     </div>
-                </Transition>
+                </div>
             </Teleport>
         </div>
     `,
     setup(props, { emit }) {
         const visible = ref(false);
+        const ready = ref(false);
         const selectRef = ref(null);
         const panelRef = ref(null);
         const panelStyle = ref({});
@@ -64,7 +64,7 @@ export const FMultiSelect = {
         };
 
         const updatePosition = () => {
-            if (!selectRef.value || !visible.value) return;
+            if (!selectRef.value) return;
             const rect = selectRef.value.getBoundingClientRect();
             const viewH = window.innerHeight;
             const isTop = props.placement === 'top';
@@ -91,8 +91,15 @@ export const FMultiSelect = {
 
         const toggle = () => {
             if (props.disabled) return;
-            visible.value = !visible.value;
-            if (visible.value) nextTick(updatePosition);
+            if (!visible.value) {
+                updatePosition();
+                visible.value = true;
+                ready.value = false;
+                nextTick(() => { ready.value = true; });
+            } else {
+                ready.value = false;
+                visible.value = false;
+            }
         };
 
         const handleClickOutside = (e) => {
@@ -100,6 +107,7 @@ export const FMultiSelect = {
             const target = e.target;
             if (selectRef.value && selectRef.value.contains(target)) return;
             if (panelRef.value && panelRef.value.contains(target)) return;
+            ready.value = false;
             visible.value = false;
         };
 
@@ -108,7 +116,6 @@ export const FMultiSelect = {
 
         watch(visible, (val) => {
             if (val) {
-                nextTick(updatePosition);
                 document.addEventListener('scroll', handleScroll, true);
                 window.addEventListener('resize', handleResize);
             } else {
@@ -124,6 +131,6 @@ export const FMultiSelect = {
             window.removeEventListener('resize', handleResize);
         });
 
-        return { visible, selectRef, panelRef, panelStyle, selectedLabels, isSelected, toggleOption, toggle };
+        return { visible, ready, selectRef, panelRef, panelStyle, selectedLabels, isSelected, toggleOption, toggle };
     }
 };

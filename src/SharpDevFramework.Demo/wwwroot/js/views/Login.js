@@ -8,7 +8,7 @@ const { ref } = Vue;
 export const LoginView = {
     components: { FButton, FInput },
     template: `
-    <div class="min-h-screen flex items-center justify-center p-5">
+    <div class="h-full overflow-hidden flex items-center justify-center p-5">
         <div class="w-full max-w-[400px] p-8 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg">
             <h1 class="text-xl font-semibold text-center mb-1 text-[var(--text-primary)] tracking-tight">SharpDevFramework</h1>
             <p class="text-sm text-[var(--text-tertiary)] text-center mb-7">登录以继续访问管理后台</p>

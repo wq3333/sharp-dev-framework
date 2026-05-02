@@ -11,7 +11,7 @@ export const LayoutComponent = {
     name: 'LayoutComponent',
     components: { FButton, FDropdown, FDropdownItem, IconMenu, IconClose, IconTasks, IconUsers, IconDemos, IconSun, IconMoon },
     template: `
-    <div class="flex h-screen overflow-hidden">
+    <div class="flex h-full overflow-hidden">
         <div v-if="mobileOpen && isMobile" class="fixed inset-0 bg-black/40 z-40 transition-opacity duration-200" :class="mobileOpen ? 'opacity-100' : 'opacity-0'" @click="mobileOpen = false"></div>
         <aside class="sidebar bg-[var(--bg-surface)] border-r border-[var(--border-subtle)] flex flex-col shrink-0 z-50"
             :class="{
@@ -31,23 +31,22 @@ export const LayoutComponent = {
                 </button>
             </div>
             <nav class="flex-1 px-2.5 py-3 overflow-y-auto overflow-x-hidden">
-                <router-link to="/tasks" class="flex items-center gap-2.5 px-3 py-2.5 rounded-md text-[15px] text-[var(--text-secondary)] cursor-pointer transition-all duration-150 ease-out mb-1 no-underline hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
-                    :class="{ 'bg-[var(--bg-active)] text-[var(--accent)] font-medium': $route.path === '/tasks' }"
+                <router-link to="/tasks" class="sidebar-nav-item"
+                    :class="{ 'sidebar-nav-item--active': $route.path === '/tasks' }"
                     @click="onNavClick">
-                    <span class="w-5 h-5 inline-flex items-center justify-center shrink-0"><IconTasks /></span>
+                    <span class="sidebar-nav-icon sidebar-nav-icon--tasks"><IconTasks /></span>
                     <span class="whitespace-nowrap">任务管理</span>
                 </router-link>
-                <router-link v-if="isAdmin" to="/users"
-                    class="flex items-center gap-2.5 px-3 py-2.5 rounded-md text-[15px] text-[var(--text-secondary)] cursor-pointer transition-all duration-150 ease-out mb-1 no-underline hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
-                    :class="{ 'bg-[var(--bg-active)] text-[var(--accent)] font-medium': $route.path === '/users' }"
+                <router-link v-if="isAdmin" to="/users" class="sidebar-nav-item"
+                    :class="{ 'sidebar-nav-item--active': $route.path === '/users' }"
                     @click="onNavClick">
-                    <span class="w-5 h-5 inline-flex items-center justify-center shrink-0"><IconUsers /></span>
+                    <span class="sidebar-nav-icon sidebar-nav-icon--users"><IconUsers /></span>
                     <span class="whitespace-nowrap">用户管理</span>
                 </router-link>
-                <router-link to="/demos" class="flex items-center gap-2.5 px-3 py-2.5 rounded-md text-[15px] text-[var(--text-secondary)] cursor-pointer transition-all duration-150 ease-out mb-1 no-underline hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
-                    :class="{ 'bg-[var(--bg-active)] text-[var(--accent)] font-medium': $route.path === '/demos' }"
+                <router-link to="/demos" class="sidebar-nav-item"
+                    :class="{ 'sidebar-nav-item--active': $route.path === '/demos' }"
                     @click="onNavClick">
-                    <span class="w-5 h-5 inline-flex items-center justify-center shrink-0"><IconDemos /></span>
+                    <span class="sidebar-nav-icon sidebar-nav-icon--demos"><IconDemos /></span>
                     <span class="whitespace-nowrap">Demo管理</span>
                 </router-link>
             </nav>
