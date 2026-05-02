@@ -19,7 +19,7 @@ export const UserManagerView = {
                 <FButton type="success" @click="showCreateModal = true"><template #icon><IconPlus :size="12" /></template>新增</FButton>
             </div>
         </div>
-        <div class="flex-1 min-h-0 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg flex flex-col overflow-hidden">
+        <div class="flex-1 min-h-0 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded flex flex-col overflow-hidden">
             <FTable :data="users" :columns="columns" empty-text="暂无用户" :pagination="true"
                 :current-page="currentPage" :page-size="pageSize" :total="totalCount" @page-change="goToPage">
                 <template #role="{ row }">
@@ -61,7 +61,7 @@ export const UserManagerView = {
         const currentUserId = computed(() => parseInt(localStorage.getItem('userId') || '0'));
         const isAdmin = computed(() => localStorage.getItem('role').split(',').filter(x => x === 'Admin').length > 0);
         const currentPage = ref(1);
-        const pageSize = ref(20);
+        const pageSize = ref(10);
         const totalCount = ref(0);
         const pageCount = ref(0);
         const roleFilter = ref([]);

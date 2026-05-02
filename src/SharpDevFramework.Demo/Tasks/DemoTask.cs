@@ -1,7 +1,4 @@
-﻿
-
-using SharpDevFramework.Demo.Data;
-using SharpDevFramework.Demo.Enums;
+﻿using SharpDevFramework.Demo.Enums;
 
 namespace SharpDevFramework.Demo.Tasks;
 
@@ -10,8 +7,7 @@ public class DemoTask(IServiceProvider serviceProvider) : BaseTask(serviceProvid
 {
     protected override async Task ProcessAsync(int id, CancellationToken cancellationToken)
     {
-        throw new Exception("some error");
-        await Task.Delay(TimeSpan.FromMinutes(10),cancellationToken);
+        await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
         if (_logger.IsEnabled(LogLevel.Information)) _logger.LogInformation("demotask processed with id:{id}", id);
         await Task.CompletedTask;
     }

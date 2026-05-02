@@ -25,20 +25,20 @@ export const FPagination = {
              <div class="flex items-center gap-2 text-[13px] text-[var(--text-secondary)]" v-if="layout.includes('jumper')">
                 <span>跳至</span>
                 <input type="number" :value="jumperValue" @input="handleJumperInput" @blur="handleJumper" @keyup.enter="handleJumper"
-                    class="w-[50px] px-2 py-1.5 border border-[var(--border-subtle)] rounded-md text-[13px] text-center bg-[var(--bg-surface)] text-[var(--text-primary)] outline-none focus:border-[var(--border-focus)] focus:shadow-[0_0_0_2px_var(--accent-subtle)]"
+                    class="w-[50px] px-2 py-1.5 border border-[var(--border-subtle)] rounded text-[13px] text-center bg-[var(--bg-surface)] text-[var(--text-primary)] outline-none focus:border-[var(--border-focus)] focus:shadow-[0_0_0_2px_var(--accent-subtle)]"
                     min="1" :max="pageCount" />
                 <span>页</span>
             </div>
             <div class="flex items-center gap-2">
-                <button class="min-w-[80px] h-[34px] px-3.5 bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)] rounded-md cursor-pointer text-[13px] transition-all duration-150 ease-out hover:bg-[var(--bg-hover)] hover:border-[var(--border-strong)] disabled:opacity-40 disabled:cursor-not-allowed"
+                <button class="h-[34px] px-3.5 bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)] rounded cursor-pointer text-[13px] transition-all duration-150 ease-out hover:bg-[var(--bg-hover)] hover:border-[var(--border-strong)] disabled:opacity-40 disabled:cursor-not-allowed"
                     :disabled="currentPage <= 1" @click="goTo(currentPage - 1)">上一页</button>
                 <div class="flex gap-1">
                     <button v-for="page in visiblePages" :key="page"
-                        class="min-w-[34px] h-[34px] px-2 bg-transparent border border-transparent text-[var(--text-secondary)] rounded-md cursor-pointer text-[13px] transition-all duration-150 ease-out hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
+                        class="min-w-[34px] h-[34px] px-2 bg-transparent border border-transparent text-[var(--text-secondary)] rounded cursor-pointer text-[13px] transition-all duration-150 ease-out hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
                         :class="{ 'bg-[var(--accent)] text-[var(--text-inverse)] border-[var(--accent)] hover:bg-[var(--accent)] hover:text-[var(--text-inverse)]': page === currentPage, 'cursor-default': page === '...' }"
                         :disabled="page === '...'" @click="page !== '...' && goTo(page)">{{ page }}</button>
                 </div>
-                <button class="min-w-[80px] h-[34px] px-3.5 bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)] rounded-md cursor-pointer text-[13px] transition-all duration-150 ease-out hover:bg-[var(--bg-hover)] hover:border-[var(--border-strong)] disabled:opacity-40 disabled:cursor-not-allowed"
+                <button class="h-[34px] px-3.5 bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)] rounded cursor-pointer text-[13px] transition-all duration-150 ease-out hover:bg-[var(--bg-hover)] hover:border-[var(--border-strong)] disabled:opacity-40 disabled:cursor-not-allowed"
                     :disabled="currentPage >= pageCount" @click="goTo(currentPage + 1)">下一页</button>
             </div>
         </div>

@@ -5,7 +5,6 @@ using SharpDevFramework.Demo.Data;
 using SharpDevFramework.Demo.Data.Entities;
 using SharpDevFramework.Demo.Enums;
 using SharpDevLib;
-using System.Threading.Tasks;
 
 namespace SharpDevFramework.Demo.Controllers;
 

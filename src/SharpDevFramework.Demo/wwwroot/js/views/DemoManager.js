@@ -19,7 +19,7 @@ export const DemoManagerView = {
                 <FButton @click="loadDemos" :loading="loading"><template #icon><IconRefresh :size="12" /></template>刷新</FButton>
             </div>
         </div>
-        <div class="flex-1 min-h-0 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg flex flex-col overflow-hidden">
+        <div class="flex-1 min-h-0 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded flex flex-col overflow-hidden">
             <FTable :data="demos" :columns="columns" empty-text="暂无数据" :pagination="true"
                 :current-page="currentPage" :page-size="pageSize" :total="totalCount" @page-change="goToPage">
                 <template #type="{ row }">
@@ -53,7 +53,7 @@ export const DemoManagerView = {
         const nameFilter = ref('');
         const typeFilter = ref([]);
         const currentPage = ref(1);
-        const pageSize = ref(20);
+        const pageSize = ref(10);
         const totalCount = ref(0);
         const loading = ref(false);
         const saving = ref(false);

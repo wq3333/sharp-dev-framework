@@ -19,7 +19,7 @@ export const TaskManagerView = {
                 <FButton @click="loadTasks" :loading="loading"><template #icon><IconRefresh :size="12" /></template>刷新</FButton>
             </div>
         </div>
-        <div class="flex-1 min-h-0 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg flex flex-col overflow-hidden">
+        <div class="flex-1 min-h-0 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded flex flex-col overflow-hidden">
             <FTable :data="tasks" :columns="columns" empty-text="暂无任务" :pagination="true"
                 :current-page="currentPage" :page-size="pageSize" :total="totalCount" @page-change="goToPage">
                 <template #status="{ row }">
@@ -48,7 +48,7 @@ export const TaskManagerView = {
                 <div class="flex items-start gap-4 text-sm"><span class="w-20 shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">用户ID</span><span class="flex-1 text-[var(--text-primary)] leading-relaxed break-all">{{ currentTask.userId }}</span></div>
                 <div class="flex items-start gap-4 text-sm"><span class="w-20 shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">类型</span><span class="flex-1 text-[var(--text-primary)] leading-relaxed break-all"><span v-for="t in getEnumName('taskTypes', currentTask.type, true).split(', ').filter(x => x)" :key="t" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[rgba(79,70,229,0.1)] text-[var(--accent)] mr-1">{{ t }}</span></span></div>
                 <div class="flex items-start gap-4 text-sm"><span class="w-20 shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">状态</span><span class="flex-1 text-[var(--text-primary)] leading-relaxed break-all"><span :class="'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ' + taskStatusClass(currentTask.status)">{{ getEnumName('taskStates', currentTask.status) }}</span></span></div>
-                <div class="flex items-start gap-4 text-sm"><span class="w-20 shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">数据</span><span class="flex-1 font-mono text-xs bg-[var(--bg-base)] px-3 py-2 rounded-md border border-[var(--border-subtle)] whitespace-pre-wrap break-all text-[var(--text-primary)]">{{ currentTask.data || '-' }}</span></div>
+                <div class="flex items-start gap-4 text-sm"><span class="w-20 shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">数据</span><span class="flex-1 font-mono text-xs bg-[var(--bg-base)] px-3 py-2 rounded border border-[var(--border-subtle)] whitespace-pre-wrap break-all text-[var(--text-primary)]">{{ currentTask.data || '-' }}</span></div>
                 <div class="flex items-start gap-4 text-sm"><span class="w-20 shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">错误信息</span><span class="flex-1 leading-relaxed break-all" :class="currentTask.errorMessage ? 'text-[var(--danger)]' : 'text-[var(--text-primary)]'">{{ currentTask.errorMessage || '-' }}</span></div>
                 <div class="flex items-start gap-4 text-sm"><span class="w-20 shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">重试次数</span><span class="flex-1 text-[var(--text-primary)] leading-relaxed break-all">{{ currentTask.retryCount }}</span></div>
                 <div class="flex items-start gap-4 text-sm"><span class="w-20 shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">创建时间</span><span class="flex-1 text-[var(--text-primary)] leading-relaxed break-all">{{ formatDate(currentTask.createdAt) }}</span></div>
@@ -65,7 +65,7 @@ export const TaskManagerView = {
         const typeFilter = ref([]);
         const loading = ref(false);
         const currentPage = ref(1);
-        const pageSize = ref(20);
+        const pageSize = ref(10);
         const totalCount = ref(0);
         const pageCount = ref(0);
         const detailModalVisible = ref(false);

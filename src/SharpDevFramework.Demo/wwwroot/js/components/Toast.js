@@ -31,7 +31,7 @@ export const ToastContainer = {
         <Teleport to="body">
             <TransitionGroup name="toast" tag="div" class="fixed top-5 right-5 z-[9999] flex flex-col gap-2">
                 <div v-for="t in toasts" :key="t.id"
-                    :class="'f-toast flex items-center gap-3 px-4 py-3 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg min-w-[280px] max-w-[400px] shadow-[0_4px_24px_rgba(0,0,0,0.08)] border-l-[3px] f-toast--' + t.type">
+                    :class="'f-toast flex items-center gap-3 px-4 py-3 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded min-w-[280px] max-w-[400px] shadow-[0_4px_24px_rgba(0,0,0,0.08)] border-l-[3px] f-toast--' + t.type">
                     <span class="f-toast__icon w-5 h-5 flex items-center justify-center shrink-0">
                         <IconSuccess v-if="t.type==='success'" />
                         <IconError v-else-if="t.type==='error'" />

@@ -5,6 +5,15 @@ const icon = (svgContent, defaultSize = 18) => ({
     template: `<svg xmlns="http://www.w3.org/2000/svg" :width="size" :height="size" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${svgContent}</svg>`
 });
 
+const iconFilled = (svgContent, defaultSize = 18) => ({
+    props: {
+        size: { type: Number, default: defaultSize }
+    },
+    template: `<svg xmlns="http://www.w3.org/2000/svg" :width="size" :height="size" viewBox="0 0 24 24">${svgContent}</svg>`
+});
+
+export const IconLogo = iconFilled('<rect width="24" height="24" rx="6" fill="var(--accent)"/><path d="M7 8h4v8H7V8zm6 0h4v8h-4V8z" fill="white" opacity="0.9"/><path d="M8 9h2v6H8V9zm6 0h2v6h-2V9z" fill="var(--accent)" opacity="0.3"/>', 28);
+
 export const IconMenu = icon('<line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/>', 20);
 
 export const IconClose = icon('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>');

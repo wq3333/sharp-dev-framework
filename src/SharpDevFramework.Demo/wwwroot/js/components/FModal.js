@@ -14,7 +14,7 @@ export const FModal = {
         <Teleport to="body">
             <Transition name="modal">
                 <div v-if="modelValue" class="fixed inset-0 bg-black/50 flex items-center justify-center z-[2000] p-5" @click.self="handleOverlayClick">
-                    <div class="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl max-h-[90vh] overflow-y-auto w-full shadow-[0_4px_24px_rgba(0,0,0,0.08)]" :style="{ width: width }">
+                    <div class="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded max-h-[90vh] overflow-y-auto w-full shadow-[0_4px_24px_rgba(0,0,0,0.08)]" :style="{ width: width }">
                         <div class="flex items-center justify-between px-5 pt-5">
                             <h3 class="text-base font-semibold text-[var(--text-primary)] leading-snug">{{ title }}</h3>
                             <button v-if="showClose" @click="handleClose" class="bg-none border-none text-[var(--text-tertiary)] text-xl cursor-pointer p-1 leading-none transition-colors duration-150 ease-out hover:text-[var(--text-primary)]">&times;</button>

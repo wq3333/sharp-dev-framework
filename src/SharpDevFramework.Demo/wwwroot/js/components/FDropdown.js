@@ -13,7 +13,7 @@ export const FDropdown = {
                 <slot name="trigger" />
             </div>
             <Transition name="dropdown">
-                <div v-if="visible" class="absolute text-nowrap bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg p-1 z-[1000] shadow-[0_4px_24px_rgba(0,0,0,0.08)]"
+                <div v-if="visible" class="absolute text-nowrap bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded p-1 z-[1000] shadow-[0_4px_24px_rgba(0,0,0,0.08)]"
                     :class="menuClass">
                     <slot />
                 </div>
@@ -62,7 +62,7 @@ export const FDropdownItem = {
     },
     emits: ['click'],
     template: `
-        <div class="flex items-center gap-2 px-2.5 py-2 rounded-md text-sm text-[var(--text-primary)] cursor-pointer transition-colors duration-150 ease-out hover:bg-[var(--bg-hover)]"
+        <div class="flex items-center gap-2 px-2.5 py-2 rounded text-sm text-[var(--text-primary)] cursor-pointer transition-colors duration-150 ease-out hover:bg-[var(--bg-hover)]"
             :class="{ 'opacity-40 cursor-not-allowed': disabled, 'border-t border-[var(--border-subtle)] mt-1 pt-2': divided }"
             @click="handleClick">
             <slot />

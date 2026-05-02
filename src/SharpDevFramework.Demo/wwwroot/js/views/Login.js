@@ -1,17 +1,26 @@
 import { api } from '../api.js';
 import { setAuth } from '../auth.js';
 import { initSignalR } from '../signalr.js';
-import { FButton, FInput } from '../components/index.js';
+import { FButton, FInput, IconLogo } from '../components/index.js';
 
 const { ref } = Vue;
 
 export const LoginView = {
-    components: { FButton, FInput },
+    components: { FButton, FInput, IconLogo },
     template: `
-    <div class="h-full overflow-hidden flex items-center justify-center p-5">
-        <div class="w-full max-w-[400px] p-8 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg">
-            <h1 class="text-xl font-semibold text-center mb-1 text-[var(--text-primary)] tracking-tight">SharpDevFramework</h1>
-            <p class="text-sm text-[var(--text-tertiary)] text-center mb-7">登录以继续访问管理后台</p>
+    <div class="login-page">
+        <div class="login-bg">
+            <div class="login-orb login-orb--1"></div>
+            <div class="login-orb login-orb--2"></div>
+            <div class="login-orb login-orb--3"></div>
+            <div class="login-grid"></div>
+        </div>
+        <div class="login-card">
+            <div class="flex flex-col items-center mb-8">
+                <IconLogo :size="44" />
+                <h1 class="text-xl font-semibold mt-4 text-[var(--text-primary)] tracking-tight">SharpDevFramework</h1>
+                <p class="text-sm text-[var(--text-tertiary)] mt-1.5">登录以继续访问管理后台</p>
+            </div>
             <form @submit.prevent="handleLogin">
                 <div class="mb-4">
                     <label class="block text-[13px] font-medium mb-1.5 text-[var(--text-secondary)]">用户名</label>

@@ -1,5 +1,5 @@
 import { FButton, FDropdown, FDropdownItem } from './index.js';
-import { IconMenu, IconClose, IconTasks, IconUsers, IconDemos, IconSun, IconMoon } from './icon.js';
+import { IconMenu, IconClose, IconTasks, IconUsers, IconDemos, IconSun, IconMoon, IconLogo } from './icon.js';
 import { clearAuth } from '../auth.js';
 import { stopSignalR } from '../signalr.js';
 import { getEnumName } from '../enums.js';
@@ -9,7 +9,7 @@ const { computed, inject, ref, onMounted, onBeforeUnmount } = Vue;
 
 export const LayoutComponent = {
     name: 'LayoutComponent',
-    components: { FButton, FDropdown, FDropdownItem, IconMenu, IconClose, IconTasks, IconUsers, IconDemos, IconSun, IconMoon },
+    components: { FButton, FDropdown, FDropdownItem, IconMenu, IconClose, IconTasks, IconUsers, IconDemos, IconSun, IconMoon, IconLogo },
     template: `
     <div class="flex h-full overflow-hidden">
         <div v-if="mobileOpen && isMobile" class="fixed inset-0 bg-black/40 z-40 transition-opacity duration-200" :class="mobileOpen ? 'opacity-100' : 'opacity-0'" @click="mobileOpen = false"></div>
@@ -22,10 +22,10 @@ export const LayoutComponent = {
             }">
             <div class="h-[60px] flex items-center justify-between px-4 py-4 border-b border-[var(--border-subtle)] shrink-0 overflow-hidden">
                 <div class="flex items-center gap-2.5 min-w-0">
-                    <div class="w-8 h-8 rounded-md bg-[var(--accent)] text-[var(--text-inverse)] flex items-center justify-center text-xs font-bold tracking-wider shrink-0">SD</div>
+                    <IconLogo />
                     <div class="font-bold text-[var(--text-primary)] tracking-tight whitespace-nowrap">SharpDev</div>
                 </div>
-                <button class="inline-flex items-center justify-center w-7 h-7 rounded-md text-[var(--text-tertiary)] cursor-pointer transition-all duration-150 ease-out hover:bg-[var(--bg-hover)] hover:text-[var(--text-secondary)] shrink-0"
+                <button class="inline-flex items-center justify-center w-7 h-7 rounded text-[var(--text-tertiary)] cursor-pointer transition-all duration-150 ease-out hover:bg-[var(--bg-hover)] hover:text-[var(--text-secondary)] shrink-0"
                     @click="closeSidebar" title="关闭侧边栏">
                     <IconClose />
                 </button>
@@ -54,10 +54,11 @@ export const LayoutComponent = {
         <div class="flex-1 overflow-hidden flex flex-col min-w-0">
             <header class="h-[60px] flex items-center justify-between px-4 sm:px-6 bg-[var(--bg-surface)] border-b border-[var(--border-subtle)] shrink-0">
                 <div class="flex items-center gap-3">
-                    <button v-if="isMobile ? !mobileOpen : !sidebarOpen" class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-secondary)] cursor-pointer transition-all duration-150 ease-out hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)]"
+                    <button v-if="isMobile ? !mobileOpen : !sidebarOpen" class="inline-flex items-center justify-center w-9 h-9 rounded border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-secondary)] cursor-pointer transition-all duration-150 ease-out hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)]"
                         @click="openSidebar" title="打开菜单">
                         <IconMenu />
                     </button>
+                    <IconLogo v-if="isMobile ? !mobileOpen : !sidebarOpen" :size="28" />
                     <h1 class="text-lg font-semibold text-[var(--text-primary)] tracking-tight leading-snug">
                         <template v-if="$route.path.startsWith('/tasks')">任务管理</template>
                         <template v-else-if="$route.path.startsWith('/users')">用户管理</template>
@@ -65,12 +66,12 @@ export const LayoutComponent = {
                     </h1>
                 </div>
                 <div class="flex items-center gap-2 sm:gap-4">
-                    <button class="inline-flex items-center justify-center w-8 h-8 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-secondary)] cursor-pointer text-sm transition-all duration-150 ease-out hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)]" @click="toggleTheme" title="切换主题">
+                    <button class="inline-flex items-center justify-center w-8 h-8 rounded border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-secondary)] cursor-pointer text-sm transition-all duration-150 ease-out hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)]" @click="toggleTheme" title="切换主题">
                         <IconSun v-if="isDark" /><IconMoon v-else />
                     </button>
                     <FDropdown placement="bottom-end">
                         <template #trigger>
-                            <button class="inline-flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-primary)] text-sm font-medium cursor-pointer transition-all duration-150 ease-out hover:bg-[var(--bg-hover)] hover:border-[var(--border-strong)]">{{ username }}</button>
+                            <button class="inline-flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-primary)] text-sm font-medium cursor-pointer transition-all duration-150 ease-out hover:bg-[var(--bg-hover)] hover:border-[var(--border-strong)]">{{ username }}</button>
                         </template>
                         <div class="px-3 py-2 text-xs text-[var(--text-tertiary)]">角色：{{ role }}</div>
                         <FDropdownItem divided @click="handleLogout">退出登录</FDropdownItem>
