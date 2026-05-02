@@ -27,7 +27,13 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.7" />
-		<PackageReference Include="SharpDevFramework" Version="1.0.0" />
+		<PackageReference Include="SharpDevFramework" Version="1.0.0.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="install.bat">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
 
 </Project>
