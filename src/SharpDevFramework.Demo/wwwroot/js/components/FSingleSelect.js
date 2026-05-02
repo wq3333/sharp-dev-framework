@@ -44,7 +44,9 @@ export const FSingleSelect = {
         const panelStyle = ref({});
 
         const selectedLabel = computed(() => {
-            if (props.modelValue === null || props.modelValue === '') return null;
+            if (props.modelValue === null || props.modelValue === '' || !props.options.length) {
+                return null;
+            }
             const opt = props.options.find(o => o[props.valueKey] === props.modelValue);
             return opt ? opt[props.labelKey] : null;
         });

@@ -1,5 +1,7 @@
 import { FPagination } from './FPagination.js';
 
+const { onMounted } = Vue;
+
 export const FTable = {
     name: 'FTable',
     components: { FPagination },
@@ -12,7 +14,8 @@ export const FTable = {
         pagination: { type: Boolean, default: false },
         currentPage: { type: Number, default: 1 },
         pageSize: { type: Number, default: 20 },
-        total: { type: Number, default: 0 }
+        total: { type: Number, default: 0 },
+        pageCount: { type: Number, default: null }
     },
     emits: ['page-change'],
     template: `
@@ -49,12 +52,15 @@ export const FTable = {
             </div>
             <div v-if="pagination" class="shrink-0">
                 <FPagination
-                    v-model="currentPage"
+                    :model-value="currentPage"
                     :page-size="pageSize"
                     :total="total"
+                    :page-count="pageCount"
+                    @update:model-value="$emit('page-change', { page: $event, pageSize: pageSize })"
                     @page-change="$emit('page-change', $event)"
                 />
             </div>
         </div>
-    `
+    `,
+
 };

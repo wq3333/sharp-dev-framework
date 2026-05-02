@@ -21,7 +21,7 @@ export const DemoManagerView = {
         </div>
         <div class="flex-1 min-h-0 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded flex flex-col overflow-hidden">
             <FTable :data="demos" :columns="columns" empty-text="暂无数据" :pagination="true"
-                :current-page="currentPage" :page-size="pageSize" :total="totalCount" @page-change="goToPage">
+                :current-page="currentPage" :page-size="pageSize" :total="totalCount" :page-count="pageCount" @page-change="goToPage">
                 <template #type="{ row }">
                     <div class="flex gap-1 flex-wrap">
                         <span v-for="t in getEnumName('demoTypes', row.type, true).split(', ').filter(x => x)" :key="t" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[rgba(79,70,229,0.1)] text-[var(--accent)]">{{ t }}</span>
@@ -55,6 +55,7 @@ export const DemoManagerView = {
         const currentPage = ref(1);
         const pageSize = ref(10);
         const totalCount = ref(0);
+        const pageCount = ref(0);
         const loading = ref(false);
         const saving = ref(false);
         const deletingId = ref(null);
@@ -78,6 +79,7 @@ export const DemoManagerView = {
             const result = await api.demos.page(nameFilter.value, typeFilter.value, currentPage.value, pageSize.value);
             demos.value = result.data || [];
             totalCount.value = result.totalCount || 0;
+            pageCount.value = result.pageCount || 0;
             loading.value = false;
         };
 
@@ -117,6 +119,6 @@ export const DemoManagerView = {
             debounceTimer = setTimeout(() => loadDemos(), 300);
         });
 
-        return { demos, columns, nameFilter, typeFilter, demoTypeOptions, currentPage, totalCount, pageSize, loading, saving, deletingId, modalVisible, isEditing, formData, loadDemos, goToPage, openCreateModal, openEditModal, saveDemo, deleteDemo, formatDate, getEnumName };
+        return { demos, columns, nameFilter, typeFilter, demoTypeOptions, currentPage, totalCount, pageCount, pageSize, loading, saving, deletingId, modalVisible, isEditing, formData, loadDemos, goToPage, openCreateModal, openEditModal, saveDemo, deleteDemo, formatDate, getEnumName };
     }
 };

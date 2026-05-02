@@ -21,7 +21,7 @@ export const UserManagerView = {
         </div>
         <div class="flex-1 min-h-0 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded flex flex-col overflow-hidden">
             <FTable :data="users" :columns="columns" empty-text="暂无用户" :pagination="true"
-                :current-page="currentPage" :page-size="pageSize" :total="totalCount" @page-change="goToPage">
+                :current-page="currentPage" :page-size="pageSize" :total="totalCount" :page-count="pageCount" @page-change="goToPage">
                 <template #role="{ row }">
                     <div class="flex gap-1 flex-wrap">
                         <span v-for="r in getEnumName('userRoleTypes', row.role, true).split(', ').filter(x => x)" :key="r"
@@ -125,6 +125,6 @@ export const UserManagerView = {
             debounceTimer = setTimeout(() => loadUsers(), 300);
         });
 
-        return { users, columns, currentUserId, nameFilter, roleFilter, showCreateModal, showEditModal, showModal, form, roleOptions, editUser, saveUser, deleteUser, closeModal, getEnumName, currentPage, totalCount, pageCount, goToPage, formatDate, loading, loadUsers };
+        return { users, columns, currentUserId, nameFilter, roleFilter, showCreateModal, showEditModal, showModal, form, roleOptions, editUser, saveUser, deleteUser, closeModal, getEnumName, currentPage, pageSize, totalCount, pageCount, goToPage, formatDate, loading, loadUsers };
     }
 };

@@ -21,7 +21,7 @@ export const TaskManagerView = {
         </div>
         <div class="flex-1 min-h-0 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded flex flex-col overflow-hidden">
             <FTable :data="tasks" :columns="columns" empty-text="暂无任务" :pagination="true"
-                :current-page="currentPage" :page-size="pageSize" :total="totalCount" @page-change="goToPage">
+                :current-page="currentPage" :page-size="pageSize" :total="totalCount" :page-count="pageCount" @page-change="goToPage">
                 <template #status="{ row }">
                     <span :class="'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ' + taskStatusClass(row.status)">{{ getEnumName('taskStates', row.status) }}</span>
                 </template>
@@ -68,6 +68,7 @@ export const TaskManagerView = {
         const pageSize = ref(10);
         const totalCount = ref(0);
         const pageCount = ref(0);
+
         const detailModalVisible = ref(false);
         const currentTask = ref(null);
 
@@ -102,6 +103,6 @@ export const TaskManagerView = {
         watch([statusFilter, typeFilter], () => { currentPage.value = 1; loadTasks(); });
         onMounted(async () => { await loadTasks(); onTaskUpdated(handleTaskUpdated); });
 
-        return { tasks, columns, statusFilter, typeFilter, taskStateOptions, taskTypeOptions, taskStatusClass: getTaskStatusClass, getEnumName, loadTasks, retryTask, cancelTask, deleteTask, formatDate, currentPage, totalCount, pageCount, goToPage, loading, detailModalVisible, currentTask, viewDetail };
+        return { tasks, columns, statusFilter, typeFilter, taskStateOptions, taskTypeOptions, taskStatusClass: getTaskStatusClass, getEnumName, loadTasks, retryTask, cancelTask, deleteTask, formatDate, currentPage, pageSize, totalCount, pageCount, goToPage, loading, detailModalVisible, currentTask, viewDetail };
     }
 };
