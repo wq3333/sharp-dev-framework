@@ -3,18 +3,18 @@ import { formatDate } from '../utils.js';
 import { FButton, FInput, FModal, FTable, FMultiSelect, toast, IconRefresh, IconPlus } from '../components/index.js';
 import { enums, getEnumName } from '../enums.js';
 
-const { ref, computed, onMounted } = Vue;
+const { ref, computed, onMounted, watch } = Vue;
 
 export const DemoManagerView = {
     components: { FButton, FInput, FModal, FTable, FMultiSelect, IconRefresh, IconPlus },
     template: `
     <div class="h-full flex flex-col">
-        <div class="flex items-end justify-between mb-4 gap-4">
+        <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between mb-4 gap-2">
             <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 lg:grid-cols-6 gap-2">
                 <FInput v-model="nameFilter" placeholder="搜索名称" />
                 <FMultiSelect v-model="typeFilter" :options="demoTypeOptions" value-key="value" label-key="displayName" placeholder="全部类型" />
             </div>
-            <div class="flex gap-2 shrink-0">
+            <div class="grid grid-cols-2 gap-2">
                 <FButton type="primary" @click="openCreateModal"><template #icon><IconPlus :size="12" /></template>新建</FButton>
                 <FButton @click="loadDemos" :loading="loading"><template #icon><IconRefresh :size="12" /></template>刷新</FButton>
             </div>
@@ -38,11 +38,11 @@ export const DemoManagerView = {
         </div>
         <FModal v-model="modalVisible" :title="isEditing ? '编辑Demo' : '新建Demo'" width="500px">
             <div class="mb-4"><label class="block text-[13px] font-medium mb-1.5 text-[var(--text-secondary)]">名称</label><FInput v-model="formData.name" placeholder="请输入名称" /></div>
-            <div class="mb-4"><label class="block text-[13px] font-medium mb-1.5 text-[var(--text-secondary)]">类型</label><FMultiSelect v-model="formData.typeList" :options="demoTypeOptions" value-key="value" label-key="displayName" placeholder="请选择类型" placement="top" /></div>
+            <div class="mb-4"><label class="block text-[13px] font-medium mb-1.5 text-[var(--text-secondary)]">类型</label><FMultiSelect v-model="formData.typeList" :options="demoTypeOptions" value-key="value" label-key="displayName" placeholder="请选择类型" /></div>
             <template #footer>
                 <div class="flex gap-2 justify-end">
                     <FButton @click="modalVisible = false">取消</FButton>
-                    <FButton type="primary" @click="saveDemo" :loading="saving">保存</FButton>
+                    <FButton type="success" @click="saveDemo" :loading="saving">保存</FButton>
                 </div>
             </template>
         </FModal>
@@ -109,6 +109,13 @@ export const DemoManagerView = {
         };
 
         onMounted(() => { loadDemos(); });
+
+        let debounceTimer = null;
+        watch([nameFilter, typeFilter], () => {
+            currentPage.value = 1;
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => loadDemos(), 300);
+        });
 
         return { demos, columns, nameFilter, typeFilter, demoTypeOptions, currentPage, totalCount, pageSize, loading, saving, deletingId, modalVisible, isEditing, formData, loadDemos, goToPage, openCreateModal, openEditModal, saveDemo, deleteDemo, formatDate, getEnumName };
     }

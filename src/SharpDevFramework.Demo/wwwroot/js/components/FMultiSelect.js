@@ -1,4 +1,4 @@
-const { ref, computed, onMounted, onUnmounted } = Vue;
+const { ref, computed, onMounted, onUnmounted, watch, nextTick } = Vue;
 
 export const FMultiSelect = {
     name: 'FMultiSelect',
@@ -19,26 +19,30 @@ export const FMultiSelect = {
                 <span v-else class="text-[var(--text-primary)] whitespace-nowrap overflow-hidden text-ellipsis flex-1 min-w-0">{{ selectedLabels.join(', ') }}</span>
                 <span class="text-[var(--text-tertiary)] text-[10px] ml-2">{{ visible ? '▲' : '▼' }}</span>
             </div>
-            <Transition name="dropdown">
-                <div v-if="visible" class="absolute left-0 right-0 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg flex flex-col gap-2 p-2 z-[1000] shadow-[0_4px_24px_rgba(0,0,0,0.08)] max-h-[300px] overflow-y-auto"
-                    :class="placement === 'top' ? 'bottom-full mb-1' : 'top-full mt-1'">
-                    <div v-for="option in options" :key="option[valueKey]"
-                        class="flex text-nowrap items-center gap-2 px-2.5 py-2 rounded-md text-sm text-[var(--text-primary)] cursor-pointer transition-colors duration-150 ease-out hover:bg-[var(--bg-hover)]"
-                        :class="{ 'bg-[var(--bg-active)] text-[var(--accent)]': isSelected(option) }"
-                        @click="toggleOption(option)">
-                        <span class="w-4 h-4 border-[1.5px] border-[var(--border-strong)] rounded-[3px] flex items-center justify-center shrink-0 text-[10px] transition-all duration-150 ease-out"
-                            :class="{ 'f-multi-select__option--selected': isSelected(option) }">
-                            {{ isSelected(option) ? '✓' : '' }}
-                        </span>
-                        <span>{{ option[labelKey] }}</span>
+            <Teleport to="body">
+                <Transition name="dropdown">
+                    <div v-if="visible" ref="panelRef" class="fixed bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg flex flex-col gap-2 p-2 z-[9999] shadow-[0_4px_24px_rgba(0,0,0,0.08)] max-h-[300px] overflow-y-auto"
+                        :style="panelStyle">
+                        <div v-for="option in options" :key="option[valueKey]"
+                            class="flex text-nowrap items-center gap-2 px-2.5 py-2 rounded-md text-sm text-[var(--text-primary)] cursor-pointer transition-colors duration-150 ease-out hover:bg-[var(--bg-hover)]"
+                            :class="{ 'bg-[var(--bg-active)] text-[var(--accent)]': isSelected(option) }"
+                            @click="toggleOption(option)">
+                            <span class="w-4 h-4 border-[1.5px] border-[var(--border-strong)] rounded-[3px] flex items-center justify-center shrink-0 text-[10px] transition-all duration-150 ease-out"
+                                :class="{ 'f-multi-select__option--selected': isSelected(option) }">
+                                {{ isSelected(option) ? '✓' : '' }}
+                            </span>
+                            <span>{{ option[labelKey] }}</span>
+                        </div>
                     </div>
-                </div>
-            </Transition>
+                </Transition>
+            </Teleport>
         </div>
     `,
     setup(props, { emit }) {
         const visible = ref(false);
         const selectRef = ref(null);
+        const panelRef = ref(null);
+        const panelStyle = ref({});
 
         const selectedLabels = computed(() => {
             return props.modelValue
@@ -59,15 +63,67 @@ export const FMultiSelect = {
             emit('change', newValue);
         };
 
-        const toggle = () => { if (!props.disabled) visible.value = !visible.value; };
+        const updatePosition = () => {
+            if (!selectRef.value || !visible.value) return;
+            const rect = selectRef.value.getBoundingClientRect();
+            const viewH = window.innerHeight;
+            const isTop = props.placement === 'top';
+            const spaceBelow = viewH - rect.bottom;
+            const spaceAbove = rect.top;
+            const useTop = isTop || (!isTop && spaceBelow < 200 && spaceAbove > spaceBelow);
 
-        const handleClickOutside = (e) => {
-            if (selectRef.value && !selectRef.value.contains(e.target)) visible.value = false;
+            if (useTop) {
+                panelStyle.value = {
+                    top: 'auto',
+                    bottom: (viewH - rect.top + 4) + 'px',
+                    left: rect.left + 'px',
+                    width: rect.width + 'px'
+                };
+            } else {
+                panelStyle.value = {
+                    top: (rect.bottom + 4) + 'px',
+                    bottom: 'auto',
+                    left: rect.left + 'px',
+                    width: rect.width + 'px'
+                };
+            }
         };
 
-        onMounted(() => document.addEventListener('click', handleClickOutside));
-        onUnmounted(() => document.removeEventListener('click', handleClickOutside));
+        const toggle = () => {
+            if (props.disabled) return;
+            visible.value = !visible.value;
+            if (visible.value) nextTick(updatePosition);
+        };
 
-        return { visible, selectRef, selectedLabels, isSelected, toggleOption, toggle };
+        const handleClickOutside = (e) => {
+            if (!visible.value) return;
+            const target = e.target;
+            if (selectRef.value && selectRef.value.contains(target)) return;
+            if (panelRef.value && panelRef.value.contains(target)) return;
+            visible.value = false;
+        };
+
+        const handleScroll = () => { if (visible.value) updatePosition(); };
+        const handleResize = () => { if (visible.value) updatePosition(); };
+
+        watch(visible, (val) => {
+            if (val) {
+                nextTick(updatePosition);
+                document.addEventListener('scroll', handleScroll, true);
+                window.addEventListener('resize', handleResize);
+            } else {
+                document.removeEventListener('scroll', handleScroll, true);
+                window.removeEventListener('resize', handleResize);
+            }
+        });
+
+        onMounted(() => document.addEventListener('click', handleClickOutside));
+        onUnmounted(() => {
+            document.removeEventListener('click', handleClickOutside);
+            document.removeEventListener('scroll', handleScroll, true);
+            window.removeEventListener('resize', handleResize);
+        });
+
+        return { visible, selectRef, panelRef, panelStyle, selectedLabels, isSelected, toggleOption, toggle };
     }
 };
