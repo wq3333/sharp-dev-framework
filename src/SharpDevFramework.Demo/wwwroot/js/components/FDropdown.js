@@ -13,7 +13,7 @@ export const FDropdown = {
                 <slot name="trigger" />
             </div>
             <Transition name="dropdown">
-                <div v-if="visible" class="absolute bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg p-1 z-[1000] shadow-[0_4px_24px_rgba(0,0,0,0.08)] min-w-[180px]"
+                <div v-if="visible" class="absolute text-nowrap bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg p-1 z-[1000] shadow-[0_4px_24px_rgba(0,0,0,0.08)]"
                     :class="menuClass">
                     <slot />
                 </div>
