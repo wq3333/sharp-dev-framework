@@ -51,12 +51,20 @@ function createThemeManager() {
     return { theme: readonly(theme), effectiveTheme, set, toggle };
 }
 
+const cacheKey = ref(0);
+
+const clearPageCache = () => {
+    cacheKey.value++;
+};
+
+window.clearPageCache = clearPageCache;
+
 const app = createApp({
-    template: '<router-view v-slot="{ Component }"><keep-alive><component :is="Component" /></keep-alive></router-view><ToastContainer />',
+    template: '<router-view v-slot="{ Component }"><keep-alive :key="cacheKey"><component :is="Component" /></keep-alive></router-view><ToastContainer />',
     setup() {
         const themeManager = createThemeManager();
         provide(ThemeSymbol, themeManager);
-        return {};
+        return { cacheKey };
     }
 });
 
@@ -82,11 +90,13 @@ router.beforeEach(async (to, from, next) => {
 
     if (hasToken && !tokenValid) {
         clearAuth();
+        clearPageCache();
         next('/login');
         return;
     }
 
     if (to.path !== '/login' && !tokenValid) {
+        clearPageCache();
         next('/login');
     } else if (to.path === '/login' && tokenValid) {
         next('/tasks');

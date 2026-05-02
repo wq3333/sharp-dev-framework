@@ -17,7 +17,7 @@ export const FButton = {
             :disabled="disabled || loading"
             @click="$emit('click', $event)">
             <span v-if="loading" class="absolute top-0 left-0 w-full h-full bg-gray-800/80 flex items-center justify-center">
-                <span class="size-3.5 border-2 border-white/30 border-t-white rounded animate-[spin_0.8s_linear_infinite]"></span>
+                <span class="size-3.5 border-2 border-white/30 border-t-white rounded-full animate-[spin_0.8s_linear_infinite]"></span>
             </span>
             <span v-if="$slots.icon" class="shrink-0"><slot name="icon" /></span>
             <span v-else-if="icon" class="text-sm leading-none">{{ icon }}</span>

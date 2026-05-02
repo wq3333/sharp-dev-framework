@@ -51,6 +51,7 @@ export const LoginView = {
                 });
                 setAuth(data);
                 initSignalR();
+                window.clearPageCache();
                 window.location.hash = '#/tasks';
             } finally {
                 loading.value = false;

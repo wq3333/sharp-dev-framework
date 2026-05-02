@@ -27,10 +27,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.7" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\SharpDevFramework\SharpDevFramework.csproj" />
+		<PackageReference Include="SharpDevFramework" Version="1.0.0" />
 	</ItemGroup>
 
 </Project>
