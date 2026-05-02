@@ -1,20 +1,22 @@
 import { api } from '../api.js';
 import { enums, getEnumName } from '../enums.js';
-import { FButton, FInput, FMultiSelect, FCheckbox, FModal, FTable } from '../components/index.js';
+import { FButton, FInput, FMultiSelect, FCheckbox, FModal, FTable, IconRefresh, IconPlus } from '../components/index.js';
 import { formatDate } from '../utils.js';
 
-const { ref, onMounted, computed } = Vue;
+const { ref, onMounted, computed, watch } = Vue;
 
 export const UserManagerView = {
-    components: { FButton, FInput, FMultiSelect, FCheckbox, FModal, FTable },
+    components: { FButton, FInput, FMultiSelect, FCheckbox, FModal, FTable, IconRefresh, IconPlus },
     template: `
     <div class="h-full flex flex-col">
-        <div class="flex items-center justify-between mb-4 gap-4">
-            <div class="flex gap-2 flex-wrap">
-                <FInput v-model="nameFilter" placeholder="搜索名称" style="width: 150px;" />
-                <FMultiSelect v-model="roleFilter" :options="roleOptions" value-key="value" label-key="displayName" placeholder="全部角色" style="width: 200px;" />
-                <FButton @click="loadUsers" :loading="loading">刷新</FButton>
-                <FButton type="success" @click="showCreateModal = true">新增用户</FButton>
+        <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between mb-4 gap-2">
+            <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 lg:grid-cols-6 gap-2">
+                <FInput v-model="nameFilter" placeholder="搜索名称" />
+                <FMultiSelect v-model="roleFilter" :options="roleOptions" value-key="value" label-key="displayName" placeholder="全部角色" />
+            </div>
+            <div class="flex gap-2 shrink-0">
+                <FButton @click="loadUsers" :loading="loading"><template #icon><IconRefresh :size="12" /></template>刷新</FButton>
+                <FButton type="success" @click="showCreateModal = true"><template #icon><IconPlus :size="12" /></template>新增</FButton>
             </div>
         </div>
         <div class="flex-1 min-h-0 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg flex flex-col overflow-hidden">
@@ -115,6 +117,13 @@ export const UserManagerView = {
         };
 
         onMounted(async () => { if (!isAdmin.value) { window.location.hash = '#/tasks'; return; } await loadUsers(); });
+
+        let debounceTimer = null;
+        watch([nameFilter, roleFilter], () => {
+            currentPage.value = 1;
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => loadUsers(), 300);
+        });
 
         return { users, columns, currentUserId, nameFilter, roleFilter, showCreateModal, showEditModal, showModal, form, roleOptions, editUser, saveUser, deleteUser, closeModal, getEnumName, currentPage, totalCount, pageCount, goToPage, formatDate, loading, loadUsers };
     }

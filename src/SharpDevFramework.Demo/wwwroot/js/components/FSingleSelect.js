@@ -14,18 +14,18 @@ export const FSingleSelect = {
     emits: ['update:modelValue', 'change'],
     template: `
         <div class="relative inline-block w-full" ref="selectRef" :class="{ 'opacity-40 cursor-not-allowed': disabled }">
-            <div class="flex items-center justify-between min-h-[38px] px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-md text-sm text-[var(--text-primary)] cursor-pointer transition-colors duration-150 ease-out hover:border-[var(--border-strong)]" @click="toggle">
+            <div class="flex items-center justify-between h-full px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-md text-sm text-[var(--text-primary)] cursor-pointer transition-colors duration-150 ease-out hover:border-[var(--border-strong)]" @click="toggle">
                 <span v-if="selectedLabel === null" class="text-[var(--text-tertiary)]">{{ placeholder }}</span>
                 <span v-else class="text-[var(--text-primary)] whitespace-nowrap overflow-hidden text-ellipsis flex-1 min-w-0">{{ selectedLabel }}</span>
                 <span class="text-[var(--text-tertiary)] text-[10px] ml-2">{{ visible ? '▲' : '▼' }}</span>
             </div>
             <Transition name="dropdown">
-                <div v-if="visible" class="absolute left-0 right-0 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg p-1 z-[1000] shadow-[0_4px_24px_rgba(0,0,0,0.08)] max-h-[300px] overflow-y-auto"
+                <div v-if="visible" class="absolute left-0 right-0 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg flex flex-col gap-2 p-2 z-[1000] shadow-[0_4px_24px_rgba(0,0,0,0.08)] max-h-[300px] overflow-y-auto"
                     :class="placement === 'top' ? 'bottom-full mb-1' : 'top-full mt-1'">
                     <div
                         v-for="option in options"
                         :key="option[valueKey]"
-                        class="flex items-center gap-2 px-2.5 py-2 rounded-md text-sm text-[var(--text-primary)] cursor-pointer transition-colors duration-150 ease-out hover:bg-[var(--bg-hover)]"
+                        class="flex items-center gap-2 px-2.5 py-2 rounded-md text-sm text-[var(--text-primary)] cursor-pointer transition-colors duration-150 ease-out hover:bg-[var(--bg-hover)] text-nowrap"
                         :class="{ 'bg-[var(--bg-active)] text-[var(--accent)]': isSelected(option) }"
                         @click="selectOption(option)"
                     >

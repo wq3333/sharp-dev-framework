@@ -86,6 +86,6 @@ public class TaskDto
     public string? ErrorMessage { get; set; }
     public int RetryCount { get; set; }
     public long CreatedAt { get; set; }
-    public long? CompletedAt { get; set; }
+    public long UpdatedAt { get; set; }
     public bool IsDeleted { get; set; }
 }

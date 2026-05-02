@@ -11,5 +11,7 @@ public enum TaskStates
     [Description("已完成")]
     Completed,
     [Description("失败")]
-    Failed
+    Failed,
+    [Description("已取消")]
+    Cancled
 }

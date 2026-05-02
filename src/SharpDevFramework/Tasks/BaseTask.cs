@@ -33,6 +33,10 @@ public abstract class BaseTask
             await ProcessAsync(taskId, cancellationToken);
             if (AutoComplete) await _taskCenter.ChangeTaskState(task.Id, TaskStates.Completed);
         }
+        catch (TaskCanceledException ex)
+        {
+            await _taskCenter.ChangeTaskState(task.Id, TaskStates.Cancled, ex.Message);
+        }
         catch (Exception ex)
         {
             await _taskCenter.ChangeTaskState(task.Id, TaskStates.Failed, ex.Message);

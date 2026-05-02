@@ -16,7 +16,7 @@ export const FTable = {
     },
     emits: ['page-change'],
     template: `
-        <div class="flex flex-col flex-1 overflow-hidden min-h-0">
+        <div class="flex flex-col flex-1 overflow-hidden min-h-0 text-nowrap">
             <div class="flex-1 overflow-auto min-h-0">
                 <table class="w-full border-collapse text-sm">
                     <thead>

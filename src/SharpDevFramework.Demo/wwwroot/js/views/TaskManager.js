@@ -2,19 +2,21 @@ import { api } from '../api.js';
 import { enums, getEnumName, getTaskStatusClass } from '../enums.js';
 import { onTaskUpdated } from '../signalr.js';
 import { formatDate } from '../utils.js';
-import { FButton, FMultiSelect, FTable, FModal } from '../components/index.js';
+import { FButton, FMultiSelect, FTable, FModal, IconRefresh } from '../components/index.js';
 
 const { ref, onMounted, computed, watch } = Vue;
 
 export const TaskManagerView = {
-    components: { FButton, FMultiSelect, FTable, FModal },
+    components: { FButton, FMultiSelect, FTable, FModal, IconRefresh },
     template: `
     <div class="h-full flex flex-col">
-        <div class="flex items-center justify-between mb-4 gap-4">
-            <div class="flex gap-2 flex-wrap">
-                <FMultiSelect v-model="statusFilter" :options="taskStateOptions" value-key="value" label-key="displayName" placeholder="全部状态" style="width: 200px;" />
-                <FMultiSelect v-model="typeFilter" :options="taskTypeOptions" value-key="value" label-key="displayName" placeholder="全部类型" style="width: 200px;" />
-                <FButton size="sm" @click="loadTasks" :loading="loading">刷新</FButton>
+        <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between mb-4 gap-2">
+            <div class="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 lg:grid-cols-6 gap-2">
+                <FMultiSelect v-model="statusFilter" :options="taskStateOptions" value-key="value" label-key="displayName" placeholder="全部状态" />
+                <FMultiSelect v-model="typeFilter" :options="taskTypeOptions" value-key="value" label-key="displayName" placeholder="全部类型" />
+            </div>
+            <div class="grid grid-cols-1 gap-2">
+                <FButton @click="loadTasks" :loading="loading"><template #icon><IconRefresh :size="12" /></template>刷新</FButton>
             </div>
         </div>
         <div class="flex-1 min-h-0 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg flex flex-col overflow-hidden">
@@ -22,7 +24,6 @@ export const TaskManagerView = {
                 :current-page="currentPage" :page-size="pageSize" :total="totalCount" @page-change="goToPage">
                 <template #status="{ row }">
                     <span :class="'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ' + taskStatusClass(row.status)">{{ getEnumName('taskStates', row.status) }}</span>
-                    <span v-if="row.errorMessage" class="ml-2 text-xs text-[var(--text-tertiary)]" :title="row.errorMessage">(有错误)</span>
                 </template>
                 <template #type="{ row }">
                     <div class="flex gap-1 flex-wrap">
@@ -30,11 +31,13 @@ export const TaskManagerView = {
                     </div>
                 </template>
                 <template #createdAt="{ row }">{{ formatDate(row.createdAt) }}</template>
+                <template #updatedAt="{ row }">{{ row.updatedAt ? formatDate(row.updatedAt) : '-' }}</template>
                 <template #actions="{ row }">
                     <div class="flex gap-2">
                         <FButton size="sm" @click="viewDetail(row.id)">详情</FButton>
-                        <FButton v-if="row.status === 3" size="sm" @click="retryTask(row.id)">重试</FButton>
-                        <FButton type="danger" size="sm" @click="deleteTask(row)">删除</FButton>
+                        <FButton v-if="row.status === 1" type="warning" size="sm" @click="cancelTask(row.id)">取消</FButton>
+                        <FButton v-if="row.status === 3 || row.status === 4" type="success" size="sm" @click="retryTask(row.id)">重试</FButton>
+                        <FButton v-if="row.status !== 1" type="danger" size="sm" @click="deleteTask(row)">删除</FButton>
                     </div>
                 </template>
             </FTable>
@@ -49,7 +52,7 @@ export const TaskManagerView = {
                 <div class="flex items-start gap-4 text-sm"><span class="w-20 shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">错误信息</span><span class="flex-1 leading-relaxed break-all" :class="currentTask.errorMessage ? 'text-[var(--danger)]' : 'text-[var(--text-primary)]'">{{ currentTask.errorMessage || '-' }}</span></div>
                 <div class="flex items-start gap-4 text-sm"><span class="w-20 shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">重试次数</span><span class="flex-1 text-[var(--text-primary)] leading-relaxed break-all">{{ currentTask.retryCount }}</span></div>
                 <div class="flex items-start gap-4 text-sm"><span class="w-20 shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">创建时间</span><span class="flex-1 text-[var(--text-primary)] leading-relaxed break-all">{{ formatDate(currentTask.createdAt) }}</span></div>
-                <div class="flex items-start gap-4 text-sm"><span class="w-20 shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">完成时间</span><span class="flex-1 text-[var(--text-primary)] leading-relaxed break-all">{{ currentTask.completedAt ? formatDate(currentTask.completedAt) : '-' }}</span></div>
+                <div class="flex items-start gap-4 text-sm"><span class="w-20 shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">更新时间</span><span class="flex-1 text-[var(--text-primary)] leading-relaxed break-all">{{ currentTask.updatedAt ? formatDate(currentTask.updatedAt) : '-' }}</span></div>
                 <div class="flex items-start gap-4 text-sm"><span class="w-20 shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">是否删除</span><span class="flex-1 text-[var(--text-primary)] leading-relaxed break-all">{{ currentTask.isDeleted ? '是' : '否' }}</span></div>
             </div>
             <template #footer><FButton @click="detailModalVisible = false">关闭</FButton></template>
@@ -73,6 +76,7 @@ export const TaskManagerView = {
             { prop: 'type', label: '类型' },
             { prop: 'status', label: '状态' },
             { prop: 'createdAt', label: '创建时间' },
+            { prop: 'updatedAt', label: '更新时间' },
             { prop: 'actions', label: '操作' }
         ];
 
@@ -92,11 +96,12 @@ export const TaskManagerView = {
         const handleTaskUpdated = () => { loadTasks(); };
         const viewDetail = async (id) => { currentTask.value = await api.tasks.get(id); detailModalVisible.value = true; };
         const retryTask = async (id) => { await api.tasks.retry(id); await loadTasks(); };
+        const cancelTask = async (id) => { if (confirm(`确定取消任务 #${id}？`)) { await api.tasks.cancel(id); await loadTasks(); } };
         const deleteTask = async (task) => { if (confirm(`确定删除任务 #${task.id}？`)) { await api.tasks.delete(task.id); await loadTasks(); } };
 
         watch([statusFilter, typeFilter], () => { currentPage.value = 1; loadTasks(); });
         onMounted(async () => { await loadTasks(); onTaskUpdated(handleTaskUpdated); });
 
-        return { tasks, columns, statusFilter, typeFilter, taskStateOptions, taskTypeOptions, taskStatusClass: getTaskStatusClass, getEnumName, loadTasks, retryTask, deleteTask, formatDate, currentPage, totalCount, pageCount, goToPage, loading, detailModalVisible, currentTask, viewDetail };
+        return { tasks, columns, statusFilter, typeFilter, taskStateOptions, taskTypeOptions, taskStatusClass: getTaskStatusClass, getEnumName, loadTasks, retryTask, cancelTask, deleteTask, formatDate, currentPage, totalCount, pageCount, goToPage, loading, detailModalVisible, currentTask, viewDetail };
     }
 };

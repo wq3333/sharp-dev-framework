@@ -10,7 +10,7 @@ using SharpDevFramework.Demo.Data;
 namespace SharpDevFramework.Demo.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260501024335_InitialCreate")]
+    [Migration("20260502085103_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -53,9 +53,6 @@ namespace SharpDevFramework.Demo.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<long?>("CompletedAt")
-                        .HasColumnType("INTEGER");
-
                     b.Property<long>("CreatedAt")
                         .HasColumnType("INTEGER");
 
@@ -77,6 +74,9 @@ namespace SharpDevFramework.Demo.Data.Migrations
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<long>("UpdatedAt")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("UserId")
                         .HasColumnType("INTEGER");

@@ -14,13 +14,20 @@ export const FPagination = {
     },
     emits: ['update:modelValue', 'update:pageSize', 'page-change', 'size-change'],
     template: `
-        <div class="flex items-center justify-end gap-4 px-4 py-3 border-t border-[var(--border-subtle)]">
+        <div class="flex flex-wrap items-center justify-center md:justify-end gap-2 px-4 py-3 border-t border-[var(--border-subtle)]">
             <div class="text-[13px] text-[var(--text-secondary)]" v-if="layout.includes('total')">
                 共 {{ total }} 条，共 {{ pageCount }} 页
             </div>
             <div class="flex items-center" v-if="layout.includes('sizes')">
                 <FSingleSelect v-model="currentPageSize" :options="pageSizeOptions" value-key="value" label-key="label"
                     placement="top" @change="handleSizeChange" class="cursor-pointer" />
+            </div>
+             <div class="flex items-center gap-2 text-[13px] text-[var(--text-secondary)]" v-if="layout.includes('jumper')">
+                <span>跳至</span>
+                <input type="number" :value="jumperValue" @input="handleJumperInput" @blur="handleJumper" @keyup.enter="handleJumper"
+                    class="w-[50px] px-2 py-1.5 border border-[var(--border-subtle)] rounded-md text-[13px] text-center bg-[var(--bg-surface)] text-[var(--text-primary)] outline-none focus:border-[var(--border-focus)] focus:shadow-[0_0_0_2px_var(--accent-subtle)]"
+                    min="1" :max="pageCount" />
+                <span>页</span>
             </div>
             <div class="flex items-center gap-2">
                 <button class="min-w-[80px] h-[34px] px-3.5 bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)] rounded-md cursor-pointer text-[13px] transition-all duration-150 ease-out hover:bg-[var(--bg-hover)] hover:border-[var(--border-strong)] disabled:opacity-40 disabled:cursor-not-allowed"
@@ -33,13 +40,6 @@ export const FPagination = {
                 </div>
                 <button class="min-w-[80px] h-[34px] px-3.5 bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)] rounded-md cursor-pointer text-[13px] transition-all duration-150 ease-out hover:bg-[var(--bg-hover)] hover:border-[var(--border-strong)] disabled:opacity-40 disabled:cursor-not-allowed"
                     :disabled="currentPage >= pageCount" @click="goTo(currentPage + 1)">下一页</button>
-            </div>
-            <div class="flex items-center gap-2 text-[13px] text-[var(--text-secondary)]" v-if="layout.includes('jumper')">
-                <span>跳至</span>
-                <input type="number" :value="jumperValue" @input="handleJumperInput" @blur="handleJumper" @keyup.enter="handleJumper"
-                    class="w-[50px] px-2 py-1.5 border border-[var(--border-subtle)] rounded-md text-[13px] text-center bg-[var(--bg-surface)] text-[var(--text-primary)] outline-none focus:border-[var(--border-focus)] focus:shadow-[0_0_0_2px_var(--accent-subtle)]"
-                    min="1" :max="pageCount" />
-                <span>页</span>
             </div>
         </div>
     `,

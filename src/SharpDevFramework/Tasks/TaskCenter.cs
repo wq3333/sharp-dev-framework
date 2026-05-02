@@ -140,17 +140,18 @@ public class TaskCenter(ILogger<TaskCenter> logger, IServiceProvider serviceProv
         if (task.Status == TaskStates.Completed) return;
 
         task.Status = state;
+        task.UpdatedAt = DateTime.Now.ToUtcTimestamp();
         if (error.NotNullOrWhiteSpace()) task.ErrorMessage = error;
-        if (state == TaskStates.Completed) task.CompletedAt = DateTime.Now.ToUtcTimestamp();
+        if (state == TaskStates.Completed) task.ErrorMessage = null;
         dbContext.Tasks.Update(task);
         dbContext.SaveChanges();
 
         await notificationService.BroadcastTaskUpdatedAsync(task);
         if (logger.IsEnabled(LogLevel.Information)) logger.LogInformation("{TaskType} task {TaskId} {TaskState}", task.Type, task.Id, task.Status);
 
-        var maxRetryCount = configuration.GetValue<int>("FrameworkSettings:Tasks:MaxRetryCount");
         if (task.Status == TaskStates.Failed)
         {
+            var maxRetryCount = configuration.GetValue<int>("FrameworkSettings:Tasks:MaxRetryCount");
             if (task.RetryCount < maxRetryCount)
             {
                 task.RetryCount += 1;

@@ -16,19 +16,22 @@ export const FButton = {
             :class="buttonClasses"
             :disabled="disabled || loading"
             @click="$emit('click', $event)">
-            <span v-if="loading" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-[spin_0.8s_linear_infinite]"></span>
+            <span v-if="loading" class="absolute top-0 left-0 w-full h-full bg-gray-800/80 flex items-center justify-center">
+                <span class="size-3.5 border-2 border-white/30 border-t-white rounded-full animate-[spin_0.8s_linear_infinite]"></span>
+            </span>
+            <span v-if="$slots.icon" class="shrink-0"><slot name="icon" /></span>
             <span v-else-if="icon" class="text-sm leading-none">{{ icon }}</span>
             <slot />
         </button>
     `,
     setup(props) {
-        const baseClasses = 'inline-flex items-center justify-center gap-1.5 font-medium whitespace-nowrap cursor-pointer transition-all duration-150 ease-out disabled:opacity-40 disabled:cursor-not-allowed';
+        const baseClasses = 'inline-flex items-center justify-center gap-1.5 font-medium whitespace-nowrap cursor-pointer transition-all duration-150 ease-out disabled:opacity-40';
 
         const sizeClasses = computed(() => {
             switch (props.size) {
                 case 'sm': return 'px-2.5 py-1 text-xs rounded-md';
-                case 'lg': return 'px-5 py-2.5 text-base rounded-xl';
-                default: return 'px-4 py-2 text-sm rounded-md';
+                case 'lg': return 'px-5 py-2 text-base rounded-xl';
+                default: return 'px-4 py-1.5 text-sm rounded-md';
             }
         });
 
@@ -47,7 +50,7 @@ export const FButton = {
             sizeClasses.value,
             typeClasses.value,
             props.block ? 'flex w-full' : '',
-            props.loading ? 'relative text-transparent' : ''
+            props.loading ? 'relative' : ''
         ].filter(Boolean).join(' '));
 
         return { buttonClasses };

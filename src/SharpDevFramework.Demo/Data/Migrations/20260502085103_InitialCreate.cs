@@ -40,7 +40,7 @@ namespace SharpDevFramework.Demo.Data.Migrations
                     ErrorMessage = table.Column<string>(type: "TEXT", nullable: true),
                     RetryCount = table.Column<int>(type: "INTEGER", nullable: false),
                     CreatedAt = table.Column<long>(type: "INTEGER", nullable: false),
-                    CompletedAt = table.Column<long>(type: "INTEGER", nullable: true),
+                    UpdatedAt = table.Column<long>(type: "INTEGER", nullable: false),
                     IsDeleted = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>

@@ -12,6 +12,6 @@ public class TaskEntity
     public string? ErrorMessage { get; set; }
     public int RetryCount { get; set; }
     public long CreatedAt { get; set; } = DateTime.Now.ToUtcTimestamp();
-    public long? CompletedAt { get; set; }
+    public long UpdatedAt { get; set; } = DateTime.Now.ToUtcTimestamp();
     public bool IsDeleted { get; set; }
 }

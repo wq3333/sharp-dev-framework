@@ -6,7 +6,7 @@ export const FModal = {
         modelValue: { type: Boolean, default: false },
         title: { type: String, default: '' },
         width: { type: String, default: '400px' },
-        closeOnOverlay: { type: Boolean, default: true },
+        closeOnOverlay: { type: Boolean, default: false },
         showClose: { type: Boolean, default: true }
     },
     emits: ['update:modelValue', 'close'],

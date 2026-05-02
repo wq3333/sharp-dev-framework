@@ -15,7 +15,7 @@ public class TaskHostedService(TaskCenter taskCenter, IServiceProvider servicePr
     {
         await taskCenter.StartAsync(Assemblies, stoppingToken);
         var maxRetryCount = configuration.GetValue<int>("FrameworkSettings:Tasks:MaxRetryCount");
-        var notFinishedTasks = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<FrameworkDbContext>().Tasks.Where(t => t.Status != TaskStates.Completed && t.RetryCount < maxRetryCount).ToList();
+        var notFinishedTasks = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<FrameworkDbContext>().Tasks.Where(t => (t.Status != TaskStates.Completed && t.Status != TaskStates.Cancled) && t.RetryCount < maxRetryCount).ToList();
         foreach (var item in notFinishedTasks)
         {
             await taskCenter.PublishAsync(item.Id);

@@ -50,9 +50,6 @@ namespace SharpDevFramework.Demo.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<long?>("CompletedAt")
-                        .HasColumnType("INTEGER");
-
                     b.Property<long>("CreatedAt")
                         .HasColumnType("INTEGER");
 
@@ -74,6 +71,9 @@ namespace SharpDevFramework.Demo.Data.Migrations
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<long>("UpdatedAt")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("UserId")
                         .HasColumnType("INTEGER");
