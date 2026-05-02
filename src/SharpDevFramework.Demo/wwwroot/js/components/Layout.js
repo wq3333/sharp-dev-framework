@@ -1,5 +1,5 @@
 import { FButton, FDropdown, FDropdownItem } from './index.js';
-import { IconMenu, IconClose, IconTasks, IconUsers, IconDemos, IconSun, IconMoon, IconLogo } from './icon.js';
+import { IconMenu, IconClose, IconTasks, IconUsers, IconDemos, IconSun, IconMoon, IconLogo, IconUser, IconRole, IconLogout } from './icon.js';
 import { clearAuth } from '../auth.js';
 import { stopSignalR } from '../signalr.js';
 import { getEnumName } from '../enums.js';
@@ -9,7 +9,7 @@ const { computed, inject, ref, onMounted, onBeforeUnmount } = Vue;
 
 export const LayoutComponent = {
     name: 'LayoutComponent',
-    components: { FButton, FDropdown, FDropdownItem, IconMenu, IconClose, IconTasks, IconUsers, IconDemos, IconSun, IconMoon, IconLogo },
+    components: { FButton, FDropdown, FDropdownItem, IconMenu, IconClose, IconTasks, IconUsers, IconDemos, IconSun, IconMoon, IconLogo, IconUser, IconRole, IconLogout },
     template: `
     <div class="flex h-full overflow-hidden">
         <div v-if="mobileOpen && isMobile" class="fixed inset-0 bg-black/40 z-40 transition-opacity duration-200" :class="mobileOpen ? 'opacity-100' : 'opacity-0'" @click="mobileOpen = false"></div>
@@ -71,10 +71,19 @@ export const LayoutComponent = {
                     </button>
                     <FDropdown placement="bottom-end">
                         <template #trigger>
-                            <button class="inline-flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-primary)] text-sm font-medium cursor-pointer transition-all duration-150 ease-out hover:bg-[var(--bg-hover)] hover:border-[var(--border-strong)]">{{ username }}</button>
+                            <button class="user-info-btn rounded">
+                                <IconUser />
+                                <span class="hidden sm:inline">{{ username }}</span>
+                            </button>
                         </template>
-                        <div class="px-3 py-2 text-xs text-[var(--text-tertiary)]">角色：{{ role }}</div>
-                        <FDropdownItem divided @click="handleLogout">退出登录</FDropdownItem>
+                        <div class="px-3 py-2 flex items-center gap-2 text-xs text-[var(--text-tertiary)]">
+                            <IconRole />
+                            {{ role }}
+                        </div>
+                        <FDropdownItem class="text-red-400 flex items-center gap-2" divided @click="handleLogout">
+                            <IconLogout />
+                            退出登录
+                        </FDropdownItem>
                     </FDropdown>
                 </div>
             </header>

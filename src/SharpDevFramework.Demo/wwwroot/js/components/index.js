@@ -9,4 +9,4 @@ export { FDropdown, FDropdownItem } from './FDropdown.js';
 export { FMultiSelect } from './FMultiSelect.js';
 export { LayoutComponent } from './Layout.js';
 export { ToastContainer, ToastPlugin, toast } from './Toast.js';
-export { IconLogo, IconMenu, IconClose, IconTasks, IconUsers, IconDemos, IconSun, IconMoon, IconRefresh, IconPlus, IconSuccess, IconError, IconWarning, IconInfo } from './icon.js';
+export { IconLogo, IconMenu, IconClose, IconTasks, IconUsers, IconUser, IconDemos, IconSun, IconMoon, IconRefresh, IconPlus, IconSuccess, IconError, IconWarning, IconInfo } from './icon.js';

@@ -18,8 +18,6 @@ export const LoginView = {
         <div class="login-card">
             <div class="flex flex-col items-center mb-8">
                 <IconLogo :size="44" />
-                <h1 class="text-xl font-semibold mt-4 text-[var(--text-primary)] tracking-tight">SharpDevFramework</h1>
-                <p class="text-sm text-[var(--text-tertiary)] mt-1.5">登录以继续访问管理后台</p>
             </div>
             <form @submit.prevent="handleLogin">
                 <div class="mb-4">

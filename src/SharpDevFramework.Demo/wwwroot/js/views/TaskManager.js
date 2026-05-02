@@ -20,7 +20,7 @@ export const TaskManagerView = {
             </div>
         </div>
         <div class="flex-1 min-h-0 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded flex flex-col overflow-hidden">
-            <FTable :data="tasks" :columns="columns" empty-text="暂无任务" :pagination="true"
+            <FTable :data="tasks" :columns="columns" empty-text="暂无任务" :loading="loading" :pagination="true"
                 :current-page="currentPage" :page-size="pageSize" :total="totalCount" :page-count="pageCount" @page-change="goToPage">
                 <template #status="{ row }">
                     <span :class="'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ' + taskStatusClass(row.status)">{{ getEnumName('taskStates', row.status) }}</span>

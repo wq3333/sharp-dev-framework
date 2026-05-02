@@ -20,7 +20,7 @@ export const UserManagerView = {
             </div>
         </div>
         <div class="flex-1 min-h-0 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded flex flex-col overflow-hidden">
-            <FTable :data="users" :columns="columns" empty-text="暂无用户" :pagination="true"
+            <FTable :data="users" :columns="columns" empty-text="暂无用户" :loading="loading" :pagination="true"
                 :current-page="currentPage" :page-size="pageSize" :total="totalCount" :page-count="pageCount" @page-change="goToPage">
                 <template #role="{ row }">
                     <div class="flex gap-1 flex-wrap">
