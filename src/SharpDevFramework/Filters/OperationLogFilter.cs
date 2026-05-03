@@ -11,7 +11,7 @@ namespace SharpDevFramework;
 public class OperationLogFilter(IServiceProvider serviceProvider) : IAsyncActionFilter
 {
     static readonly string[] _ignoredQueryPath = ["/api/tasks", "/api/useroperationlogs"];
-    static readonly BlockingCollection<UserOperationLogEntity> _cache = [];
+    static BlockingCollection<UserOperationLogEntity> _cache = [];
     static DateTime _lastWriteTime = DateTime.Now;
     static readonly Lock _lock = new();
 
@@ -98,24 +98,25 @@ public class OperationLogFilter(IServiceProvider serviceProvider) : IAsyncAction
             IsSuccess = isSuccess,
             ErrorMessage = errorMessage
         };
-        lock (_lock) _cache.Add(logData);
+        _cache.Add(logData);
         if ((DateTime.Now - _lastWriteTime) < TimeSpan.FromMinutes(2)) return;
 
-        _ = Task.Run(async () =>
+        _ = Task.Run(() =>
         {
             try
             {
-                var scope = serviceProvider.CreateScope();
-                var dbContext = scope.ServiceProvider.GetRequiredService<FrameworkDbContext>();
-                var data = _cache.GroupBy(x => new { x.RoutePath, x.HttpMethod, x.UserId, x.RequestData }).Select(x => x.OrderBy(y => y.CreatedAt).Last());
-                dbContext.UserOperationLogs.AddRange(data);
-                await dbContext.SaveChangesAsync();
-                lock (_lock) while (_cache.TryTake(out _)) { };
-                _lastWriteTime = DateTime.Now;
+                lock (_lock)
+                {
+                    var scope = serviceProvider.CreateScope();
+                    var dbContext = scope.ServiceProvider.GetRequiredService<FrameworkDbContext>();
+                    var data = _cache.GroupBy(x => new { x.RoutePath, x.HttpMethod, x.UserId, x.RequestData }).Select(x => x.OrderBy(y => y.CreatedAt).Last());
+                    dbContext.UserOperationLogs.AddRange(data);
+                    dbContext.SaveChanges();
+                    _lastWriteTime = DateTime.Now;
+                    _cache = [];
+                }
             }
-            catch
-            {
-            }
+            catch { }
         });
     }
 
