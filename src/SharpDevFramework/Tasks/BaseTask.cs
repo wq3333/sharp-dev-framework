@@ -21,7 +21,7 @@ public abstract class BaseTask : IScopedService
     /// <summary>
     /// 数据库上下文
     /// </summary>
-    protected readonly FrameworkDbContext _dbContext;
+    internal protected readonly FrameworkDbContext _dbContext;
 
     /// <summary>
     /// 任务中心

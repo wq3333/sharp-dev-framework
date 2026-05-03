@@ -1,5 +1,5 @@
 import { FButton, FDropdown, FDropdownItem } from './index.js';
-import { IconMenu, IconClose, IconTasks, IconUsers, IconDemos, IconSun, IconMoon, IconLogo, IconUser, IconRole, IconLogout } from './icon.js';
+import { IconMenu, IconClose, IconTasks, IconUsers, IconDemos, IconLogs, IconSun, IconMoon, IconLogo, IconUser, IconRole, IconLogout } from './icon.js';
 import { clearAuth } from '../auth.js';
 import { stopSignalR } from '../signalr.js';
 import { getEnumName } from '../enums.js';
@@ -9,7 +9,7 @@ const { computed, inject, ref, onMounted, onBeforeUnmount } = Vue;
 
 export const LayoutComponent = {
     name: 'LayoutComponent',
-    components: { FButton, FDropdown, FDropdownItem, IconMenu, IconClose, IconTasks, IconUsers, IconDemos, IconSun, IconMoon, IconLogo, IconUser, IconRole, IconLogout },
+    components: { FButton, FDropdown, FDropdownItem, IconMenu, IconClose, IconTasks, IconUsers, IconDemos, IconLogs, IconSun, IconMoon, IconLogo, IconUser, IconRole, IconLogout },
     template: `
     <div class="flex h-full overflow-hidden">
         <div v-if="mobileOpen && isMobile" class="fixed inset-0 bg-black/40 z-40 transition-opacity duration-200" :class="mobileOpen ? 'opacity-100' : 'opacity-0'" @click="mobileOpen = false"></div>
@@ -49,6 +49,12 @@ export const LayoutComponent = {
                     <span class="sidebar-nav-icon sidebar-nav-icon--demos"><IconDemos /></span>
                     <span class="whitespace-nowrap">Demo管理</span>
                 </router-link>
+                <router-link to="/logs" class="sidebar-nav-item"
+                    :class="{ 'sidebar-nav-item--active': $route.path === '/logs' }"
+                    @click="onNavClick">
+                    <span class="sidebar-nav-icon sidebar-nav-icon--logs"><IconLogs /></span>
+                    <span class="whitespace-nowrap">操作日志</span>
+                </router-link>
             </nav>
         </aside>
         <div class="flex-1 overflow-hidden flex flex-col min-w-0">
@@ -63,6 +69,7 @@ export const LayoutComponent = {
                         <template v-if="$route.path.startsWith('/tasks')">任务管理</template>
                         <template v-else-if="$route.path.startsWith('/users')">用户管理</template>
                         <template v-else-if="$route.path.startsWith('/demos')">Demo管理</template>
+                        <template v-else-if="$route.path.startsWith('/logs')">操作日志</template>
                     </h1>
                 </div>
                 <div class="flex items-center gap-2 sm:gap-4">

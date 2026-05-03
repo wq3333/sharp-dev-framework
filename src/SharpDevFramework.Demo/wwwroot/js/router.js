@@ -3,6 +3,7 @@ import { LayoutComponent as LayoutView } from './components/Layout.js';
 import { TaskManagerView } from './views/TaskManager.js';
 import { UserManagerView } from './views/UserManager.js';
 import { DemoManagerView } from './views/DemoManager.js';
+import { OperationLogManagerView } from './views/OperationLogManager.js';
 
 const { createRouter, createWebHashHistory } = VueRouter;
 
@@ -15,7 +16,8 @@ const routes = [
             { path: '', redirect: '/tasks' },
             { path: 'tasks', component: TaskManagerView },
             { path: 'users', component: UserManagerView },
-            { path: 'demos', component: DemoManagerView }
+            { path: 'demos', component: DemoManagerView },
+            { path: 'logs', component: OperationLogManagerView }
         ]
     },
 ];

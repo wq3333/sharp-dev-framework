@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using SharpDevLib;
 using System.Reflection;
 
@@ -11,7 +10,7 @@ namespace SharpDevFramework;
 /// <summary>
 /// 任务托管服务，后台运行的任务中心
 /// </summary>
-public class TaskHostedService(TaskCenter taskCenter, IServiceProvider serviceProvider, IConfiguration configuration, ILogger<TaskHostedService> logger) : BackgroundService
+public class TaskHostedService(TaskCenter taskCenter, IServiceProvider serviceProvider, IConfiguration configuration) : BackgroundService
 {
     /// <summary>
     /// 需要扫描的程序集
@@ -34,70 +33,11 @@ public class TaskHostedService(TaskCenter taskCenter, IServiceProvider servicePr
             await taskCenter.PublishAsync(item.Id);
         }
 
-        // 启动定时数据清理任务
-        var dataCleanupEnabled = configuration.GetValue<bool>("FrameworkSettings:DataCleanup:IsEnabled");
-        if (dataCleanupEnabled)
-        {
-            _ = RunDataCleanupSchedulerAsync(stoppingToken);
-        }
-    }
-
-    /// <summary>
-    /// 运行数据清理任务调度器
-    /// </summary>
-    async Task RunDataCleanupSchedulerAsync(CancellationToken stoppingToken)
-    {
-        var cleanupTimeStr = configuration.GetValue<string>("FrameworkSettings:DataCleanup:CleanupTime") ?? "02:00";
-        if (!TimeOnly.TryParse(cleanupTimeStr, out var cleanupTime))
-        {
-            cleanupTime = new TimeOnly(2, 0);
-        }
-
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            var now = DateTime.Now;
-            var nextRun = now.Date.AddHours(cleanupTime.Hour).AddMinutes(cleanupTime.Minute);
-            if (nextRun <= now)
-            {
-                nextRun = nextRun.AddDays(1);
-            }
-
-            var delay = nextRun - now;
-            if (logger.IsEnabled(LogLevel.Information))
-            {
-                logger.LogInformation("下一次数据清理将在 {NextRun} 执行（等待 {Delay}）", nextRun, delay);
-            }
-
-            await Task.Delay(delay, stoppingToken);
-
-            if (stoppingToken.IsCancellationRequested) break;
-
-            try
-            {
-                var scope = serviceProvider.CreateScope();
-                var dbContext = scope.ServiceProvider.GetRequiredService<FrameworkDbContext>();
-
-                var taskEntity = new TaskEntity
-                {
-                    Type = FrameworkTaskTypes.DataCleanup,
-                    Status = TaskStates.Pending
-                };
-                dbContext.Tasks.Add(taskEntity);
-                await dbContext.SaveChangesAsync(stoppingToken);
-                await taskCenter.PublishAsync(taskEntity.Id);
-
-                if (logger.IsEnabled(LogLevel.Information))
-                {
-                    logger.LogInformation("已发布数据清理任务");
-                }
-            }
-            catch (Exception ex)
-            {
-                if (logger.IsEnabled(LogLevel.Error))
-                {
-                    logger.LogError(ex, "发布数据清理任务失败");
-                }
-            }
-        }
+        //清理数据库
+        var dbContext = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<FrameworkDbContext>();
+        var cleanTask = new TaskEntity { Type = FrameworkTaskTypes.DataCleanup };
+        dbContext.Tasks.Add(cleanTask);
+        dbContext.SaveChanges();
+        await taskCenter.PublishAsync(cleanTask.Id);
     }
 }

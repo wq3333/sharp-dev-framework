@@ -95,6 +95,20 @@ public class TasksController(FrameworkDbContext context, TaskCenter taskCenter) 
         await taskCenter.CancelTaskAsync(id);
         return EmptyReply.Succeed();
     }
+
+    /// <summary>
+    /// 清理数据库
+    /// </summary>
+    /// <returns>操作结果</returns>
+    [HttpPost("cleandb")]
+    public async Task<EmptyReply> CleanDB()
+    {
+        var cleanTask = new TaskEntity { Type = FrameworkTaskTypes.DataCleanup };
+        context.Tasks.Add(cleanTask);
+        context.SaveChanges();
+        await taskCenter.PublishAsync(cleanTask.Id);
+        return EmptyReply.Succeed();
+    }
 }
 
 /// <summary>

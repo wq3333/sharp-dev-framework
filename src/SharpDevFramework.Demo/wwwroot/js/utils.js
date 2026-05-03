@@ -9,3 +9,9 @@ export function formatDate(timestamp) {
     const seconds = String(date.getSeconds()).padStart(2, '0');
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
+
+export function formatDuration(ms) {
+    if (!ms && ms !== 0) return '';
+    if (ms < 1000) return `${ms}ms`;
+    return `${(ms / 1000).toFixed(2)}s`;
+}

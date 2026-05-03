@@ -129,6 +129,65 @@ namespace SharpDevFramework.Demo.Data.Migrations
 
                     b.ToTable("Users");
                 });
+
+            modelBuilder.Entity("SharpDevFramework.UserOperationLogEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ActionName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ControllerName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("CreatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("DurationMs")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("HttpMethod")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("IpAddress")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsSuccess")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("OperationType")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RequestData")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ResponseData")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RoutePath")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserAgent")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("UserName")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserOperationLogs");
+                });
 #pragma warning restore 612, 618
         }
     }

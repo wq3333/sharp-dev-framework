@@ -19,13 +19,17 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.7" />
-		<!--<PackageReference Include="SharpDevFramework" Version="1.0.0.2" />-->
+	  <None Remove="C:\Users\Devel\.nuget\packages\sharpdevframework\1.0.0.2\contentFiles\any\any\framework.json" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\SharpDevFramework\SharpDevFramework.csproj" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.7" />
+		<PackageReference Include="SharpDevFramework" Version="12.0.0.3" />
 	</ItemGroup>
+
+	<!--<ItemGroup>
+	  <ProjectReference Include="..\SharpDevFramework\SharpDevFramework.csproj" />
+	</ItemGroup>-->
 
 	<ItemGroup>
 	  <None Update="install.bat">

@@ -1,17 +1,10 @@
-using SharpDevLib;
-
 namespace SharpDevFramework;
 
 /// <summary>
 /// 用户操作日志实体
 /// </summary>
-public class UserOperationLogEntity
+public class UserOperationLogEntity : BaseEntity
 {
-    /// <summary>
-    /// 日志 ID
-    /// </summary>
-    public int Id { get; set; }
-
     /// <summary>
     /// 用户 ID
     /// </summary>
@@ -81,9 +74,4 @@ public class UserOperationLogEntity
     /// 错误信息
     /// </summary>
     public string? ErrorMessage { get; set; }
-
-    /// <summary>
-    /// 创建时间戳
-    /// </summary>
-    public long CreatedAt { get; set; } = DateTime.Now.ToUtcTimestamp();
 }

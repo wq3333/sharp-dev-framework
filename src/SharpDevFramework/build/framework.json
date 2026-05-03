@@ -64,6 +64,22 @@
       "LockMinutes": 30,
       "MaxFailedCount": 10,
       "FailedMinutes": 10
+    },
+    "OperationLog": {
+      "IsEnabled": true
+    },
+    "DataCleanup": {
+      "IsEnabled": true,
+      "Tables": [
+        {
+          "Name": "UserOperationLogs",
+          "RetentionDays": 30
+        },
+        {
+          "Name": "Tasks",
+          "RetentionDays": 30
+        }
+      ]
     }
   }
 }

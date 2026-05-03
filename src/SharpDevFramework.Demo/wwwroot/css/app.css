@@ -216,10 +216,12 @@ html,body,#app {
 .sidebar-nav-icon--tasks { color: #3b82f6; }
 .sidebar-nav-icon--users { color: #8b5cf6; }
 .sidebar-nav-icon--demos { color: #f59e0b; }
+.sidebar-nav-icon--logs { color: #10b981; }
 .sidebar-nav-item--active .sidebar-nav-icon--tasks,
 .sidebar-nav-item--active .sidebar-nav-icon--users,
-.sidebar-nav-item--active .sidebar-nav-icon--demos {
-  color: var(--accent);
+.sidebar-nav-item--active .sidebar-nav-icon--demos,
+.sidebar-nav-item--active .sidebar-nav-icon--logs {
+    color: var(--accent);
 }
 
 /* Dropdown teleport animation */

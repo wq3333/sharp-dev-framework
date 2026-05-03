@@ -85,6 +85,9 @@ export const api = {
         },
         delete: async (id, onerror = null) => {
             await request('DELETE', `/tasks/${id}`, null, null, onerror);
+        },
+        cleandb: async (onerror = null) => {
+            await request('POST', '/tasks/cleandb', null, null, onerror);
         }
     },
     
@@ -137,6 +140,24 @@ export const api = {
     enums: {
         list: async (onerror = null) => {
             const result = await request('GET', '/enums', null, null, onerror);
+            return result.data;
+        }
+    },
+
+    logs: {
+        page: async (username, operationType, isSuccess, startTimestamp, endTimestamp, page = 1, size = 20, onerror = null) => {
+            const params = { index: page, size };
+            if (username) params.username = username;
+            if (operationType && operationType.length > 0) {
+                params.operationType = Array.isArray(operationType) ? operationType.join(',') : operationType;
+            }
+            if (isSuccess !== null && isSuccess !== undefined && isSuccess !== '') params.isSuccess = isSuccess;
+            if (startTimestamp) params.startTimestamp = startTimestamp;
+            if (endTimestamp) params.endTimestamp = endTimestamp;
+            return await request('GET', '/useroperationlogs', null, params, onerror);
+        },
+        get: async (id, onerror = null) => {
+            const result = await request('GET', `/useroperationlogs/${id}`, null, null, onerror);
             return result.data;
         }
     }

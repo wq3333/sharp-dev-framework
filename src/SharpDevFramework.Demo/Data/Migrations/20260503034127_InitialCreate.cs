@@ -5,7 +5,7 @@
 namespace SharpDevFramework.Demo.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class AddUserOperationLogs : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -18,8 +18,8 @@ namespace SharpDevFramework.Demo.Data.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     Type = table.Column<string>(type: "TEXT", nullable: false),
-                    CreatedAt = table.Column<long>(type: "INTEGER", nullable: false),
                     UpdatedAt = table.Column<long>(type: "INTEGER", nullable: true),
+                    CreatedAt = table.Column<long>(type: "INTEGER", nullable: false),
                     IsDeleted = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
@@ -39,13 +39,41 @@ namespace SharpDevFramework.Demo.Data.Migrations
                     Status = table.Column<int>(type: "INTEGER", nullable: false),
                     ErrorMessage = table.Column<string>(type: "TEXT", nullable: true),
                     RetryCount = table.Column<int>(type: "INTEGER", nullable: false),
-                    CreatedAt = table.Column<long>(type: "INTEGER", nullable: false),
                     UpdatedAt = table.Column<long>(type: "INTEGER", nullable: false),
+                    CreatedAt = table.Column<long>(type: "INTEGER", nullable: false),
                     IsDeleted = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Tasks", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserOperationLogs",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    UserId = table.Column<int>(type: "INTEGER", nullable: false),
+                    UserName = table.Column<string>(type: "TEXT", nullable: true),
+                    OperationType = table.Column<string>(type: "TEXT", nullable: true),
+                    ControllerName = table.Column<string>(type: "TEXT", nullable: true),
+                    ActionName = table.Column<string>(type: "TEXT", nullable: true),
+                    RoutePath = table.Column<string>(type: "TEXT", nullable: true),
+                    HttpMethod = table.Column<string>(type: "TEXT", nullable: true),
+                    IpAddress = table.Column<string>(type: "TEXT", nullable: true),
+                    UserAgent = table.Column<string>(type: "TEXT", nullable: true),
+                    RequestData = table.Column<string>(type: "TEXT", nullable: true),
+                    ResponseData = table.Column<string>(type: "TEXT", nullable: true),
+                    DurationMs = table.Column<long>(type: "INTEGER", nullable: false),
+                    IsSuccess = table.Column<bool>(type: "INTEGER", nullable: false),
+                    ErrorMessage = table.Column<string>(type: "TEXT", nullable: true),
+                    CreatedAt = table.Column<long>(type: "INTEGER", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserOperationLogs", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -56,7 +84,6 @@ namespace SharpDevFramework.Demo.Data.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     PasswordHash = table.Column<string>(type: "TEXT", nullable: false),
-                    CreatedAt = table.Column<long>(type: "INTEGER", nullable: false),
                     IsActive = table.Column<bool>(type: "INTEGER", nullable: false),
                     FailedLoginAttempts = table.Column<int>(type: "INTEGER", nullable: false),
                     LockoutUntil = table.Column<long>(type: "INTEGER", nullable: true),
@@ -64,6 +91,7 @@ namespace SharpDevFramework.Demo.Data.Migrations
                     LastLoginAt = table.Column<long>(type: "INTEGER", nullable: true),
                     LastLoginIp = table.Column<string>(type: "TEXT", nullable: true),
                     Role = table.Column<string>(type: "TEXT", nullable: false),
+                    CreatedAt = table.Column<long>(type: "INTEGER", nullable: false),
                     IsDeleted = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
@@ -80,6 +108,9 @@ namespace SharpDevFramework.Demo.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Tasks");
+
+            migrationBuilder.DropTable(
+                name: "UserOperationLogs");
 
             migrationBuilder.DropTable(
                 name: "Users");

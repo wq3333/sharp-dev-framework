@@ -2,12 +2,12 @@ import { api } from '../api.js';
 import { enums, getEnumName, getTaskStatusClass } from '../enums.js';
 import { onTaskUpdated } from '../signalr.js';
 import { formatDate } from '../utils.js';
-import { FButton, FMultiSelect, FTable, FModal, IconRefresh } from '../components/index.js';
+import { FButton, FMultiSelect, FTable, FModal, IconRefresh, IconTrash } from '../components/index.js';
 
 const { ref, onMounted, computed, watch } = Vue;
 
 export const TaskManagerView = {
-    components: { FButton, FMultiSelect, FTable, FModal, IconRefresh },
+    components: { FButton, FMultiSelect, FTable, FModal, IconRefresh, IconTrash },
     template: `
     <div class="h-full flex flex-col">
         <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between mb-4 gap-2">
@@ -15,8 +15,9 @@ export const TaskManagerView = {
                 <FMultiSelect v-model="statusFilter" :options="taskStateOptions" value-key="value" label-key="displayName" placeholder="全部状态" />
                 <FMultiSelect v-model="typeFilter" :options="taskTypeOptions" value-key="value" label-key="displayName" placeholder="全部类型" />
             </div>
-            <div class="grid grid-cols-1 gap-2">
+            <div class="grid grid-cols-2 gap-2">
                 <FButton @click="loadTasks" :loading="loading"><template #icon><IconRefresh :size="12" /></template>刷新</FButton>
+                <FButton type="danger" @click="cleanDb" :loading="cleaning"><template #icon><IconTrash :size="12" /></template>清理数据</FButton>
             </div>
         </div>
         <div class="flex-1 min-h-0 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded flex flex-col overflow-hidden">
@@ -64,6 +65,7 @@ export const TaskManagerView = {
         const statusFilter = ref([]);
         const typeFilter = ref([]);
         const loading = ref(false);
+        const cleaning = ref(false);
         const currentPage = ref(1);
         const pageSize = ref(10);
         const totalCount = ref(0);
@@ -94,15 +96,31 @@ export const TaskManagerView = {
         };
 
         const goToPage = ({ page, pageSize: newSize }) => { currentPage.value = page; pageSize.value = newSize; loadTasks(); };
-        const handleTaskUpdated = () => { loadTasks(); };
+        const handleTaskUpdated = (task) => {
+            loadTasks();
+        };
         const viewDetail = async (id) => { currentTask.value = await api.tasks.get(id); detailModalVisible.value = true; };
         const retryTask = async (id) => { await api.tasks.retry(id); await loadTasks(); };
         const cancelTask = async (id) => { if (confirm(`确定取消任务 #${id}？`)) { await api.tasks.cancel(id); await loadTasks(); } };
         const deleteTask = async (task) => { if (confirm(`确定删除任务 #${task.id}？`)) { await api.tasks.delete(task.id); await loadTasks(); } };
+        const cleanDb = async () => {
+            if (confirm('确定清理数据库过期数据？\n\n此操作将删除：\n- 30天前的操作日志\n- 90天前已完成/已取消的任务')) {
+                cleaning.value = true;
+                try {
+                    await api.tasks.cleandb();
+                    await loadTasks();
+                } finally {
+                    cleaning.value = false;
+                }
+            }
+        };
 
         watch([statusFilter, typeFilter], () => { currentPage.value = 1; loadTasks(); });
-        onMounted(async () => { await loadTasks(); onTaskUpdated(handleTaskUpdated); });
+        onMounted(async () => {
+            await loadTasks();
+            onTaskUpdated(handleTaskUpdated);
+        });
 
-        return { tasks, columns, statusFilter, typeFilter, taskStateOptions, taskTypeOptions, taskStatusClass: getTaskStatusClass, getEnumName, loadTasks, retryTask, cancelTask, deleteTask, formatDate, currentPage, pageSize, totalCount, pageCount, goToPage, loading, detailModalVisible, currentTask, viewDetail };
+        return { tasks, columns, statusFilter, typeFilter, taskStateOptions, taskTypeOptions, taskStatusClass: getTaskStatusClass, getEnumName, loadTasks, retryTask, cancelTask, deleteTask, cleanDb, formatDate, currentPage, pageSize, totalCount, pageCount, goToPage, loading, cleaning, detailModalVisible, currentTask, viewDetail };
     }
 };

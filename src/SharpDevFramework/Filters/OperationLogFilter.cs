@@ -14,15 +14,21 @@ public class OperationLogFilter(IServiceProvider serviceProvider) : IAsyncAction
     /// </summary>
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
+        if (context.HttpContext.Request.Method == HttpMethod.Get.Method)
+        {
+            await next();
+            return;
+        }
+
         var startTime = DateTime.Now;
         var httpContext = context.HttpContext;
         var userId = 0;
         var userName = string.Empty;
 
-        if (httpContext.Items["payload"] is Dictionary<string, object> payload)
+        if (httpContext.Items["payload"] is JwtPayload payload)
         {
-            _ = int.TryParse(payload.GetValueOrDefault("userId")?.ToString(), out userId);
-            userName = payload.GetValueOrDefault("userName")?.ToString() ?? string.Empty;
+            userId = payload.UserId;
+            userName = payload.Username;
         }
 
         var routePath = httpContext.Request.Path.Value ?? string.Empty;
@@ -31,6 +37,7 @@ public class OperationLogFilter(IServiceProvider serviceProvider) : IAsyncAction
         var actionName = context.ActionDescriptor.RouteValues["action"] ?? string.Empty;
         var ipAddress = httpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
         var userAgent = httpContext.Request.Headers.UserAgent.FirstOrDefault() ?? string.Empty;
+        var operationType = GetOperationType(httpMethod, actionName);
 
         var requestData = string.Empty;
         try
@@ -67,7 +74,6 @@ public class OperationLogFilter(IServiceProvider serviceProvider) : IAsyncAction
             responseData = "无法序列化响应数据";
         }
 
-        var operationType = GetOperationType(httpMethod, actionName);
 
         var logData = new UserOperationLogEntity
         {
