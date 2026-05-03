@@ -1,0 +1,128 @@
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.DependencyInjection;
+using System.Text.Json;
+
+namespace SharpDevFramework;
+
+/// <summary>
+/// 操作日志过滤器，记录用户操作并发布到后台任务
+/// </summary>
+public class OperationLogFilter(IServiceProvider serviceProvider) : IAsyncActionFilter
+{
+    /// <summary>
+    /// 执行过滤器逻辑
+    /// </summary>
+    public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+    {
+        var startTime = DateTime.Now;
+        var httpContext = context.HttpContext;
+        var userId = 0;
+        var userName = string.Empty;
+
+        if (httpContext.Items["payload"] is Dictionary<string, object> payload)
+        {
+            _ = int.TryParse(payload.GetValueOrDefault("userId")?.ToString(), out userId);
+            userName = payload.GetValueOrDefault("userName")?.ToString() ?? string.Empty;
+        }
+
+        var routePath = httpContext.Request.Path.Value ?? string.Empty;
+        var httpMethod = httpContext.Request.Method;
+        var controllerName = context.ActionDescriptor.RouteValues["controller"] ?? string.Empty;
+        var actionName = context.ActionDescriptor.RouteValues["action"] ?? string.Empty;
+        var ipAddress = httpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+        var userAgent = httpContext.Request.Headers.UserAgent.FirstOrDefault() ?? string.Empty;
+
+        var requestData = string.Empty;
+        try
+        {
+            if (context.ActionArguments.Count > 0)
+            {
+                requestData = JsonSerializer.Serialize(context.ActionArguments);
+            }
+        }
+        catch
+        {
+            requestData = "无法序列化请求参数";
+        }
+
+        var resultContext = await next();
+        var durationMs = (long)(DateTime.Now - startTime).TotalMilliseconds;
+
+        var responseData = string.Empty;
+        var isSuccess = !resultContext.ExceptionHandled && resultContext.Exception == null;
+        var errorMessage = resultContext.Exception?.Message ?? string.Empty;
+
+        try
+        {
+            if (resultContext.Result is Microsoft.AspNetCore.Mvc.ObjectResult objectResult)
+            {
+                if (objectResult.Value != null)
+                {
+                    responseData = JsonSerializer.Serialize(objectResult.Value);
+                }
+            }
+        }
+        catch
+        {
+            responseData = "无法序列化响应数据";
+        }
+
+        var operationType = GetOperationType(httpMethod, actionName);
+
+        var logData = new UserOperationLogEntity
+        {
+            UserId = userId,
+            UserName = userName,
+            OperationType = operationType,
+            ControllerName = controllerName,
+            ActionName = actionName,
+            RoutePath = routePath,
+            HttpMethod = httpMethod,
+            IpAddress = ipAddress,
+            UserAgent = userAgent,
+            RequestData = requestData,
+            ResponseData = responseData,
+            DurationMs = durationMs,
+            IsSuccess = isSuccess,
+            ErrorMessage = errorMessage
+        };
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                var scope = serviceProvider.CreateScope();
+                var dbContext = scope.ServiceProvider.GetRequiredService<FrameworkDbContext>();
+                var taskCenter = scope.ServiceProvider.GetRequiredService<TaskCenter>();
+
+                var taskEntity = new TaskEntity
+                {
+                    Type = FrameworkTaskTypes.OperationLogSave,
+                    Data = JsonSerializer.Serialize(logData),
+                    Status = TaskStates.Pending
+                };
+                dbContext.Tasks.Add(taskEntity);
+                await dbContext.SaveChangesAsync();
+                await taskCenter.PublishAsync(taskEntity.Id);
+            }
+            catch
+            {
+            }
+        });
+    }
+
+    /// <summary>
+    /// 根据HTTP方法和动作名称推断操作类型
+    /// </summary>
+    static string GetOperationType(string httpMethod, string actionName)
+    {
+        return httpMethod.ToUpper() switch
+        {
+            "POST" => "Create",
+            "PUT" => "Update",
+            "DELETE" => "Delete",
+            "GET" => "Query",
+            _ => actionName
+        };
+    }
+}

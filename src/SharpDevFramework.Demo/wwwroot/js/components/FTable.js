@@ -17,6 +17,38 @@ export const FTable = {
         pageCount: { type: Number, default: null }
     },
     emits: ['page-change'],
+    setup() {
+        const { ref, watch } = Vue;
+        const hasRendered = ref(false);
+        const prevDataLength = ref(0);
+
+        watch(() => this?.data?.length || 0, (newLen, oldLen) => {
+            if (newLen > 0 && oldLen === 0) {
+                hasRendered.value = false;
+                setTimeout(() => {
+                    hasRendered.value = true;
+                }, 10);
+            }
+            prevDataLength.value = oldLen || 0;
+        });
+
+        return { hasRendered };
+    },
+    data() {
+        return {
+            initialRender: true
+        };
+    },
+    watch: {
+        data: {
+            immediate: true,
+            handler(newVal) {
+                if (newVal?.length > 0 && this.initialRender) {
+                    this.initialRender = false;
+                }
+            }
+        }
+    },
     template: `
         <div class="flex flex-col flex-1 overflow-hidden min-h-0 text-nowrap">
             <div class="flex-1 overflow-auto min-h-0">
@@ -41,7 +73,9 @@ export const FTable = {
                     </tbody>
                     <tbody v-else>
                         <template v-if="data.length > 0">
-                            <tr v-for="(row, index) in data" :key="index" class="hover:bg-[var(--bg-hover)] cursor-pointer">
+                            <tr v-for="(row, index) in data" :key="index"
+                                :class="['hover:bg-[var(--bg-hover)] cursor-pointer', { 'table-row-enter': !initialRender }]"
+                                :style="!initialRender ? { animationDelay: (index * 50) + 'ms' } : {}">
                                 <td v-for="col in columns" :key="col.prop" class="px-4 py-3 text-[var(--text-primary)] border-b border-[var(--border-subtle)]">
                                     <slot v-if="$slots[col.prop]" :name="col.prop" :row="row" :index="index"></slot>
                                     <template v-else>{{ row[col.prop] }}</template>

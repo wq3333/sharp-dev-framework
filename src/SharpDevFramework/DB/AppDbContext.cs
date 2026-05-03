@@ -16,4 +16,9 @@ public abstract class FrameworkDbContext(DbContextOptions options) : DbContext(o
     /// 任务表
     /// </summary>
     public DbSet<TaskEntity> Tasks { get; set; }
+
+    /// <summary>
+    /// 用户操作日志表
+    /// </summary>
+    public DbSet<UserOperationLogEntity> UserOperationLogs { get; set; }
 }

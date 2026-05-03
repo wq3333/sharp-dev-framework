@@ -10,8 +10,8 @@ using SharpDevFramework.Demo.Data;
 namespace SharpDevFramework.Demo.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260502085103_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260503024726_AddUserOperationLogs")]
+    partial class AddUserOperationLogs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

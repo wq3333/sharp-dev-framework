@@ -155,6 +155,7 @@ public static class FrameworkExtensions
     {
         var useAuthFilter = builder.Configuration.GetValue<bool>("FrameworkSettings:Auth:IsEnabled");
         var useExceptionFilter = builder.Configuration.GetValue<bool>("FrameworkSettings:UseExceptionFilter");
+        var useOperationLogFilter = builder.Configuration.GetValue<bool>("FrameworkSettings:OperationLog:IsEnabled");
 
         builder.Services.AddControllers(options =>
         {
@@ -164,6 +165,7 @@ public static class FrameworkExtensions
                 options.Filters.Add<AuthFilter>();
             }
             if (useExceptionFilter) options.Filters.Add<ExceptionFilter>();
+            if (useOperationLogFilter) options.Filters.Add<OperationLogFilter>();
         });
         return builder;
     }

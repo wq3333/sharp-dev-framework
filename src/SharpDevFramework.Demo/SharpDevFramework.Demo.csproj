@@ -20,7 +20,11 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.7" />
-		<PackageReference Include="SharpDevFramework" Version="100.0.0.5" />
+		<!--<PackageReference Include="SharpDevFramework" Version="1.0.0.2" />-->
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\SharpDevFramework\SharpDevFramework.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
