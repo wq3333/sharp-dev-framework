@@ -16,7 +16,7 @@ export const OperationLogManagerView = {
                 <input type="date" v-model="startDateFilter" class="px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded text-sm text-[var(--text-primary)] outline-none focus:border-[var(--border-focus)]" />
                 <input type="date" v-model="endDateFilter" class="px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded text-sm text-[var(--text-primary)] outline-none focus:border-[var(--border-focus)]" />
             </div>
-            <div class="grid grid-cols-1 gap-2">
+            <div class="grid grid-cols-1 gap-2 md:flex">
                 <FButton @click="loadLogs" :loading="loading"><template #icon><IconRefresh :size="12" /></template>刷新</FButton>
             </div>
         </div>

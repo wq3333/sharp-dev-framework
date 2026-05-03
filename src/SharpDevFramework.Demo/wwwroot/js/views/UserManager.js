@@ -14,7 +14,7 @@ export const UserManagerView = {
                 <FInput v-model="nameFilter" placeholder="搜索名称" />
                 <FMultiSelect v-model="roleFilter" :options="roleOptions" value-key="value" label-key="displayName" placeholder="全部角色" />
             </div>
-            <div class="grid grid-cols-2 gap-2">
+            <div class="grid grid-cols-2 gap-2 md:flex">
                 <FButton @click="loadUsers" :loading="loading"><template #icon><IconRefresh :size="12" /></template>刷新</FButton>
                 <FButton type="success" @click="showCreateModal = true"><template #icon><IconPlus :size="12" /></template>新增</FButton>
             </div>

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Concurrent;
 using System.Text.Json;
 
 namespace SharpDevFramework;
@@ -10,6 +11,9 @@ namespace SharpDevFramework;
 public class OperationLogFilter(IServiceProvider serviceProvider) : IAsyncActionFilter
 {
     static readonly string[] _ignoredQueryPath = ["/api/tasks", "/api/useroperationlogs"];
+    static readonly BlockingCollection<UserOperationLogEntity> _cache = [];
+    static DateTime _lastWriteTime = DateTime.Now;
+    static readonly Lock _lock = new();
 
     /// <summary>
     /// 执行过滤器逻辑
@@ -94,6 +98,8 @@ public class OperationLogFilter(IServiceProvider serviceProvider) : IAsyncAction
             IsSuccess = isSuccess,
             ErrorMessage = errorMessage
         };
+        lock (_lock) _cache.Add(logData);
+        if ((DateTime.Now - _lastWriteTime) < TimeSpan.FromMinutes(2)) return;
 
         _ = Task.Run(async () =>
         {
@@ -101,8 +107,11 @@ public class OperationLogFilter(IServiceProvider serviceProvider) : IAsyncAction
             {
                 var scope = serviceProvider.CreateScope();
                 var dbContext = scope.ServiceProvider.GetRequiredService<FrameworkDbContext>();
-                dbContext.UserOperationLogs.Add(logData);
+                var data = _cache.GroupBy(x => new { x.RoutePath, x.HttpMethod, x.UserId, x.RequestData }).Select(x => x.OrderBy(y => y.CreatedAt).Last());
+                dbContext.UserOperationLogs.AddRange(data);
                 await dbContext.SaveChangesAsync();
+                lock (_lock) while (_cache.TryTake(out _)) { };
+                _lastWriteTime = DateTime.Now;
             }
             catch
             {

@@ -15,7 +15,7 @@ export const TaskManagerView = {
                 <FMultiSelect v-model="statusFilter" :options="taskStateOptions" value-key="value" label-key="displayName" placeholder="全部状态" />
                 <FMultiSelect v-model="typeFilter" :options="taskTypeOptions" value-key="value" label-key="displayName" placeholder="全部类型" />
             </div>
-            <div class="grid grid-cols-2 gap-2">
+            <div class="grid grid-cols-2 gap-2 md:flex">
                 <FButton @click="loadTasks" :loading="loading"><template #icon><IconRefresh :size="12" /></template>刷新</FButton>
                 <FButton v-if="isAdmin" type="danger" @click="cleanDb" :loading="cleaning"><template #icon><IconTrash :size="12" /></template>清理数据</FButton>
             </div>

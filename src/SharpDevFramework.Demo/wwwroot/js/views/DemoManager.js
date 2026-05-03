@@ -14,7 +14,7 @@ export const DemoManagerView = {
                 <FInput v-model="nameFilter" placeholder="搜索名称" />
                 <FMultiSelect v-model="typeFilter" :options="demoTypeOptions" value-key="value" label-key="displayName" placeholder="全部类型" />
             </div>
-            <div class="grid grid-cols-2 gap-2">
+            <div class="grid grid-cols-2 gap-2 md:flex">
                 <FButton type="primary" @click="openCreateModal"><template #icon><IconPlus :size="12" /></template>新建</FButton>
                 <FButton @click="loadDemos" :loading="loading"><template #icon><IconRefresh :size="12" /></template>刷新</FButton>
             </div>

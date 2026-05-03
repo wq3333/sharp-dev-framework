@@ -345,6 +345,7 @@ html,body,#app {
 .sidebar {
   width: 260px;
   transition: width 250ms cubic-bezier(0.4, 0, 0.2, 1), opacity 250ms cubic-bezier(0.4, 0, 0.2, 1), transform 200ms cubic-bezier(0, 0, 0.2, 1);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.04);
 }
 
 .sidebar--closed {
@@ -390,6 +391,11 @@ html,body,#app {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Header shadow */
+header {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 /* Mobile */

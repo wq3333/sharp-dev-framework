@@ -36,15 +36,19 @@ export const FTable = {
     },
     data() {
         return {
-            initialRender: true
+            initialRender: false
         };
     },
     watch: {
         data: {
             immediate: true,
             handler(newVal) {
-                if (newVal?.length > 0 && this.initialRender) {
+                if (newVal?.length > 0) {
                     this.initialRender = false;
+                    let timer = setTimeout(() => {
+                        this.initialRender = true;
+                        clearTimeout(timer);
+                    }, 1000);
                 }
             }
         }
@@ -78,7 +82,7 @@ export const FTable = {
                         <template v-if="data.length > 0">
                             <tr v-for="(row, index) in data" :key="index"
                                 :class="['hover:bg-[var(--bg-hover)] cursor-pointer', { 'table-row-enter': !initialRender }]"
-                                :style="!initialRender ? { animationDelay: (index * 50) + 'ms' } : {}">
+                                :style="!initialRender ? { animationDelay: (index * 20) + 'ms' } : {}">
                                 <td v-for="col in columns" :key="col.prop" class="px-4 py-3 text-[var(--text-primary)] border-b border-[var(--border-subtle)]"
                                     :class="col.align === 'end' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'">
                                     <slot v-if="$slots[col.prop]" :name="col.prop" :row="row" :index="index"></slot>
