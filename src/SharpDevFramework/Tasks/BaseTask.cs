@@ -6,7 +6,7 @@ namespace SharpDevFramework;
 /// <summary>
 /// 后台任务基类，继承此类实现具体任务逻辑
 /// </summary>
-public abstract class BaseTask
+public abstract class BaseTask:IScopedService
 {
     /// <summary>
     /// 服务提供器

@@ -3,7 +3,7 @@
 namespace SharpDevFramework.Demo.Tasks;
 
 [TaskRegister(nameof(TaskTypes.Demo))]
-public class DemoTask(IServiceProvider serviceProvider) : BaseTask(serviceProvider), IScopedService
+public class DemoTask(IServiceProvider serviceProvider) : BaseTask(serviceProvider)
 {
     protected override async Task ProcessAsync(int id, CancellationToken cancellationToken)
     {
