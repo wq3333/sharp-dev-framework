@@ -20,7 +20,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Content Include="content\**\*" Exclude="content\**\bin\**;content\**\obj\**;content\**\.vs\**" />
+		<Content Include="content/**/*" Exclude="content/**/bin/**;content/**/obj/**;content/**/.vs/**" />
 	</ItemGroup>
 
 </Project>
