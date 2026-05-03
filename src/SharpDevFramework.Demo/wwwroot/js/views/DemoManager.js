@@ -29,7 +29,7 @@ export const DemoManagerView = {
                 </template>
                 <template #createdAt="{ row }">{{ formatDate(row.createdAt) }}</template>
                 <template #actions="{ row }">
-                    <div class="flex gap-2">
+                    <div class="flex gap-2 justify-end">
                         <FButton size="sm" @click="openEditModal(row)">编辑</FButton>
                         <FButton type="danger" size="sm" @click="deleteDemo(row)" :loading="deletingId === row.id">删除</FButton>
                     </div>
@@ -66,7 +66,7 @@ export const DemoManagerView = {
             { prop: 'name', label: '名称' },
             { prop: 'type', label: '类型' },
             { prop: 'createdAt', label: '创建时间' },
-            { prop: 'actions', label: '操作', width: '150px' }
+            { prop: 'actions', label: '操作', width: '150px', align: 'end' }
         ];
 
         const modalVisible = ref(false);
@@ -111,14 +111,6 @@ export const DemoManagerView = {
         };
 
         onMounted(() => { loadDemos(); });
-
-        let debounceTimer = null;
-        watch([nameFilter, typeFilter], () => {
-            currentPage.value = 1;
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => loadDemos(), 300);
-        });
-
         return { demos, columns, nameFilter, typeFilter, demoTypeOptions, currentPage, totalCount, pageCount, pageSize, loading, saving, deletingId, modalVisible, isEditing, formData, loadDemos, goToPage, openCreateModal, openEditModal, saveDemo, deleteDemo, formatDate, getEnumName };
     }
 };

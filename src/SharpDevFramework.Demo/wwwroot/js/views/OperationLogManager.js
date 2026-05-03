@@ -1,28 +1,20 @@
 import { api } from '../api.js';
-import { FButton, FInput, FTable, IconRefresh, FModal } from '../components/index.js';
+import { FButton, FInput, FTable, IconRefresh, FModal, FMultiSelect, FSingleSelect } from '../components/index.js';
 import { formatDate, formatDuration } from '../utils.js';
 
-const { ref, onMounted, watch } = Vue;
+const { ref, onMounted, watch, computed } = Vue;
 
 export const OperationLogManagerView = {
-    components: { FButton, FInput, FTable, IconRefresh, FModal },
+    components: { FButton, FInput, FTable, IconRefresh, FModal, FMultiSelect, FSingleSelect },
     template: `
     <div class="h-full flex flex-col">
         <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between mb-4 gap-2">
-            <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 lg:grid-cols-6 gap-2">
+            <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
                 <FInput v-model="usernameFilter" placeholder="搜索用户名" />
-                <select v-model="operationTypeFilter" class="px-3 py-2 rounded border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-primary)] text-sm focus:outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]">
-                    <option value="">全部操作类型</option>
-                    <option value="Create">新增</option>
-                    <option value="Update">更新</option>
-                    <option value="Delete">删除</option>
-                    <option value="Query">查询</option>
-                </select>
-                <select v-model="isSuccessFilter" class="px-3 py-2 rounded border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-primary)] text-sm focus:outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]">
-                    <option value="">全部状态</option>
-                    <option value="true">成功</option>
-                    <option value="false">失败</option>
-                </select>
+                <FMultiSelect v-model="operationTypeFilter" :options="operationTypeOptions" value-key="value" label-key="label" placeholder="全部操作类型" />
+                <FSingleSelect v-model="isSuccessFilter" :options="isSuccessOptions" value-key="value" label-key="label" placeholder="全部状态" />
+                <input type="date" v-model="startDateFilter" class="px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded text-sm text-[var(--text-primary)] outline-none focus:border-[var(--border-focus)]" />
+                <input type="date" v-model="endDateFilter" class="px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded text-sm text-[var(--text-primary)] outline-none focus:border-[var(--border-focus)]" />
             </div>
             <div class="grid grid-cols-1 gap-2">
                 <FButton @click="loadLogs" :loading="loading"><template #icon><IconRefresh :size="12" /></template>刷新</FButton>
@@ -46,11 +38,11 @@ export const OperationLogManagerView = {
                 </template>
                 <template #createdAt="{ row }">{{ formatDate(row.createdAt) }}</template>
                 <template #actions="{ row }">
-                    <FButton size="sm" @click="showDetail(row)">查看</FButton>
+                    <FButton size="sm" @click="showDetail(row)">详情</FButton>
                 </template>
             </FTable>
         </div>
-        <FModal v-model="detailVisible" :title="'操作日志详情'" width="700px">
+        <FModal v-model="detailVisible" title="操作日志详情" width="700px">
             <div v-if="currentDetail" class="space-y-3">
                 <div class="grid grid-cols-2 gap-3">
                     <div><label class="block text-[12px] text-[var(--text-tertiary)] mb-1">日志ID</label><div class="text-sm">{{ currentDetail.id }}</div></div>
@@ -70,14 +62,25 @@ export const OperationLogManagerView = {
                 <div><label class="block text-[12px] text-[var(--text-tertiary)] mb-1">响应数据</label><pre class="text-xs bg-[var(--bg-hover)] p-2 rounded overflow-auto max-h-[100px]">{{ currentDetail.responseData || '-' }}</pre></div>
                 <div v-if="!currentDetail.isSuccess"><label class="block text-[12px] text-[var(--text-tertiary)] mb-1">错误信息</label><div class="text-sm text-[var(--danger)]">{{ currentDetail.errorMessage || '-' }}</div></div>
             </div>
+            <template #footer><FButton @click="detailVisible = false">关闭</FButton></template>
         </FModal>
     </div>
     `,
     setup() {
         const logs = ref([]);
         const usernameFilter = ref('');
-        const operationTypeFilter = ref('');
-        const isSuccessFilter = ref('');
+        const operationTypeFilter = ref([]);
+        const isSuccessFilter = ref(null);
+        const startDateFilter = ref('');
+        const endDateFilter = ref('');
+
+        const initDateFilters = () => {
+            const today = new Date();
+            const weekAgo = new Date();
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            endDateFilter.value = today.toISOString().split('T')[0];
+            startDateFilter.value = weekAgo.toISOString().split('T')[0];
+        };
         const currentPage = ref(1);
         const pageSize = ref(10);
         const totalCount = ref(0);
@@ -85,6 +88,19 @@ export const OperationLogManagerView = {
         const loading = ref(false);
         const detailVisible = ref(false);
         const currentDetail = ref(null);
+
+        const operationTypeOptions = computed(() => [
+            { value: 'Create', label: '新增' },
+            { value: 'Update', label: '更新' },
+            { value: 'Delete', label: '删除' },
+            { value: 'Query', label: '查询' }
+        ]);
+
+        const isSuccessOptions = [
+            { value: null, label: '全部' },
+            { value: true, label: '成功' },
+            { value: false, label: '失败' }
+        ];
 
         const columns = [
             { prop: 'id', label: 'ID', width: '60px' },
@@ -96,8 +112,20 @@ export const OperationLogManagerView = {
             { prop: 'durationMs', label: '耗时', width: '70px' },
             { prop: 'isSuccess', label: '状态', width: '70px' },
             { prop: 'createdAt', label: '时间', width: '150px' },
-            { prop: 'actions', label: '操作', width: '80px' }
+            { prop: 'actions', label: '操作', width: '80px', align: 'end' }
         ];
+
+        const getStartTimestamp = () => {
+            if (!startDateFilter.value) return null;
+            return new Date(startDateFilter.value).getTime();
+        };
+
+        const getEndTimestamp = () => {
+            if (!endDateFilter.value) return null;
+            const date = new Date(endDateFilter.value);
+            date.setHours(23, 59, 59, 999);
+            return date.getTime();
+        };
 
         const loadLogs = async () => {
             loading.value = true;
@@ -105,8 +133,8 @@ export const OperationLogManagerView = {
                 usernameFilter.value,
                 operationTypeFilter.value,
                 isSuccessFilter.value === '' ? null : isSuccessFilter.value,
-                null,
-                null,
+                getStartTimestamp(),
+                getEndTimestamp(),
                 currentPage.value,
                 pageSize.value
             );
@@ -122,9 +150,14 @@ export const OperationLogManagerView = {
             loadLogs();
         };
 
-        const showDetail = (row) => {
-            currentDetail.value = row;
-            detailVisible.value = true;
+        const showDetail = async (row) => {
+            loading.value = true;
+            try {
+                currentDetail.value = await api.logs.get(row.id);
+                detailVisible.value = true;
+            } finally {
+                loading.value = false;
+            }
         };
 
         const getOperationTypeLabel = (type) => {
@@ -142,15 +175,7 @@ export const OperationLogManagerView = {
             return classes[type] || '';
         };
 
-        onMounted(() => { loadLogs(); });
-
-        let debounceTimer = null;
-        watch([usernameFilter, operationTypeFilter, isSuccessFilter], () => {
-            currentPage.value = 1;
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => loadLogs(), 300);
-        });
-
-        return { logs, columns, usernameFilter, operationTypeFilter, isSuccessFilter, currentPage, pageSize, totalCount, pageCount, loading, loadLogs, goToPage, formatDate, formatDuration, showDetail, detailVisible, currentDetail, getOperationTypeLabel, getOperationTypeClass };
+        onMounted(() => { initDateFilters(); loadLogs(); });
+        return { logs, columns, usernameFilter, operationTypeFilter, isSuccessFilter, isSuccessOptions, startDateFilter, endDateFilter, operationTypeOptions, currentPage, pageSize, totalCount, pageCount, loading, loadLogs, goToPage, formatDate, formatDuration, showDetail, detailVisible, currentDetail, getOperationTypeLabel, getOperationTypeClass };
     }
 };

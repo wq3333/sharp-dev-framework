@@ -1,5 +1,3 @@
-using SharpDevLib;
-
 namespace SharpDevFramework.Demo.Data.Entities;
 
 public class DemoEntity : BaseEntity

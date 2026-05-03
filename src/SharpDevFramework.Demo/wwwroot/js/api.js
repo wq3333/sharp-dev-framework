@@ -145,15 +145,15 @@ export const api = {
     },
 
     logs: {
-        page: async (username, operationType, isSuccess, startTimestamp, endTimestamp, page = 1, size = 20, onerror = null) => {
+        page: async (username, operationType, isSuccess, startTime, endTime, page = 1, size = 20, onerror = null) => {
             const params = { index: page, size };
             if (username) params.username = username;
             if (operationType && operationType.length > 0) {
                 params.operationType = Array.isArray(operationType) ? operationType.join(',') : operationType;
             }
             if (isSuccess !== null && isSuccess !== undefined && isSuccess !== '') params.isSuccess = isSuccess;
-            if (startTimestamp) params.startTimestamp = startTimestamp;
-            if (endTimestamp) params.endTimestamp = endTimestamp;
+            if (startTime) params.startTime = startTime;
+            if (endTime) params.endTime = endTime;
             return await request('GET', '/useroperationlogs', null, params, onerror);
         },
         get: async (id, onerror = null) => {

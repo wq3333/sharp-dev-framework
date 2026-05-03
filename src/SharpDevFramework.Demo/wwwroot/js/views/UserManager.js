@@ -33,7 +33,7 @@ export const UserManagerView = {
                 </template>
                 <template #createdAt="{ row }">{{ formatDate(row.createdAt) }}</template>
                 <template #actions="{ row }">
-                    <div class="flex gap-2">
+                    <div class="flex gap-2 justify-end">
                         <FButton size="sm" @click="editUser(row)">编辑</FButton>
                         <FButton type="danger" size="sm" @click="deleteUser(row)" v-if="row.id !== currentUserId">删除</FButton>
                     </div>
@@ -74,7 +74,7 @@ export const UserManagerView = {
             { prop: 'role', label: '角色' },
             { prop: 'status', label: '状态' },
             { prop: 'createdAt', label: '创建时间' },
-            { prop: 'actions', label: '操作' }
+            { prop: 'actions', label: '操作', align: 'end' }
         ];
 
         const showModal = computed({ get: () => showCreateModal.value || showEditModal.value, set: (val) => { if (!val) closeModal(); } });
@@ -117,14 +117,6 @@ export const UserManagerView = {
         };
 
         onMounted(async () => { if (!isAdmin.value) { window.location.hash = '#/tasks'; return; } await loadUsers(); });
-
-        let debounceTimer = null;
-        watch([nameFilter, roleFilter], () => {
-            currentPage.value = 1;
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => loadUsers(), 300);
-        });
-
         return { users, columns, currentUserId, nameFilter, roleFilter, showCreateModal, showEditModal, showModal, form, roleOptions, editUser, saveUser, deleteUser, closeModal, getEnumName, currentPage, pageSize, totalCount, pageCount, goToPage, formatDate, loading, loadUsers };
     }
 };

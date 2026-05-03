@@ -21,14 +21,6 @@ export function initSignalR() {
         fireEvent('TaskUpdated', notification);
     });
 
-    connection.on('DownloadUpdated', (notification) => {
-        fireEvent('DownloadUpdated', notification);
-    });
-
-    connection.on('FileUploaded', (notification) => {
-        fireEvent('FileUploaded', notification);
-    });
-
     connection.onclose(() => {
         console.log('SignalR disconnected');
     });
@@ -49,14 +41,6 @@ export function stopSignalR() {
 
 export function onTaskUpdated(handler) {
     on('TaskUpdated', handler);
-}
-
-export function onDownloadUpdated(handler) {
-    on('DownloadUpdated', handler);
-}
-
-export function onFileUploaded(handler) {
-    on('FileUploaded', handler);
 }
 
 function on(event, handler) {

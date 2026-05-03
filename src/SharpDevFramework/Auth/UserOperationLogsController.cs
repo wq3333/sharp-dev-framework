@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SharpDevLib;
@@ -10,69 +9,40 @@ namespace SharpDevFramework;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
 public class UserOperationLogsController(FrameworkDbContext dbContext) : ControllerBase
 {
+    void CheckAdmin()
+    {
+        if (!HttpContext.GetJwtPayload().Role.SplitToList().Any(x => x == UserRoleTypes.Admin)) throw new UnauthorizedAccessException("没有权限执行此操作");
+    }
+
     /// <summary>
     /// 分页查询操作日志
     /// </summary>
-    /// <param name="username">用户名（模糊搜索）</param>
-    /// <param name="operationType">操作类型（多个用逗号分隔）</param>
-    /// <param name="isSuccess">是否成功（true/false）</param>
-    /// <param name="startTimestamp">开始时间戳</param>
-    /// <param name="endTimestamp">结束时间戳</param>
-    /// <param name="index">页码（从1开始）</param>
-    /// <param name="size">每页数量</param>
+    /// <param name="request">分页request</param>
     /// <returns></returns>
     [HttpGet]
-    public async Task<PageReply<UserOperationLogEntity>> Page(
-        [FromQuery] string? username = null,
-        [FromQuery] string? operationType = null,
-        [FromQuery] bool? isSuccess = null,
-        [FromQuery] long? startTimestamp = null,
-        [FromQuery] long? endTimestamp = null,
-        [FromQuery] int index = 1,
-        [FromQuery] int size = 20)
+    public async Task<PageReply<UserOperationLogEntity>> Page([FromQuery] PageUserOperationLogRequest request)
     {
+        CheckAdmin();
         var query = dbContext.UserOperationLogs.AsQueryable();
 
-        if (!string.IsNullOrWhiteSpace(username))
+        if (request.Username.NotNullOrWhiteSpace()) query = query.Where(x => x.UserName != null && x.UserName.Contains(request.Username));
+        if (request.OperationType.NotNullOrWhiteSpace())
         {
-            query = query.Where(x => x.UserName != null && x.UserName.Contains(username));
+            var types = request.OperationType.SplitToList();
+            query = query.Where(x => x.OperationType != null && types.Contains(x.OperationType));
         }
-
-        if (!string.IsNullOrWhiteSpace(operationType))
-        {
-            var types = operationType.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim()).ToList();
-            if (types.Count > 0)
-            {
-                query = query.Where(x => x.OperationType != null && types.Contains(x.OperationType));
-            }
-        }
-
-        if (isSuccess.HasValue)
-        {
-            query = query.Where(x => x.IsSuccess == isSuccess.Value);
-        }
-
-        if (startTimestamp.HasValue)
-        {
-            query = query.Where(x => x.CreatedAt >= startTimestamp.Value);
-        }
-
-        if (endTimestamp.HasValue)
-        {
-            query = query.Where(x => x.CreatedAt <= endTimestamp.Value);
-        }
-
+        if (request.IsSuccess.HasValue) query = query.Where(x => x.IsSuccess == request.IsSuccess.Value);
+        if (request.StartTime.HasValue) query = query.Where(x => x.CreatedAt >= request.StartTime.Value);
+        if (request.EndTime.HasValue) query = query.Where(x => x.CreatedAt <= request.EndTime.Value);
         var total = await query.CountAsync();
         var data = await query
             .OrderByDescending(x => x.CreatedAt)
-            .Skip((index - 1) * size)
-            .Take(size)
+            .Skip((request.Index - 1) * request.Size)
+            .Take(request.Size)
             .ToListAsync();
-
-        return PageReply.Succeed(data, total, index, size);
+        return PageReply.Succeed(data, total, request);
     }
 
     /// <summary>
@@ -83,8 +53,35 @@ public class UserOperationLogsController(FrameworkDbContext dbContext) : Control
     [HttpGet("{id}")]
     public async Task<DataReply<UserOperationLogEntity>> Get(int id)
     {
+        CheckAdmin();
         var log = await dbContext.UserOperationLogs.FindAsync(id);
-        if (log == null) throw new Exception("日志不存在");
-        return DataReply.Succeed(log);
+        return log == null ? throw new Exception("日志不存在") : DataReply.Succeed(log);
     }
+}
+
+/// <summary>
+/// 分页查询用户操作记录Request
+/// </summary>
+public class PageUserOperationLogRequest : PageRequest
+{
+    /// <summary>
+    /// 用户名
+    /// </summary>
+    public string? Username { get; set; }
+    /// <summary>
+    /// 操作类型,逗号分隔
+    /// </summary>
+    public string? OperationType { get; set; }
+    /// <summary>
+    /// 是否成功
+    /// </summary>
+    public bool? IsSuccess { get; set; }
+    /// <summary>
+    /// 开始时间
+    /// </summary>
+    public long? StartTime { get; set; }
+    /// <summary>
+    /// 结束时间
+    /// </summary>
+    public long? EndTime { get; set; }
 }

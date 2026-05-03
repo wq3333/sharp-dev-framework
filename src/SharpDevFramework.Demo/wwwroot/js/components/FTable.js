@@ -56,7 +56,10 @@ export const FTable = {
                     <thead v-if="!loading && data.length > 0">
                         <tr>
                             <th v-for="col in columns" :key="col.prop" :style="col.width ? {width: col.width} : {}"
-                                class="text-left px-4 py-3 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide border-b border-[var(--border-subtle)] bg-[var(--bg-surface)] whitespace-nowrap sticky top-0 z-[1]">
+                                :class="[
+                                    'px-4 py-3 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide border-b border-[var(--border-subtle)] bg-[var(--bg-surface)] whitespace-nowrap sticky top-0 z-[1]',
+                                    col.align === 'end' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'
+                                ]">
                                 {{ col.label }}
                             </th>
                         </tr>
@@ -76,7 +79,8 @@ export const FTable = {
                             <tr v-for="(row, index) in data" :key="index"
                                 :class="['hover:bg-[var(--bg-hover)] cursor-pointer', { 'table-row-enter': !initialRender }]"
                                 :style="!initialRender ? { animationDelay: (index * 50) + 'ms' } : {}">
-                                <td v-for="col in columns" :key="col.prop" class="px-4 py-3 text-[var(--text-primary)] border-b border-[var(--border-subtle)]">
+                                <td v-for="col in columns" :key="col.prop" class="px-4 py-3 text-[var(--text-primary)] border-b border-[var(--border-subtle)]"
+                                    :class="col.align === 'end' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'">
                                     <slot v-if="$slots[col.prop]" :name="col.prop" :row="row" :index="index"></slot>
                                     <template v-else>{{ row[col.prop] }}</template>
                                 </td>

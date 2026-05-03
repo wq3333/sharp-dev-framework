@@ -8,7 +8,7 @@ namespace SharpDevFramework;
 public abstract class BaseEntity
 {
     /// <summary>
-    /// 任务 ID
+    /// ID
     /// </summary>
     public int Id { get; set; }
 

@@ -17,7 +17,7 @@ export const TaskManagerView = {
             </div>
             <div class="grid grid-cols-2 gap-2">
                 <FButton @click="loadTasks" :loading="loading"><template #icon><IconRefresh :size="12" /></template>刷新</FButton>
-                <FButton type="danger" @click="cleanDb" :loading="cleaning"><template #icon><IconTrash :size="12" /></template>清理数据</FButton>
+                <FButton v-if="isAdmin" type="danger" @click="cleanDb" :loading="cleaning"><template #icon><IconTrash :size="12" /></template>清理数据</FButton>
             </div>
         </div>
         <div class="flex-1 min-h-0 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded flex flex-col overflow-hidden">
@@ -34,11 +34,11 @@ export const TaskManagerView = {
                 <template #createdAt="{ row }">{{ formatDate(row.createdAt) }}</template>
                 <template #updatedAt="{ row }">{{ row.updatedAt ? formatDate(row.updatedAt) : '-' }}</template>
                 <template #actions="{ row }">
-                    <div class="flex gap-2">
+                    <div class="flex gap-2 justify-end">
                         <FButton size="sm" @click="viewDetail(row.id)">详情</FButton>
                         <FButton v-if="row.status === 1" type="warning" size="sm" @click="cancelTask(row.id)">取消</FButton>
                         <FButton v-if="row.status === 3 || row.status === 4" type="success" size="sm" @click="retryTask(row.id)">重试</FButton>
-                        <FButton v-if="row.status !== 1" type="danger" size="sm" @click="deleteTask(row)">删除</FButton>
+                        <FButton v-if="isAdmin && row.status !== 1" type="danger" size="sm" @click="deleteTask(row)">删除</FButton>
                     </div>
                 </template>
             </FTable>
@@ -70,6 +70,7 @@ export const TaskManagerView = {
         const pageSize = ref(10);
         const totalCount = ref(0);
         const pageCount = ref(0);
+        const isAdmin = computed(() => localStorage.getItem('role').split(',').filter(x => x === 'Admin').length > 0);
 
         const detailModalVisible = ref(false);
         const currentTask = ref(null);
@@ -80,7 +81,7 @@ export const TaskManagerView = {
             { prop: 'status', label: '状态' },
             { prop: 'createdAt', label: '创建时间' },
             { prop: 'updatedAt', label: '更新时间' },
-            { prop: 'actions', label: '操作' }
+            { prop: 'actions', label: '操作', align: 'end' }
         ];
 
         const taskStateOptions = computed(() => enums.taskStates || []);
@@ -97,7 +98,10 @@ export const TaskManagerView = {
 
         const goToPage = ({ page, pageSize: newSize }) => { currentPage.value = page; pageSize.value = newSize; loadTasks(); };
         const handleTaskUpdated = (task) => {
-            loadTasks();
+            const index = tasks.value.findIndex(t => t.id === task.id);
+            if (index !== -1) {
+                tasks.value[index] = { ...tasks.value[index], ...task };
+            }
         };
         const viewDetail = async (id) => { currentTask.value = await api.tasks.get(id); detailModalVisible.value = true; };
         const retryTask = async (id) => { await api.tasks.retry(id); await loadTasks(); };
@@ -115,12 +119,11 @@ export const TaskManagerView = {
             }
         };
 
-        watch([statusFilter, typeFilter], () => { currentPage.value = 1; loadTasks(); });
         onMounted(async () => {
             await loadTasks();
             onTaskUpdated(handleTaskUpdated);
         });
 
-        return { tasks, columns, statusFilter, typeFilter, taskStateOptions, taskTypeOptions, taskStatusClass: getTaskStatusClass, getEnumName, loadTasks, retryTask, cancelTask, deleteTask, cleanDb, formatDate, currentPage, pageSize, totalCount, pageCount, goToPage, loading, cleaning, detailModalVisible, currentTask, viewDetail };
+        return { tasks, columns, statusFilter, typeFilter, taskStateOptions, taskTypeOptions, taskStatusClass: getTaskStatusClass, getEnumName, loadTasks, retryTask, cancelTask, deleteTask, cleanDb, formatDate, currentPage, pageSize, totalCount, pageCount, goToPage, loading, cleaning, isAdmin, detailModalVisible, currentTask, viewDetail };
     }
 };

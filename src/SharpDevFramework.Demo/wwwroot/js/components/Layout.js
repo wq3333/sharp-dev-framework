@@ -49,7 +49,7 @@ export const LayoutComponent = {
                     <span class="sidebar-nav-icon sidebar-nav-icon--demos"><IconDemos /></span>
                     <span class="whitespace-nowrap">Demo管理</span>
                 </router-link>
-                <router-link to="/logs" class="sidebar-nav-item"
+                <router-link v-if="isAdmin" to="/logs" class="sidebar-nav-item"
                     :class="{ 'sidebar-nav-item--active': $route.path === '/logs' }"
                     @click="onNavClick">
                     <span class="sidebar-nav-icon sidebar-nav-icon--logs"><IconLogs /></span>

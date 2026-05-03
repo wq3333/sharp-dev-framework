@@ -9,12 +9,14 @@ namespace SharpDevFramework;
 /// </summary>
 public class OperationLogFilter(IServiceProvider serviceProvider) : IAsyncActionFilter
 {
+    static readonly string[] _ignoredQueryPath = ["/api/tasks", "/api/useroperationlogs"];
+
     /// <summary>
     /// 执行过滤器逻辑
     /// </summary>
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
-        if (context.HttpContext.Request.Method == HttpMethod.Get.Method)
+        if (context.HttpContext.Request.Method == "GET" && _ignoredQueryPath.Contains(context.HttpContext.Request.Path.Value ?? string.Empty))
         {
             await next();
             return;
@@ -99,17 +101,8 @@ public class OperationLogFilter(IServiceProvider serviceProvider) : IAsyncAction
             {
                 var scope = serviceProvider.CreateScope();
                 var dbContext = scope.ServiceProvider.GetRequiredService<FrameworkDbContext>();
-                var taskCenter = scope.ServiceProvider.GetRequiredService<TaskCenter>();
-
-                var taskEntity = new TaskEntity
-                {
-                    Type = FrameworkTaskTypes.OperationLogSave,
-                    Data = JsonSerializer.Serialize(logData),
-                    Status = TaskStates.Pending
-                };
-                dbContext.Tasks.Add(taskEntity);
+                dbContext.UserOperationLogs.Add(logData);
                 await dbContext.SaveChangesAsync();
-                await taskCenter.PublishAsync(taskEntity.Id);
             }
             catch
             {
