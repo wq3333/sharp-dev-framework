@@ -6,6 +6,7 @@
 		<TargetFramework>net10.0</TargetFramework>
 		<IncludeContentInPack>true</IncludeContentInPack>
 		<IncludeBuildOutput>false</IncludeBuildOutput>
+		<SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
 		<ContentTargetFolders>content</ContentTargetFolders>
 		<Authors>yibei333</Authors>
 		<Description>SharpDevFramework 项目模板 - 基于 .NET 10.0 的全栈 Web 开发框架</Description>
@@ -17,7 +18,12 @@
 		<Version>1.0.0</Version>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<NoDefaultExcludes>true</NoDefaultExcludes>
+		<PackageReadmeFile>nuget.md</PackageReadmeFile>
 	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="nuget.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<Content Include="content\**\*" Exclude="content\**\bin\**;content\**\obj\**;content\**\.vs\**" />
