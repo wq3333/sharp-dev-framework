@@ -40,7 +40,7 @@ jobs:
         $localVersion = "${{ steps.GetVersionFromCsproj.outputs.local_version }}"
         $csproj = "templates/SharpDevFramework.Template/SharpDevFramework.Template.csproj"
         [xml]$xml = Get-Content $csproj
-        $node = $xml.Project.PropertyGroup.Version
+        $node = $xml.SelectSingleNode('//Version')
         $node.InnerText = $localVersion
         $xml.Save((Resolve-Path $csproj).Path)
         echo "Synced template version to $localVersion"
