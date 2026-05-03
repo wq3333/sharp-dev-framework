@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "yibei333",
+  "classifications": ["Web", "Framework", "SharpDevFramework"],
+  "identity": "SharpDevFramework.Template",
+  "name": "SharpDevFramework App",
+  "shortName": "sharpdev",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "SharpDevFramework.Demo",
+  "sources": [
+    {
+      "modifiers": [
+        {
+          "exclude": [
+            "**/bin/**",
+            "**/obj/**",
+            "**/*.csproj.user",
+            "**/Migrations/**"
+          ]
+        }
+      ]
+    }
+  ],
+  "symbols": {
+    "serviceName": {
+      "type": "parameter",
+      "datatype": "string",
+      "description": "Windows 服务名称",
+      "defaultValue": "myapp",
+      "replaces": "demo-service-name"
+    }
+  },
+  "primaryOutputs": [
+    {
+      "path": "SharpDevFramework.Demo.csproj"
+    }
+  ],
+  "postActions": [
+    {
+      "id": "restore",
+      "condition": "(!skipRestore)",
+      "description": "还原 NuGet 包",
+      "manualInstructions": [
+        {
+          "text": "运行 'dotnet restore'"
+        }
+      ],
+      "actionId": "210D431B-A78B-4D2F-B762-4ED3E3EA9025",
+      "continueOnError": true
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+		<SatelliteResourceLanguages>zh-CN</SatelliteResourceLanguages>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
+		<PublishIISAssets>false</PublishIISAssets>
+		<IsWebConfigTransformDisabled>true</IsWebConfigTransformDisabled>
+		<DebugType>none</DebugType>
+		<DebugSymbols>false</DebugSymbols>
+		<SatelliteResourceLanguages>zh-CN</SatelliteResourceLanguages>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.7" />
+		<PackageReference Include="SharpDevFramework" Version="1.0.0.4" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="install.bat">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
+</Project>
