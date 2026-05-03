@@ -1,0 +1,15 @@
+<Project>
+  <Target Name="CopyFrameworkJsonToRoot" BeforeTargets="Build">
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)framework.json" 
+          DestinationFolder="$(MSBuildProjectDirectory)" 
+          Condition="!Exists('$(MSBuildProjectDirectory)/framework.json')" />
+  </Target>
+  <Target Name="AddFrameworkJsonToProject" AfterTargets="Build" DependsOnTargets="CopyFrameworkJsonToRoot">
+    <ItemGroup>
+      <Content Include="$(MSBuildProjectDirectory)/framework.json" Condition="Exists('$(MSBuildProjectDirectory)/framework.json')">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <Visible>true</Visible>
+      </Content>
+    </ItemGroup>
+  </Target>
+</Project>

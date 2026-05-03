@@ -1,0 +1,69 @@
+{
+  "Serilog": {
+    "IsEnabled": true,
+    "Using": [ "Serilog.Sinks.Console", "Serilog.Sinks.File" ],
+    "MinimumLevel": {
+      "Default": "Information",
+      "Override": {
+        "Microsoft.EntityFrameworkCore.Database.Command": "Warning",
+        "Microsoft.AspNetCore.Hosting.Diagnostics": "Warning",
+        "Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware": "Warning",
+        "Microsoft.AspNetCore.Routing.EndpointMiddleware": "Warning",
+        "Microsoft.AspNetCore.Mvc.Infrastructure.ObjectResultExecutor": "Warning",
+        "Microsoft.AspNetCore.Cors.Infrastructure.CorsService": "Warning",
+        "Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker": "Warning",
+        "Microsoft.AspNetCore.Authorization.DefaultAuthorizationService": "Warning",
+        "Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerHandler": "Warning"
+      }
+    },
+    "Enrich": [ "FromLogContext" ],
+    "WriteTo": [
+      {
+        "Name": "File",
+        "Args": {
+          "path": "logs.log",
+          "rollOnFileSizeLimit": true,
+          "fileSizeLimitBytes": 2097152,
+          "rollingInterval": "Day",
+          "retainedFileCountLimit": 30,
+          "outputTemplate": "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}"
+        }
+      },
+      {
+        "Name": "Console",
+        "Args": {
+          "outputTemplate": "{Timestamp:HH:mm:ss} [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}"
+        }
+      }
+    ]
+  },
+  "FrameworkSettings": {
+    "UseExceptionFilter": true,
+    "UseWindowsService": true,
+    "UseSignalR": true,
+    "HubUrl": "/hubs/notifications",
+    "RequestSizeLimit": 10737418240,
+    "JwtExpirationMinutes": 120,
+    "Cors": {
+      "IsEnabled": true,
+      "PolicyName": "DefaultCorsPolicy",
+      "Origins": [ "http://127.0.0.1:*", "http://localhost:*" ],
+      "Methods": [ "GET", "POST", "PUT", "DELETE" ],
+      "Headers": [],
+      "AllowCredentials": true,
+      "ExposedHeaders": [],
+      "MaxAgeSeconds": 3600
+    },
+    "Tasks": {
+      "IsEnabled": true,
+      "MaxRetryCount": 3,
+      "MaxProcessCount": 5
+    },
+    "Auth": {
+      "IsEnabled": true,
+      "LockMinutes": 30,
+      "MaxFailedCount": 10,
+      "FailedMinutes": 10
+    }
+  }
+}

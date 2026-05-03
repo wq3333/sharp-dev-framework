@@ -45,10 +45,14 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Update="framework.json">
+	  <None Include="build\SharpDevFramework.targets">
+	    <Pack>True</Pack>
+	    <PackagePath>build</PackagePath>
+	  </None>
+	  <None Include="build\framework.json">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	    <Pack>True</Pack>
-	    <PackagePath>contentFiles\any\any</PackagePath>
+	    <PackagePath>build</PackagePath>
 	  </None>
 	</ItemGroup>
 
