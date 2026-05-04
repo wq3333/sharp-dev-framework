@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -10,7 +9,7 @@ namespace SharpDevFramework;
 /// <summary>
 /// 全局异常过滤器，统一处理未捕获的异常
 /// </summary>
-public class ExceptionFilter(IWebHostEnvironment env) : IExceptionFilter
+public class ExceptionFilter : IExceptionFilter
 {
     /// <summary>
     /// 异常处理逻辑
