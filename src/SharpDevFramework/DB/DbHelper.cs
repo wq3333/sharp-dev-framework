@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-namespace SharpDevFramework.DB;
+namespace SharpDevFramework;
 
 /// <summary>
 /// 数据库操作辅助类

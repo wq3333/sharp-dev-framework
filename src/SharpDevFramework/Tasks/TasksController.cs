@@ -1,6 +1,5 @@
 using Mapster;
 using Microsoft.AspNetCore.Mvc;
-using SharpDevFramework.DB;
 using SharpDevLib;
 
 namespace SharpDevFramework;
