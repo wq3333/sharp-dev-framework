@@ -85,23 +85,17 @@ app.component('FMultiSelect', FMultiSelect);
 setStopSignalR(stopSignalR);
 
 router.beforeEach(async (to, from, next) => {
-    const hasToken = localStorage.getItem('token');
     const tokenValid = isTokenValid();
 
-    if (hasToken && !tokenValid) {
-        clearAuth();
+    if (!tokenValid) {
         clearPageCache();
-        next('/login');
-        return;
-    }
-
-    if (to.path !== '/login' && !tokenValid) {
-        clearPageCache();
-        next('/login');
-    } else if (to.path === '/login' && tokenValid) {
-        next('/tasks');
+        if (to.path !== '/login') {
+            next('/login');
+        } else {
+            next();
+        }
     } else {
-        if (!window._enumsLoaded && tokenValid) {
+        if (!window._enumsLoaded) {
             await loadEnums();
             window._enumsLoaded = true;
         }

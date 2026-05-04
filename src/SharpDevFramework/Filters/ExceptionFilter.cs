@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SharpDevLib;
 
@@ -24,21 +23,13 @@ public class ExceptionFilter(IWebHostEnvironment env) : IExceptionFilter
 
         if (context.Exception is UnauthorizedAccessException)
         {
-            // 权限异常返回 403
             context.HttpContext.Response.StatusCode = 403;
-            var errorMessage = env.IsDevelopment()
-                ? context.Exception?.InnerException?.Message ?? context.Exception?.Message
-                : "服务器处理请求时发生错误";
-            context.Result = new JsonResult(EmptyReply.Failed(errorMessage));
+            context.Result = new JsonResult(EmptyReply.Failed(context.Exception?.InnerException?.Message ?? context.Exception?.Message));
         }
         else
         {
-            // 其他异常返回 500
             context.HttpContext.Response.StatusCode = 500;
-            var errorMessage = env.IsDevelopment()
-                ? context.Exception?.InnerException?.Message ?? context.Exception?.Message
-                : "服务器处理请求时发生错误";
-            context.Result = new JsonResult(EmptyReply.Failed(errorMessage));
+            context.Result = new JsonResult(EmptyReply.Failed(context.Exception?.InnerException?.Message ?? context.Exception?.Message));
         }
     }
 }
