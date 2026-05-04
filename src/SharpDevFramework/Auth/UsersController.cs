@@ -15,15 +15,6 @@ namespace SharpDevFramework;
 public class UsersController(FrameworkDbContext context, TokenService tokenService, IConfiguration configuration) : ControllerBase
 {
     /// <summary>
-    /// 检查是否为管理员
-    /// </summary>
-    /// <exception cref="UnauthorizedAccessException">非管理员时抛出异常</exception>
-    void CheckAdmin()
-    {
-        if (!HttpContext.GetJwtPayload().Role.SplitToList().Any(x => x == UserRoleTypes.Admin)) throw new UnauthorizedAccessException("没有权限执行此操作");
-    }
-
-    /// <summary>
     /// 用户登录
     /// </summary>
     /// <param name="request">登录请求（用户名、密码）</param>
@@ -98,9 +89,9 @@ public class UsersController(FrameworkDbContext context, TokenService tokenServi
     /// <param name="request">查询参数</param>
     /// <returns>用户分页列表</returns>
     [HttpGet]
+    [Role([UserRoleTypes.Admin])]
     public PageReply<UserDto> GetPage([FromQuery] UserPageRequest request)
     {
-        CheckAdmin();
         var query = context.Users.Where(x => !x.IsDeleted);
         if (request.Name.NotNullOrWhiteSpace()) query = query.Where(x => x.Name!.Contains(request.Name));
         if (request.Role.NotNullOrWhiteSpace())
@@ -120,9 +111,9 @@ public class UsersController(FrameworkDbContext context, TokenService tokenServi
     /// <param name="id">用户 ID</param>
     /// <returns>用户详情</returns>
     [HttpGet("{id}")]
+    [Role([UserRoleTypes.Admin])]
     public DataReply<UserDto> Get(int id)
     {
-        CheckAdmin();
         var user = context.Users.Find(id) ?? throw new Exception("User not found");
         return DataReply.Succeed(user.Adapt<UserDto>());
     }
@@ -133,9 +124,9 @@ public class UsersController(FrameworkDbContext context, TokenService tokenServi
     /// <param name="request">创建用户请求</param>
     /// <returns>操作结果</returns>
     [HttpPost]
+    [Role([UserRoleTypes.Admin])]
     public EmptyReply Create([FromBody] CreateUserRequest request)
     {
-        CheckAdmin();
         if (request.Name.IsNullOrWhiteSpace()) throw new Exception("用户名不能为空");
         if (request.Password.IsNullOrWhiteSpace()) throw new Exception("密码不能为空");
         if (request.Role.IsNullOrWhiteSpace()) throw new Exception("角色不能为空");
@@ -159,9 +150,9 @@ public class UsersController(FrameworkDbContext context, TokenService tokenServi
     /// <param name="request">更新用户请求</param>
     /// <returns>操作结果</returns>
     [HttpPut("{id}")]
+    [Role([UserRoleTypes.Admin])]
     public EmptyReply Update(int id, [FromBody] UpdateUserRequest request)
     {
-        CheckAdmin();
         if (request.Name.IsNullOrWhiteSpace()) throw new Exception("用户名不能为空");
         if (request.Role.IsNullOrWhiteSpace()) throw new Exception("角色不能为空");
         var user = context.Users.Find(id) ?? throw new Exception("data not found");
@@ -185,9 +176,9 @@ public class UsersController(FrameworkDbContext context, TokenService tokenServi
     /// <param name="id">用户 ID</param>
     /// <returns>操作结果</returns>
     [HttpDelete("{id}")]
+    [Role([UserRoleTypes.Admin])]
     public EmptyReply Delete(int id)
     {
-        CheckAdmin();
         if (id == HttpContext.GetJwtPayload().UserId) throw new Exception("不能删除自己");
         var user = context.Users.Find(id) ?? throw new Exception("data not found");
         user.IsDeleted = true;

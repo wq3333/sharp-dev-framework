@@ -1,19 +1,17 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Concurrent;
-using System.Text.Json;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using SharpDevLib;
 
 namespace SharpDevFramework;
 
 /// <summary>
 /// 操作日志过滤器，记录用户操作并发布到后台任务
 /// </summary>
-public class OperationLogFilter(IServiceProvider serviceProvider) : IAsyncActionFilter
+internal class OperationLogFilter : IAsyncActionFilter
 {
     static readonly string[] _ignoredQueryPath = ["/api/tasks", "/api/useroperationlogs"];
-    static BlockingCollection<UserOperationLogEntity> _cache = [];
-    static DateTime _lastWriteTime = DateTime.Now;
-    static readonly Lock _lock = new();
 
     /// <summary>
     /// 执行过滤器逻辑
@@ -45,41 +43,14 @@ public class OperationLogFilter(IServiceProvider serviceProvider) : IAsyncAction
         var userAgent = httpContext.Request.Headers.UserAgent.FirstOrDefault() ?? string.Empty;
         var operationType = GetOperationType(httpMethod, actionName);
 
-        var requestData = string.Empty;
-        try
-        {
-            if (context.ActionArguments.Count > 0)
-            {
-                requestData = JsonSerializer.Serialize(context.ActionArguments);
-            }
-        }
-        catch
-        {
-            requestData = "无法序列化请求参数";
-        }
-
+        var requestData = context.ActionArguments.TrySerialize(out var data) ? data : null;
         var resultContext = await next();
         var durationMs = (long)(DateTime.Now - startTime).TotalMilliseconds;
 
         var responseData = string.Empty;
         var isSuccess = !resultContext.ExceptionHandled && resultContext.Exception == null;
         var errorMessage = resultContext.Exception?.Message ?? string.Empty;
-
-        try
-        {
-            if (resultContext.Result is Microsoft.AspNetCore.Mvc.ObjectResult objectResult)
-            {
-                if (objectResult.Value != null)
-                {
-                    responseData = JsonSerializer.Serialize(objectResult.Value);
-                }
-            }
-        }
-        catch
-        {
-            responseData = "无法序列化响应数据";
-        }
-
+        if (resultContext.Result is Microsoft.AspNetCore.Mvc.ObjectResult objectResult) responseData = objectResult.Value!.TrySerialize(out var o) ? o : null;
 
         var logData = new UserOperationLogEntity
         {
@@ -98,26 +69,7 @@ public class OperationLogFilter(IServiceProvider serviceProvider) : IAsyncAction
             IsSuccess = isSuccess,
             ErrorMessage = errorMessage
         };
-        _cache.Add(logData);
-        if ((DateTime.Now - _lastWriteTime) < TimeSpan.FromMinutes(2)) return;
-
-        _ = Task.Run(() =>
-        {
-            try
-            {
-                lock (_lock)
-                {
-                    var scope = serviceProvider.CreateScope();
-                    var dbContext = scope.ServiceProvider.GetRequiredService<FrameworkDbContext>();
-                    var data = _cache.GroupBy(x => new { x.RoutePath, x.HttpMethod, x.UserId, x.RequestData }).Select(x => x.OrderBy(y => y.CreatedAt).Last());
-                    dbContext.UserOperationLogs.AddRange(data);
-                    dbContext.SaveChanges();
-                    _lastWriteTime = DateTime.Now;
-                    _cache = [];
-                }
-            }
-            catch { }
-        });
+        OperationLogHostedService.Push(logData);
     }
 
     /// <summary>
@@ -133,5 +85,54 @@ public class OperationLogFilter(IServiceProvider serviceProvider) : IAsyncAction
             "GET" => "Query",
             _ => actionName
         };
+    }
+}
+
+internal class OperationLogHostedService(IServiceProvider serviceProvider, ILogger<OperationLogHostedService> logger) : BackgroundService
+{
+    static readonly List<UserOperationLogEntity> _cache = [];
+    static readonly Lock _lock = new();
+    static bool _isRunning = false;
+
+    public static void Push(UserOperationLogEntity entity)
+    {
+        lock (_lock)
+        {
+            _cache.Add(entity);
+        }
+    }
+
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        var timer = new System.Timers.Timer
+        {
+            Interval = TimeSpan.FromMinutes(2).TotalMilliseconds
+        };
+        timer.Elapsed += (_, _) =>
+        {
+            try
+            {
+                if (_isRunning) return;
+                _isRunning = true;
+                using var scope = serviceProvider.CreateScope();
+                var dbContext = scope.ServiceProvider.GetRequiredService<FrameworkDbContext>();
+                lock (_lock)
+                {
+                    dbContext.UserOperationLogs.AddRange(_cache);
+                    dbContext.SaveChanges();
+                    _cache.Clear();
+                }
+            }
+            catch (Exception ex)
+            {
+                if (logger.IsEnabled(LogLevel.Warning)) logger.LogWarning("save operation logs failed:{Message}", ex.Message);
+            }
+            finally
+            {
+                _isRunning = false;
+            }
+        };
+        timer.Start();
+        await Task.CompletedTask;
     }
 }

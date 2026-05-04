@@ -11,7 +11,7 @@ namespace SharpDevFramework;
 /// <summary>
 /// 任务中心，负责管理后台任务的发布、消费、重试和状态更新
 /// </summary>
-public class TaskCenter(ILogger<TaskCenter> logger, IServiceProvider serviceProvider, IConfiguration configuration, NotificationService notificationService) : ISingletonService
+public class TaskCenter(ILogger<TaskCenter> logger, IServiceProvider serviceProvider, IConfiguration configuration) : ISingletonService
 {
     Channel<int>? _channel;
     bool _started;
@@ -36,7 +36,7 @@ public class TaskCenter(ILogger<TaskCenter> logger, IServiceProvider serviceProv
     /// <param name="assemblies">需要扫描的程序集</param>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>Task</returns>
-    public Task StartAsync(Assembly[] assemblies, CancellationToken cancellationToken)
+    internal Task StartAsync(Assembly[] assemblies, CancellationToken cancellationToken)
     {
         if (_started) throw new InvalidOperationException($"{nameof(TaskCenter)} already started");
         _started = true;
@@ -118,7 +118,7 @@ public class TaskCenter(ILogger<TaskCenter> logger, IServiceProvider serviceProv
     /// 停止任务中心
     /// </summary>
     /// <returns>Task</returns>
-    public async Task StopAsync()
+    internal async Task StopAsync()
     {
         if (!_started) return;
         _stoppingTokenSource?.Cancel();
@@ -188,7 +188,7 @@ public class TaskCenter(ILogger<TaskCenter> logger, IServiceProvider serviceProv
         dbContext.Tasks.Update(task);
         dbContext.SaveChanges();
 
-        await notificationService.BroadcastTaskUpdatedAsync(task);
+        await serviceProvider.GetRequiredService<NotificationService>().BroadcastTaskUpdatedAsync(task);
         if (logger.IsEnabled(LogLevel.Information)) logger.LogInformation("{TaskType} task {TaskId} {TaskState}", task.Type, task.Id, task.Status);
 
         if (task.Status == TaskStates.Failed)

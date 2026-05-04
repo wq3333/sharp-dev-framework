@@ -29,11 +29,6 @@ public abstract class BaseTask : IScopedService
     protected readonly TaskCenter _taskCenter;
 
     /// <summary>
-    /// 通知服务
-    /// </summary>
-    protected readonly NotificationService _notificationService;
-
-    /// <summary>
     /// 服务作用域
     /// </summary>
     protected readonly IServiceScope _serviceScope;
@@ -49,7 +44,6 @@ public abstract class BaseTask : IScopedService
         _logger = _serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(GetType());
         _dbContext = _serviceProvider.GetRequiredService<FrameworkDbContext>();
         _taskCenter = _serviceProvider.GetRequiredService<TaskCenter>();
-        _notificationService = _serviceProvider.GetRequiredService<NotificationService>();
     }
 
     /// <summary>

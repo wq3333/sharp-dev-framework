@@ -7,7 +7,7 @@ namespace SharpDevFramework;
 /// <summary>
 /// 枚举相关扩展方法
 /// </summary>
-public static class EnumsExtensions
+internal static class EnumsExtensions
 {
     /// <summary>
     /// 使用枚举控制器

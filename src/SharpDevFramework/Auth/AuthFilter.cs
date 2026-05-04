@@ -9,7 +9,7 @@ namespace SharpDevFramework;
 /// <summary>
 /// JWT 认证过滤器，用于验证请求的 JWT Token
 /// </summary>
-public class AuthFilter(TokenService tokenService) : IAuthorizationFilter
+internal class AuthFilter(TokenService tokenService) : IAuthorizationFilter
 {
     /// <summary>
     /// 授权过滤逻辑
@@ -45,6 +45,17 @@ public class AuthFilter(TokenService tokenService) : IAuthorizationFilter
             var token = authHeader["Bearer ".Length..].Trim();
             var payload = tokenService.VerifyToken(token);
             context.HttpContext.Items["payload"] = payload;
+
+            var roles = context.ActionDescriptor.EndpointMetadata.Where(m => m is RoleAttribute).SelectMany(m => (m as RoleAttribute)!.Roles);
+            if (roles.Any())
+            {
+                var currentRoles = payload.Role.SplitToList();
+                if ((from a in roles join b in currentRoles on a equals b select 1).IsNullOrEmpty())
+                {
+                    context.Result = new StatusCodeResult(StatusCodes.Status403Forbidden);
+                    return;
+                }
+            }
         }
         catch
         {

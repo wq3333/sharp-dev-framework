@@ -10,7 +10,7 @@ namespace SharpDevFramework;
 /// <summary>
 /// 任务托管服务，后台运行的任务中心
 /// </summary>
-public class TaskHostedService(TaskCenter taskCenter, IServiceProvider serviceProvider, IConfiguration configuration) : BackgroundService
+internal class TaskHostedService(TaskCenter taskCenter, IServiceProvider serviceProvider, IConfiguration configuration) : BackgroundService
 {
     /// <summary>
     /// 需要扫描的程序集

@@ -6,7 +6,7 @@ namespace SharpDevFramework;
 /// <summary>
 /// 通知服务，用于向客户端推送实时通知
 /// </summary>
-public class NotificationService(IServiceProvider serviceProvider) : ISingletonService
+internal class NotificationService(IServiceProvider serviceProvider) : ISingletonService
 {
     /// <summary>
     /// 广播任务更新消息

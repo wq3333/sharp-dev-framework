@@ -11,20 +11,15 @@ namespace SharpDevFramework;
 [Route("api/[controller]")]
 public class UserOperationLogsController(FrameworkDbContext dbContext) : ControllerBase
 {
-    void CheckAdmin()
-    {
-        if (!HttpContext.GetJwtPayload().Role.SplitToList().Any(x => x == UserRoleTypes.Admin)) throw new UnauthorizedAccessException("没有权限执行此操作");
-    }
-
     /// <summary>
     /// 分页查询操作日志
     /// </summary>
     /// <param name="request">分页request</param>
     /// <returns></returns>
     [HttpGet]
+    [Role([UserRoleTypes.Admin])]
     public async Task<PageReply<UserOperationLogEntity>> Page([FromQuery] PageUserOperationLogRequest request)
     {
-        CheckAdmin();
         var query = dbContext.UserOperationLogs.AsQueryable();
 
         if (request.Username.NotNullOrWhiteSpace()) query = query.Where(x => x.UserName != null && x.UserName.Contains(request.Username));
@@ -51,9 +46,9 @@ public class UserOperationLogsController(FrameworkDbContext dbContext) : Control
     /// <param name="id">日志ID</param>
     /// <returns></returns>
     [HttpGet("{id}")]
+    [Role([UserRoleTypes.Admin])]
     public async Task<DataReply<UserOperationLogEntity>> Get(int id)
     {
-        CheckAdmin();
         var log = await dbContext.UserOperationLogs.FindAsync(id);
         return log == null ? throw new Exception("日志不存在") : DataReply.Succeed(log);
     }

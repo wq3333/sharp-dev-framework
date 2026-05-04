@@ -89,7 +89,7 @@ public static class FrameworkExtensions
     {
         var isEnabled = builder.Configuration.GetValue<bool>("Serilog:IsEnabled");
         if (!isEnabled) return builder;
-        Environment.SetEnvironmentVariable("Serilog:WriteTo:0:Args:path", Statics.LogsPath);
+        Environment.SetEnvironmentVariable("Serilog:WriteTo:0:Args:path", SharpFrameworkStatics.LogsPath);
         builder.Configuration.AddEnvironmentVariables();
         builder.Host.UseSerilog((context, services, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
         return builder;
@@ -161,12 +161,14 @@ public static class FrameworkExtensions
         {
             if (useAuthFilter)
             {
-                if (!File.Exists(Statics.JwtSecretPath)) File.WriteAllText(Statics.JwtSecretPath, RandomHelper.GenerateCode(RandomType.Mix, 255));
+                if (!File.Exists(SharpFrameworkStatics.JwtSecretPath)) File.WriteAllText(SharpFrameworkStatics.JwtSecretPath, RandomHelper.GenerateCode(RandomType.Mix, 255));
                 options.Filters.Add<AuthFilter>();
             }
             if (useExceptionFilter) options.Filters.Add<ExceptionFilter>();
             if (useOperationLogFilter) options.Filters.Add<OperationLogFilter>();
         });
+        if (useOperationLogFilter) builder.Services.AddHostedService<OperationLogHostedService>();
+
         return builder;
     }
 
@@ -191,7 +193,7 @@ public static class FrameworkExtensions
     /// <returns>WebApplicationBuilder 实例</returns>
     static WebApplicationBuilder AddDbContext<TDbContext>(this WebApplicationBuilder builder) where TDbContext : FrameworkDbContext
     {
-        builder.Services.AddDbContext<TDbContext>(options => options.UseSqlite($"Data Source={Statics.DatabasePath}"));
+        builder.Services.AddDbContext<TDbContext>(options => options.UseSqlite($"Data Source={SharpFrameworkStatics.DatabasePath}"));
         builder.Services.AddScoped<FrameworkDbContext, TDbContext>();
         return builder;
     }

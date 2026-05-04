@@ -12,16 +12,6 @@ namespace SharpDevFramework;
 public class TasksController(FrameworkDbContext context, TaskCenter taskCenter) : ControllerBase
 {
     /// <summary>
-    /// 检查是否为管理员
-    /// </summary>
-    /// <exception cref="UnauthorizedAccessException">非管理员时抛出异常</exception>
-    void CheckAdmin()
-    {
-        if (!HttpContext.GetJwtPayload().Role.SplitToList().Any(x => x == UserRoleTypes.Admin))
-            throw new UnauthorizedAccessException("没有权限执行此操作");
-    }
-
-    /// <summary>
     /// 分页查询任务列表
     /// </summary>
     /// <param name="request">查询请求参数</param>
@@ -64,9 +54,9 @@ public class TasksController(FrameworkDbContext context, TaskCenter taskCenter) 
     /// <param name="id">任务 ID</param>
     /// <returns>操作结果</returns>
     [HttpDelete("{id}")]
+    [Role([UserRoleTypes.Admin])]
     public EmptyReply Delete(int id)
     {
-        CheckAdmin();
         var task = context.Tasks.FirstOrDefault(x => x.Id == id) ?? throw new Exception("任务不存在");
         context.Tasks.Remove(task);
         context.SaveChanges();
@@ -111,9 +101,9 @@ public class TasksController(FrameworkDbContext context, TaskCenter taskCenter) 
     /// </summary>
     /// <returns>操作结果</returns>
     [HttpPost("cleandb")]
+    [Role([UserRoleTypes.Admin])]
     public async Task<EmptyReply> CleanDB()
     {
-        CheckAdmin();
         var cleanTask = new TaskEntity { Type = FrameworkTaskTypes.DataCleanup };
         context.Tasks.Add(cleanTask);
         context.SaveChanges();

@@ -5,9 +5,9 @@ namespace SharpDevFramework;
 /// <summary>
 /// 框架静态路径和目录配置
 /// </summary>
-public static class Statics
+public static class SharpFrameworkStatics
 {
-    static Statics()
+    static SharpFrameworkStatics()
     {
         if (!Directory.Exists(DatabaseDirectory)) Directory.CreateDirectory(DatabaseDirectory);
         if (!Directory.Exists(LogsDirectory)) Directory.CreateDirectory(LogsDirectory);

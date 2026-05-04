@@ -24,8 +24,8 @@ public class TokenService(IConfiguration configuration) : ISingletonService
         }
         if (_secret.IsNullOrEmpty())
         {
-            if (!File.Exists(Statics.JwtSecretPath)) File.WriteAllText(Statics.JwtSecretPath, RandomHelper.GenerateCode(RandomType.Mix, 255));
-            _secret = File.ReadAllText(Statics.JwtSecretPath).Utf8Decode();
+            if (!File.Exists(SharpFrameworkStatics.JwtSecretPath)) File.WriteAllText(SharpFrameworkStatics.JwtSecretPath, RandomHelper.GenerateCode(RandomType.Mix, 255));
+            _secret = File.ReadAllText(SharpFrameworkStatics.JwtSecretPath).Utf8Decode();
         }
         return (_expire.Value, _secret);
     }

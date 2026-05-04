@@ -9,7 +9,7 @@ namespace SharpDevFramework;
 /// <summary>
 /// 全局异常过滤器，统一处理未捕获的异常
 /// </summary>
-public class ExceptionFilter : IExceptionFilter
+internal class ExceptionFilter : IExceptionFilter
 {
     /// <summary>
     /// 异常处理逻辑

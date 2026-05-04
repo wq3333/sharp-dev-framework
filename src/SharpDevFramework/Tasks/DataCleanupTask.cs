@@ -10,7 +10,7 @@ namespace SharpDevFramework;
 /// <summary>
 /// 数据清理任务配置
 /// </summary>
-public class DataCleanupTableConfig
+internal class DataCleanupTableConfig
 {
     /// <summary>
     /// 表名
@@ -56,7 +56,7 @@ public class DataCleanupTask(IServiceProvider serviceProvider) : BaseTask(servic
 
         try
         {
-            var sqlHelper = new SqlHelper(SqliteFactory.Instance, $"Data Source={Statics.DatabasePath}");
+            var sqlHelper = new SqlHelper(SqliteFactory.Instance, $"Data Source={SharpFrameworkStatics.DatabasePath}");
             var deletedCount = await sqlHelper.ExecuteNonQueryAsync(cancellationToken, $"DELETE FROM {tableName} WHERE CreatedAt < {cutoffTimestamp}");
             if (_logger.IsEnabled(LogLevel.Information)) _logger.LogInformation("数据清理完成: 表={TableName}, 删除记录数={DeletedCount}", tableName, deletedCount);
         }
