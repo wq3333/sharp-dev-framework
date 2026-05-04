@@ -9,7 +9,7 @@
 		<Copyright>yibei333</Copyright>
 		<RepositoryUrl>https://github.com/yibei333/sharp-dev-framework</RepositoryUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<Version>1.0.0.8</Version>
+		<Version>1.0.0.9</Version>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
@@ -26,12 +26,12 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.7" />
-		<!--<PackageReference Include="SharpDevFramework" Version="1.0.0.7" />-->
+		<PackageReference Include="SharpDevFramework" Version="1.0.0.9" />
 	</ItemGroup>
 
-	<ItemGroup>
+	<!--<ItemGroup>
 	  <ProjectReference Include="..\SharpDevFramework\SharpDevFramework.csproj" />
-	</ItemGroup>
+	</ItemGroup>-->
 
 	<ItemGroup>
 	  <None Update="install.bat">

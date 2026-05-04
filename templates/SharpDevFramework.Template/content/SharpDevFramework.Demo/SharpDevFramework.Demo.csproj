@@ -4,12 +4,6 @@
 		<TargetFramework>net10.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<Authors>yibei333</Authors>
-		<Description>SharpDevFramework web模板</Description>
-		<Copyright>yibei333</Copyright>
-		<RepositoryUrl>https://github.com/yibei333/sharp-dev-framework</RepositoryUrl>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<Version>1.0.0.8</Version>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
@@ -26,12 +20,8 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.7" />
-		<PackageReference Include="SharpDevFramework" Version="1.0.0.8" />
+		<PackageReference Include="SharpDevFramework" Version="1.0.0.9" />
 	</ItemGroup>
-
-	<!--<ItemGroup>
-	  <ProjectReference Include="..\SharpDevFramework\SharpDevFramework.csproj" />
-	</ItemGroup>-->
 
 	<ItemGroup>
 	  <None Update="install.bat">
