@@ -1,10 +1,6 @@
-using Mapster;
-using Microsoft.AspNetCore.Mvc;
-using SharpDevFramework.DB;
-using SharpDevFramework.Demo.Data;
+﻿using SharpDevFramework.Demo.Data;
 using SharpDevFramework.Demo.Data.Entities;
 using SharpDevFramework.Demo.Enums;
-using SharpDevLib;
 
 namespace SharpDevFramework.Demo.Controllers;
 

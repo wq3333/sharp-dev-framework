@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-
-namespace SharpDevFramework.Demo.Enums;
+﻿namespace SharpDevFramework.Demo.Enums;
 
 public enum DemoTypes
 {

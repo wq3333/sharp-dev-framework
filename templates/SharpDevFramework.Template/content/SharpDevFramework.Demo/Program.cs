@@ -1,6 +1,4 @@
-using SharpDevFramework;
 using SharpDevFramework.Demo.Data;
-using System.Reflection;
 
 Assembly[] assemblies = [Assembly.GetExecutingAssembly()];
 

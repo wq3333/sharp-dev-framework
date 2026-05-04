@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using SharpDevFramework.Demo.Data.Entities;
+﻿using SharpDevFramework.Demo.Data.Entities;
 
 namespace SharpDevFramework.Demo.Data;
 

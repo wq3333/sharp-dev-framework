@@ -18,24 +18,17 @@
             "**/bin/**",
             "**/obj/**",
             "**/*.csproj.user",
-            "**/Migrations/**"
+            "**/*.pubxml.user",
+            "**/PublishProfiles/**",
+            "**/Migrations/*.cs"
           ]
         }
       ]
     }
   ],
-  "symbols": {
-    "serviceName": {
-      "type": "parameter",
-      "datatype": "string",
-      "description": "Windows 服务名称",
-      "defaultValue": "myapp",
-      "replaces": "demo-service-name"
-    }
-  },
   "primaryOutputs": [
     {
-      "path": "SharpDevFramework.Demo.csproj"
+      "path": "SharpDevFramework.Demo/SharpDevFramework.Demo.csproj"
     }
   ],
   "postActions": [

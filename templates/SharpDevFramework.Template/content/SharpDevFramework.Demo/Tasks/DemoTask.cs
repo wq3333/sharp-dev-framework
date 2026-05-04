@@ -1,4 +1,4 @@
-using SharpDevFramework.Demo.Enums;
+﻿using SharpDevFramework.Demo.Enums;
 
 namespace SharpDevFramework.Demo.Tasks;
 
