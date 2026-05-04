@@ -14,13 +14,6 @@ dotnet new install SharpDevFramework.Template
 dotnet new sharpdev -n MyProject
 ```
 
-### 参数
-
-| 参数 | 说明 | 默认值 |
-|------|------|--------|
-| `-n` | 项目名称 | - |
-| `--serviceName` | Windows 服务名称 | `myapp` |
-
 ## 文档
 
 https://github.com/yibei333/sharp-dev-framework
