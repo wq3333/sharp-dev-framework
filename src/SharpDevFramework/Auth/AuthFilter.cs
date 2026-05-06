@@ -41,8 +41,7 @@ internal class AuthFilter(TokenService tokenService) : IAuthorizationFilter
 
         try
         {
-            // 解析 Bearer Token
-            var token = authHeader["Bearer ".Length..].Trim();
+            var token = authHeader.TrimStart("Bearer ");
             var payload = tokenService.VerifyToken(token);
             context.HttpContext.Items["payload"] = payload;
 

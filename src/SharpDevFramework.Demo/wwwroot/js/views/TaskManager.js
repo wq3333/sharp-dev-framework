@@ -70,7 +70,7 @@ export const TaskManagerView = {
         const pageSize = ref(10);
         const totalCount = ref(0);
         const pageCount = ref(0);
-        const isAdmin = computed(() => localStorage.getItem('role').split(',').filter(x => x === 'Admin').length > 0);
+        const isAdmin = computed(() => localStorage.getItem('role')?.split(',').filter(x => x === 'Admin').length > 0) || false;
 
         const detailModalVisible = ref(false);
         const currentTask = ref(null);
@@ -89,33 +89,50 @@ export const TaskManagerView = {
 
         const loadTasks = async () => {
             loading.value = true;
-            const result = await api.tasks.page(statusFilter.value, typeFilter.value, currentPage.value, pageSize.value);
+            const result = await api.tasks.page(statusFilter.value, typeFilter.value, currentPage.value, pageSize.value, () => { loading.value = false; });
             tasks.value = result.data || [];
             totalCount.value = result.totalCount || 0;
             pageCount.value = result.pageCount || 0;
             loading.value = false;
         };
 
-        const goToPage = ({ page, pageSize: newSize }) => { currentPage.value = page; pageSize.value = newSize; loadTasks(); };
+        const goToPage = ({ page, pageSize: newSize }) => {
+            currentPage.value = page;
+            pageSize.value = newSize;
+            loadTasks();
+        };
         const handleTaskUpdated = (task) => {
             const index = tasks.value.findIndex(t => t.id === task.id);
             if (index !== -1) {
                 tasks.value[index] = { ...tasks.value[index], ...task };
             }
         };
-        const viewDetail = async (id) => { currentTask.value = await api.tasks.get(id); detailModalVisible.value = true; };
-        const retryTask = async (id) => { await api.tasks.retry(id); await loadTasks(); };
-        const cancelTask = async (id) => { if (confirm(`确定取消任务 #${id}？`)) { await api.tasks.cancel(id); await loadTasks(); } };
-        const deleteTask = async (task) => { if (confirm(`确定删除任务 #${task.id}？`)) { await api.tasks.delete(task.id); await loadTasks(); } };
+        const viewDetail = async (id) => {
+            currentTask.value = await api.tasks.get(id);
+            detailModalVisible.value = true;
+        };
+        const retryTask = async (id) => {
+            await api.tasks.retry(id);
+            await loadTasks();
+        };
+        const cancelTask = async (id) => {
+            if (confirm(`确定取消任务 #${id}?`)) {
+                await api.tasks.cancel(id);
+                await loadTasks();
+            }
+        };
+        const deleteTask = async (task) => {
+            if (confirm(`确定删除任务 #${task.id}?`)) {
+                await api.tasks.delete(task.id);
+                await loadTasks();
+            }
+        };
         const cleanDb = async () => {
-            if (confirm('确定清理数据库过期数据？\n\n此操作将删除：\n- 30天前的操作日志\n- 90天前已完成/已取消的任务')) {
+            if (confirm('确定清理数据库过期数据？')) {
                 cleaning.value = true;
-                try {
-                    await api.tasks.cleandb();
-                    await loadTasks();
-                } finally {
-                    cleaning.value = false;
-                }
+                await api.tasks.cleandb(() => cleaning.value = false);
+                await loadTasks();
+                cleaning.value = false;
             }
         };
 

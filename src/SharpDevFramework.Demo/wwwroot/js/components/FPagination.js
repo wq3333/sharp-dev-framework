@@ -85,9 +85,16 @@ export const FPagination = {
         };
 
         const handleJumperInput = (e) => { jumperValue.value = Number(e.target.value); };
-        const handleJumper = () => { let page = Math.round(jumperValue.value); if (isNaN(page)) page = 1; goTo(page); };
+        const handleJumper = () => {
+            let page = Math.round(jumperValue.value);
+            if (isNaN(page)) page = 1;
+            goTo(page);
+        };
 
-        watch(() => props.modelValue, (val) => { currentPage.value = val; jumperValue.value = val; });
+        watch(() => props.modelValue, (val) => {
+            currentPage.value = val;
+            jumperValue.value = val;
+        });
 
         return { pageCount, visiblePages, currentPage, pageSizeOptions, jumperValue, goTo, handleSizeChange, handleJumperInput, handleJumper };
     }

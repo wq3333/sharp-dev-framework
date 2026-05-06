@@ -21,7 +21,7 @@ public abstract class BaseTask : IScopedService
     /// <summary>
     /// 数据库上下文
     /// </summary>
-    internal protected readonly FrameworkDbContext _dbContext;
+    private protected readonly FrameworkDbContext _dbContext;
 
     /// <summary>
     /// 任务中心
@@ -68,7 +68,7 @@ public abstract class BaseTask : IScopedService
         }
         catch (Exception ex)
         {
-            await _taskCenter.ChangeTaskState(task.Id, TaskStates.Failed, ex.Message);
+            await _taskCenter.ChangeTaskState(task.Id, TaskStates.Failed, ex.Message + "\r\n" + ex.StackTrace);
         }
         finally
         {

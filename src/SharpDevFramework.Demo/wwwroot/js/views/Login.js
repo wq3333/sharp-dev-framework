@@ -46,13 +46,13 @@ export const LoginView = {
             loading.value = true;
             error.value = '';
             try {
-                const data = await api.auth.login(username.value, password.value, (e) => {
+                const data = await api.users.login(username.value, password.value, (e) => {
                     error.value = e.message || '登录失败，请检查用户名和密码';
                 });
                 setAuth(data);
                 initSignalR();
                 window.clearPageCache();
-                window.location.hash = '#/tasks';
+                window.location.hash = '/';
             } finally {
                 loading.value = false;
             }

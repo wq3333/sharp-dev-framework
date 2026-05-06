@@ -85,26 +85,13 @@ app.component('FMultiSelect', FMultiSelect);
 setStopSignalR(stopSignalR);
 
 router.beforeEach(async (to, from, next) => {
-    const tokenValid = isTokenValid();
-
-    if (!tokenValid) {
-        clearPageCache();
-        if (to.path !== '/login') {
-            next('/login');
-        } else {
-            next();
-        }
-    } else {
-        if (!window._enumsLoaded) {
-            await loadEnums();
-            window._enumsLoaded = true;
-        }
-        next();
+    if (isTokenValid() && !window._enumsLoaded) {
+        await loadEnums();
+        initSignalR();
+        window._enumsLoaded = true;
     }
+    next();
 });
 
 app.mount('#app');
-
-initSignalR();
-
 export { ThemeSymbol };

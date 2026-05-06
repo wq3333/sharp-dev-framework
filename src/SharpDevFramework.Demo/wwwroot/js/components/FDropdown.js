@@ -48,7 +48,10 @@ export const FDropdown = {
         };
 
         onMounted(() => document.addEventListener('click', handleClickOutside));
-        onUnmounted(() => { document.removeEventListener('click', handleClickOutside); clearTimeout(hoverTimer); });
+        onUnmounted(() => {
+            document.removeEventListener('click', handleClickOutside);
+            clearTimeout(hoverTimer);
+        });
 
         return { visible, dropdownRef, toggle, show, hide, menuClass, handleMouseEnter, handleMouseLeave };
     }
@@ -69,7 +72,9 @@ export const FDropdownItem = {
         </div>
     `,
     setup(props, { emit }) {
-        const handleClick = (e) => { if (!props.disabled) emit('click', e); };
+        const handleClick = (e) => {
+            if (!props.disabled) emit('click', e);
+        };
         return { handleClick };
     }
 };

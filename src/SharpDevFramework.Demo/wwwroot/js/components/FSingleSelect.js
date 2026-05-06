@@ -108,8 +108,14 @@ export const FSingleSelect = {
             visible.value = false;
         };
 
-        const handleScroll = () => { if (visible.value) updatePosition(); };
-        const handleResize = () => { if (visible.value) updatePosition(); };
+        const handleScroll = () => {
+            if (visible.value)
+                updatePosition();
+        };
+        const handleResize = () => {
+            if (visible.value)
+                updatePosition();
+        };
 
         watch(visible, (val) => {
             if (val) {

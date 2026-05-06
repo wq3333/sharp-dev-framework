@@ -24,14 +24,14 @@
 		<SatelliteResourceLanguages>zh-CN</SatelliteResourceLanguages>
 	</PropertyGroup>
 
-	<ItemGroup>
+	<!--<ItemGroup>
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.7" />
 		<PackageReference Include="SharpDevFramework" Version="1.0.0.9" />
-	</ItemGroup>
-
-	<!--<ItemGroup>
-	  <ProjectReference Include="..\SharpDevFramework\SharpDevFramework.csproj" />
 	</ItemGroup>-->
+
+	<ItemGroup>
+	  <ProjectReference Include="..\SharpDevFramework\SharpDevFramework.csproj" />
+	</ItemGroup>
 
 	<ItemGroup>
 	  <None Update="install.bat">

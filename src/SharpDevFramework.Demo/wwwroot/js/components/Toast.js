@@ -38,7 +38,7 @@ export const ToastContainer = {
                         <IconWarning v-else-if="t.type==='warning'" />
                         <IconInfo v-else />
                     </span>
-                    <span class="flex-1 text-sm text-[var(--text-primary)] leading-relaxed">{{ t.message }}</span>
+                    <span class="flex-1 text-sm text-[var(--text-primary)] leading-relaxed" style="overflow-wrap:anywhere">{{ t.message }}</span>
                     <button @click="remove(t.id)" class="bg-transparent border-none text-[var(--text-tertiary)] text-lg cursor-pointer p-0 leading-none transition-colors duration-150 ease-out hover:text-[var(--text-primary)]">&times;</button>
                 </div>
             </TransitionGroup>
