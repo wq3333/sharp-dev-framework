@@ -32,8 +32,8 @@ apiClient.interceptors.response.use(
         if (error.response?.status === 401) {
             clearAuth();
             window.location.hash = '#/login';
+            window.location.reload();
             const authError = new Error('Unauthorized');
-            toast.error('登录已过期，请重新登录');
             throw authError;
         }
         const message = error.response?.data?.message || error.message || '请求失败';
@@ -55,13 +55,6 @@ async function request(method, url, data = null, params = null, onerror = null) 
 }
 
 export const api = {
-    auth: {
-        login: async (username, password, onerror = null) => {
-            const result = await request('POST', '/users/login', { username, password }, null, onerror);
-            return result.data;
-        }
-    },
-    
     tasks: {
         page: async (status, type, page = 1, size = 20, onerror = null) => {
             const params = { index: page, size };
@@ -92,6 +85,10 @@ export const api = {
     },
     
     users: {
+        login: async (username, password, onerror = null) => {
+            const result = await request('POST', '/users/login', { username, password }, null, onerror);
+            return result.data;
+        },
         page: async (name, role, page = 1, size = 20, onerror = null) => {
             const params = { index: page, size };
             if (name) params.name = name;
@@ -110,7 +107,11 @@ export const api = {
         },
         delete: async (id, onerror = null) => {
             await request('DELETE', `/users/${id}`, null, null, onerror);
-        }
+        },
+        token: async (onerror = null) => {
+            const result = await request('POST', '/users/token', null, null, onerror);
+            return "Bearer "+result.data;
+        },
     },
     
     demos: {

@@ -152,12 +152,9 @@ export const OperationLogManagerView = {
 
         const showDetail = async (row) => {
             loading.value = true;
-            try {
-                currentDetail.value = await api.logs.get(row.id);
-                detailVisible.value = true;
-            } finally {
-                loading.value = false;
-            }
+            currentDetail.value = await api.logs.get(row.id, () => { loading.value = false; });
+            detailVisible.value = true;
+            loading.value = false;
         };
 
         const getOperationTypeLabel = (type) => {
@@ -175,7 +172,10 @@ export const OperationLogManagerView = {
             return classes[type] || '';
         };
 
-        onMounted(() => { initDateFilters(); loadLogs(); });
+        onMounted(() => {
+            initDateFilters();
+            loadLogs();
+        });
         return { logs, columns, usernameFilter, operationTypeFilter, isSuccessFilter, isSuccessOptions, startDateFilter, endDateFilter, operationTypeOptions, currentPage, pageSize, totalCount, pageCount, loading, loadLogs, goToPage, formatDate, formatDuration, showDetail, detailVisible, currentDetail, getOperationTypeLabel, getOperationTypeClass };
     }
 };

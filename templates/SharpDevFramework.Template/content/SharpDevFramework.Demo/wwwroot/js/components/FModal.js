@@ -31,9 +31,18 @@ export const FModal = {
         </Teleport>
     `,
     setup(props, { emit }) {
-        const handleOverlayClick = () => { if (props.closeOnOverlay) handleClose(); };
-        const handleClose = () => { emit('update:modelValue', false); emit('close'); };
-        const handleEscKey = (e) => { if (e.key === 'Escape' && props.modelValue) handleClose(); };
+        const handleOverlayClick = () => {
+            if (props.closeOnOverlay)
+                handleClose();
+        };
+        const handleClose = () => {
+            emit('update:modelValue', false);
+            emit('close');
+        };
+        const handleEscKey = (e) => {
+            if (e.key === 'Escape' && props.modelValue)
+                handleClose();
+        };
 
         onMounted(() => document.addEventListener('keydown', handleEscKey));
         onUnmounted(() => document.removeEventListener('keydown', handleEscKey));

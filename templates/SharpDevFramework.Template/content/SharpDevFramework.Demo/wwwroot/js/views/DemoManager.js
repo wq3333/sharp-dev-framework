@@ -76,32 +76,54 @@ export const DemoManagerView = {
 
         const loadDemos = async () => {
             loading.value = true;
-            const result = await api.demos.page(nameFilter.value, typeFilter.value, currentPage.value, pageSize.value);
+            const result = await api.demos.page(nameFilter.value, typeFilter.value, currentPage.value, pageSize.value, () => { loading.value = false; });
             demos.value = result.data || [];
             totalCount.value = result.totalCount || 0;
             pageCount.value = result.pageCount || 0;
             loading.value = false;
         };
 
-        const goToPage = ({ page, pageSize: newSize }) => { currentPage.value = page; pageSize.value = newSize; loadDemos(); };
+        const goToPage = ({ page, pageSize: newSize }) => {
+            currentPage.value = page;
+            pageSize.value = newSize;
+            loadDemos();
+        };
 
-        const openCreateModal = () => { isEditing.value = false; editingId.value = null; formData.value = { name: '', typeList: [] }; modalVisible.value = true; };
-        const openEditModal = (demo) => { isEditing.value = true; editingId.value = demo.id; formData.value = { name: demo.name, typeList: demo.type ? demo.type.split(',').map(t => parseInt(t)) : [] }; modalVisible.value = true; };
+        const openCreateModal = () => {
+            isEditing.value = false;
+            editingId.value = null;
+            formData.value = { name: '', typeList: [] };
+            modalVisible.value = true;
+        };
+        const openEditModal = (demo) => {
+            isEditing.value = true;
+            editingId.value = demo.id;
+            formData.value = {
+                name: demo.name,
+                typeList: demo.type ? demo.type.split(',').map(t => parseInt(t)) : []
+            };
+            modalVisible.value = true;
+        };
 
         const saveDemo = async () => {
             if (!formData.value.name) { toast.error('请输入名称'); return; }
             saving.value = true;
             const typeStr = formData.value.typeList.join(',');
-            if (isEditing.value) { await api.demos.update(editingId.value, formData.value.name, typeStr); toast.success('更新成功'); }
-            else { await api.demos.create(formData.value.name, typeStr); toast.success('创建成功'); }
+            if (isEditing.value) {
+                await api.demos.update(editingId.value, formData.value.name, typeStr, () => { saving.value = false; });
+                toast.success('更新成功');
+            }
+            else {
+                await api.demos.create(formData.value.name, typeStr, () => { saving.value = false; });
+                toast.success('创建成功');
+            }
             loadDemos();
-            hideModal();
+            modalVisible.value = false;
+            saving.value = false;
         };
 
-        const hideModal = () => { modalVisible.value = false; saving.value = false; };
-
         const deleteDemo = async (demo) => {
-            if (confirm(`确定删除 ${demo.name}？`)) {
+            if (confirm(`确定删除 ${demo.name}?`)) {
                 deletingId.value = demo.id;
                 await api.demos.delete(demo.id);
                 toast.success('删除成功');
@@ -110,7 +132,9 @@ export const DemoManagerView = {
             }
         };
 
-        onMounted(() => { loadDemos(); });
+        onMounted(() => {
+            loadDemos();
+        });
         return { demos, columns, nameFilter, typeFilter, demoTypeOptions, currentPage, totalCount, pageCount, pageSize, loading, saving, deletingId, modalVisible, isEditing, formData, loadDemos, goToPage, openCreateModal, openEditModal, saveDemo, deleteDemo, formatDate, getEnumName };
     }
 };

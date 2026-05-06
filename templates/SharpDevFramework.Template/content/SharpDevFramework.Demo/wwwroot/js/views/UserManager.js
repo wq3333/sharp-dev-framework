@@ -59,7 +59,7 @@ export const UserManagerView = {
         const form = ref({ name: '', password: '', roleList: [], isActive: true });
         const editingUserId = ref(null);
         const currentUserId = computed(() => parseInt(localStorage.getItem('userId') || '0'));
-        const isAdmin = computed(() => localStorage.getItem('role').split(',').filter(x => x === 'Admin').length > 0);
+        const isAdmin = computed(() => localStorage.getItem('role')?.split(',').filter(x => x === 'Admin').length > 0) || false;
         const currentPage = ref(1);
         const pageSize = ref(10);
         const totalCount = ref(0);
@@ -82,18 +82,27 @@ export const UserManagerView = {
 
         const loadUsers = async () => {
             loading.value = true;
-            const result = await api.users.page(nameFilter.value, roleFilter.value, currentPage.value, pageSize.value);
+            const result = await api.users.page(nameFilter.value, roleFilter.value, currentPage.value, pageSize.value, () => loading.value = false);
             users.value = result.data || [];
             totalCount.value = result.totalCount || 0;
             pageCount.value = result.pageCount || 0;
             loading.value = false;
         };
 
-        const goToPage = ({ page, pageSize: newSize }) => { currentPage.value = page; pageSize.value = newSize; loadUsers(); };
+        const goToPage = ({ page, pageSize: newSize }) => {
+            currentPage.value = page;
+            pageSize.value = newSize;
+            loadUsers();
+        };
 
         const editUser = (user) => {
             editingUserId.value = user.id;
-            form.value = { name: user.name, password: '', roleList: user.role ? user.role.split(',') : [], isActive: user.isActive };
+            form.value = {
+                name: user.name,
+                password: '',
+                roleList: user.role ? user.role.split(',') : [],
+                isActive: user.isActive
+            };
             showEditModal.value = true;
         };
 
@@ -106,17 +115,30 @@ export const UserManagerView = {
         };
 
         const deleteUser = async (user) => {
-            if (confirm(`确定删除用户 "${user.name}"？`)) { await api.users.delete(user.id); await loadUsers(); }
+            if (confirm(`确定删除用户 "${user.name}"?`)) {
+                await api.users.delete(user.id);
+                await loadUsers();
+            }
         };
 
         const closeModal = () => {
             showCreateModal.value = false;
             showEditModal.value = false;
             editingUserId.value = null;
-            form.value = { name: '', password: '', roleList: [], isActive: true };
+            form.value = {
+                name: '',
+                password: '',
+                roleList: [],
+                isActive: true
+            };
         };
 
-        onMounted(async () => { if (!isAdmin.value) { window.location.hash = '#/tasks'; return; } await loadUsers(); });
+        onMounted(async () => {
+            if (!isAdmin.value) {
+                window.location.hash = '/';
+                return;
+            } await loadUsers();
+        });
         return { users, columns, currentUserId, nameFilter, roleFilter, showCreateModal, showEditModal, showModal, form, roleOptions, editUser, saveUser, deleteUser, closeModal, getEnumName, currentPage, pageSize, totalCount, pageCount, goToPage, formatDate, loading, loadUsers };
     }
 };

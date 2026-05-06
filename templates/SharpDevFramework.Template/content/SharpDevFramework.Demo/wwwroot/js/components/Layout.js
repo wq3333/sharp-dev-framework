@@ -141,12 +141,16 @@ export const LayoutComponent = {
         };
 
         const username = computed(() => localStorage.getItem('username') || '');
-        const isAdmin = computed(() => localStorage.getItem('role').split(',').filter(x => x === 'Admin').length > 0);
+        const isAdmin = computed(() => localStorage.getItem('role')?.split(',').filter(x => x === 'Admin').length > 0) || false;
         const role = computed(() => getEnumName('userRoleTypes', localStorage.getItem('role'), true));
         const theme = inject(ThemeSymbol, null);
         const isDark = computed(() => theme ? theme.effectiveTheme() === 'dark' : false);
         const toggleTheme = () => { if (theme) theme.toggle(); };
-        const handleLogout = () => { stopSignalR(); clearAuth(); window.location.hash = '#/login'; window.location.reload(); };
+        const handleLogout = () => {
+            stopSignalR();
+            clearAuth(); 
+            window.location.hash = '#/login'; 
+        };
 
         return { sidebarOpen, mobileOpen, isMobile, closeSidebar, openSidebar, onNavClick, username, role, isAdmin, handleLogout, isDark, toggleTheme };
     }
