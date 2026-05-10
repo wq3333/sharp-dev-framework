@@ -1,10 +1,10 @@
 import { router } from './router.js';
 import { loadEnums } from './enums.js';
 import { initSignalR, stopSignalR } from './signalr.js';
-import { isTokenValid, clearAuth, setStopSignalR } from './auth.js';
+import { isTokenValid, setStopSignalR } from './auth.js';
 import {
     FButton, FInput, FSingleSelect, FCheckbox, FModal, FTable, FPagination,
-    FDropdown, FDropdownItem, FMultiSelect, ToastContainer, ToastPlugin
+    FDropdown, FDropdownItem, FMultiSelect, LayoutComponent, ToastContainer, ToastPlugin
 } from './components/index.js';
 
 const { createApp, ref, provide, readonly } = Vue;
@@ -51,20 +51,15 @@ function createThemeManager() {
     return { theme: readonly(theme), effectiveTheme, set, toggle };
 }
 
-const cacheKey = ref(0);
-
-const clearPageCache = () => {
-    cacheKey.value++;
-};
-
-window.clearPageCache = clearPageCache;
-
 const app = createApp({
-    template: '<router-view v-slot="{ Component }"><keep-alive :key="cacheKey"><component :is="Component" /></keep-alive></router-view><ToastContainer />',
+    template: '<LayoutComponent @logout="handleLogout"/><ToastContainer />',
+    components: {
+        LayoutComponent,
+    },
     setup() {
         const themeManager = createThemeManager();
         provide(ThemeSymbol, themeManager);
-        return { cacheKey };
+        return { };
     }
 });
 

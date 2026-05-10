@@ -12,7 +12,8 @@ export const LayoutComponent = {
     name: 'LayoutComponent',
     components: { FButton, FDropdown, FDropdownItem, IconMenu, IconClose, IconTasks, IconUsers, IconDemos, IconLogs, IconSun, IconMoon, IconLogo, IconUser, IconRole, IconLogout, IconRefresh, IconSettings, IconChevronDown },
     template: `
-    <div class="flex h-full overflow-hidden">
+    <router-view v-if="$route.meta.useLayout===false"/>
+    <div v-else class="flex h-full overflow-hidden">
         <div v-if="mobileOpen && isMobile" class="fixed inset-0 bg-black/40 z-40 transition-opacity duration-200" :class="mobileOpen ? 'opacity-100' : 'opacity-0'" @click="mobileOpen = false"></div>
         <aside class="sidebar bg-[var(--bg-surface)] border-r border-[var(--border-subtle)] flex flex-col shrink-0 z-50"
             :class="{
@@ -95,7 +96,7 @@ export const LayoutComponent = {
                         <template #trigger>
                             <button class="user-info-btn rounded">
                                 <IconUser />
-                                <span class="hidden sm:inline">{{ username }}</span>
+                                <span>{{ username }}</span>
                             </button>
                         </template>
                         <div class="px-3 py-2 flex items-center gap-2 text-xs text-[var(--text-tertiary)]">
@@ -126,7 +127,7 @@ export const LayoutComponent = {
 
         const isSystemMenuActive = computed(() => {
             const path = router?.currentRoute?.value?.path || '';
-            return path === '/users' || path === '/logs';
+            return path === '/tasks' || path === '/users' || path === '/logs';
         });
 
         const updateIsMobile = () => {
@@ -169,9 +170,8 @@ export const LayoutComponent = {
         const isDark = computed(() => theme ? theme.effectiveTheme() === 'dark' : false);
         const toggleTheme = () => { if (theme) theme.toggle(); };
         const handleLogout = () => {
-            stopSignalR();
-            clearAuth(); 
-            window.location.hash = '#/login'; 
+            clearAuth();
+            window.location.hash = '#/login';
         };
 
         const refreshPage = async () => {
