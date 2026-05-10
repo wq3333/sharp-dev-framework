@@ -45,16 +45,16 @@ export const TaskManagerView = {
         </div>
         <FModal v-model="detailModalVisible" title="任务详情" width="520px">
             <div v-if="currentTask" class="flex flex-col gap-3">
-                <div class="flex items-start gap-4 text-sm"><span class="w-20 shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">ID</span><span class="flex-1 text-[var(--text-primary)] leading-relaxed break-all">{{ currentTask.id }}</span></div>
-                <div class="flex items-start gap-4 text-sm"><span class="w-20 shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">用户ID</span><span class="flex-1 text-[var(--text-primary)] leading-relaxed break-all">{{ currentTask.userId }}</span></div>
-                <div class="flex items-start gap-4 text-sm"><span class="w-20 shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">类型</span><span class="flex-1 text-[var(--text-primary)] leading-relaxed break-all"><span v-for="t in getEnumName('taskTypes', currentTask.type, true).split(', ').filter(x => x)" :key="t" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[rgba(79,70,229,0.1)] text-[var(--accent)] mr-1">{{ t }}</span></span></div>
-                <div class="flex items-start gap-4 text-sm"><span class="w-20 shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">状态</span><span class="flex-1 text-[var(--text-primary)] leading-relaxed break-all"><span :class="'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ' + taskStatusClass(currentTask.status)">{{ getEnumName('taskStates', currentTask.status) }}</span></span></div>
-                <div class="flex items-start gap-4 text-sm"><span class="w-20 shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">数据</span><span class="flex-1 font-mono text-xs bg-[var(--bg-base)] px-3 py-2 rounded border border-[var(--border-subtle)] whitespace-pre-wrap break-all text-[var(--text-primary)]">{{ currentTask.data || '-' }}</span></div>
-                <div class="flex items-start gap-4 text-sm"><span class="w-20 shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">错误信息</span><span class="flex-1 leading-relaxed break-all" :class="currentTask.errorMessage ? 'text-[var(--danger)]' : 'text-[var(--text-primary)]'">{{ currentTask.errorMessage || '-' }}</span></div>
-                <div class="flex items-start gap-4 text-sm"><span class="w-20 shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">重试次数</span><span class="flex-1 text-[var(--text-primary)] leading-relaxed break-all">{{ currentTask.retryCount }}</span></div>
-                <div class="flex items-start gap-4 text-sm"><span class="w-20 shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">创建时间</span><span class="flex-1 text-[var(--text-primary)] leading-relaxed break-all">{{ formatDate(currentTask.createdAt) }}</span></div>
-                <div class="flex items-start gap-4 text-sm"><span class="w-20 shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">更新时间</span><span class="flex-1 text-[var(--text-primary)] leading-relaxed break-all">{{ currentTask.updatedAt ? formatDate(currentTask.updatedAt) : '-' }}</span></div>
-                <div class="flex items-start gap-4 text-sm"><span class="w-20 shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">是否删除</span><span class="flex-1 text-[var(--text-primary)] leading-relaxed break-all">{{ currentTask.isDeleted ? '是' : '否' }}</span></div>
+                <div class="flex items-start gap-4 text-sm"><span class="w-20 self-center shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">ID</span><span class="flex-1 text-[var(--text-primary)] leading-relaxed break-all">{{ currentTask.id }}</span></div>
+                <div class="flex items-start gap-4 text-sm"><span class="w-20 self-center shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">用户ID</span><span class="flex-1 text-[var(--text-primary)] leading-relaxed break-all">{{ currentTask.userId }}</span></div>
+                <div class="flex items-start gap-4 text-sm"><span class="w-20 self-center shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">类型</span><span class="flex-1 text-[var(--text-primary)] leading-relaxed break-all"><span v-for="t in getEnumName('taskTypes', currentTask.type, true).split(', ').filter(x => x)" :key="t" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[rgba(79,70,229,0.1)] text-[var(--accent)] mr-1">{{ t }}</span></span></div>
+                <div class="flex items-start gap-4 text-sm"><span class="w-20 self-center shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">状态</span><span class="flex-1 text-[var(--text-primary)] leading-relaxed break-all"><span :class="'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ' + taskStatusClass(currentTask.status)">{{ getEnumName('taskStates', currentTask.status) }}</span></span></div>
+                <div class="flex items-start gap-4 text-sm"><span class="w-20 self-center shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">数据</span><span class="flex-1 font-mono text-xs bg-[var(--bg-base)] px-3 py-2 rounded border border-[var(--border-subtle)] whitespace-pre-wrap break-all text-[var(--text-primary)]">{{ currentTask.data || '-' }}</span></div>
+                <div class="flex items-start gap-4 text-sm"><span class="w-20 self-center shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">错误信息</span><span class="flex-1 leading-relaxed break-all" :class="currentTask.errorMessage ? 'text-[var(--danger)]' : 'text-[var(--text-primary)]'">{{ currentTask.errorMessage || '-' }}</span></div>
+                <div class="flex items-start gap-4 text-sm"><span class="w-20 self-center shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">重试次数</span><span class="flex-1 text-[var(--text-primary)] leading-relaxed break-all">{{ currentTask.retryCount }}</span></div>
+                <div class="flex items-start gap-4 text-sm"><span class="w-20 self-center shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">创建时间</span><span class="flex-1 text-[var(--text-primary)] leading-relaxed break-all">{{ formatDate(currentTask.createdAt) }}</span></div>
+                <div class="flex items-start gap-4 text-sm"><span class="w-20 self-center shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">更新时间</span><span class="flex-1 text-[var(--text-primary)] leading-relaxed break-all">{{ currentTask.updatedAt ? formatDate(currentTask.updatedAt) : '-' }}</span></div>
+                <div class="flex items-start gap-4 text-sm"><span class="w-20 self-center shrink-0 text-[var(--text-secondary)] font-medium leading-relaxed">是否删除</span><span class="flex-1 text-[var(--text-primary)] leading-relaxed break-all">{{ currentTask.isDeleted ? '是' : '否' }}</span></div>
             </div>
             <template #footer><FButton @click="detailModalVisible = false">关闭</FButton></template>
         </FModal>
@@ -94,6 +94,10 @@ export const TaskManagerView = {
             totalCount.value = result.totalCount || 0;
             pageCount.value = result.pageCount || 0;
             loading.value = false;
+        };
+
+        const refresh = () => {
+            loadTasks();
         };
 
         const goToPage = ({ page, pageSize: newSize }) => {
@@ -141,6 +145,6 @@ export const TaskManagerView = {
             onTaskUpdated(handleTaskUpdated);
         });
 
-        return { tasks, columns, statusFilter, typeFilter, taskStateOptions, taskTypeOptions, taskStatusClass: getTaskStatusClass, getEnumName, loadTasks, retryTask, cancelTask, deleteTask, cleanDb, formatDate, currentPage, pageSize, totalCount, pageCount, goToPage, loading, cleaning, isAdmin, detailModalVisible, currentTask, viewDetail };
+        return { tasks, columns, statusFilter, typeFilter, taskStateOptions, taskTypeOptions, taskStatusClass: getTaskStatusClass, getEnumName, loadTasks, refresh, retryTask, cancelTask, deleteTask, cleanDb, formatDate, currentPage, pageSize, totalCount, pageCount, goToPage, loading, cleaning, isAdmin, detailModalVisible, currentTask, viewDetail };
     }
 };

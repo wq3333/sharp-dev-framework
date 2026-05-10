@@ -72,14 +72,14 @@ public class UsersController(FrameworkDbContext context, TokenService tokenServi
     }
 
     /// <summary>
-    /// 刷新 Token
+    /// 特殊Token
     /// </summary>
-    /// <returns>新的 Token</returns>
-    [HttpPost("token")]
-    public DataReply<string> Token()
+    /// <returns>Token</returns>
+    [HttpPost("special-token")]
+    public DataReply<string> SpecialToken()
     {
         var payload = HttpContext.GetJwtPayload();
-        var token = tokenService.GenerateToken(payload.UserId, payload.Username, payload.Role);
+        var token = tokenService.GenerateSpecialToken(payload.UserId, payload.Username, payload.Role);
         return DataReply.Succeed(token);
     }
 
@@ -89,10 +89,11 @@ public class UsersController(FrameworkDbContext context, TokenService tokenServi
     /// <param name="request">查询参数</param>
     /// <returns>用户分页列表</returns>
     [HttpGet]
-    [Role([UserRoleTypes.Admin])]
     public PageReply<UserDto> GetPage([FromQuery] UserPageRequest request)
     {
         var query = context.Users.Where(x => !x.IsDeleted);
+        var payload = HttpContext.GetJwtPayload();
+        if (!payload.Role.SplitToList().Any(x => x == UserRoleTypes.Admin)) query = query.Where(x => x.Id == payload.UserId);
         if (request.Name.NotNullOrWhiteSpace()) query = query.Where(x => x.Name!.Contains(request.Name));
         if (request.Role.NotNullOrWhiteSpace())
         {
@@ -111,9 +112,10 @@ public class UsersController(FrameworkDbContext context, TokenService tokenServi
     /// <param name="id">用户 ID</param>
     /// <returns>用户详情</returns>
     [HttpGet("{id}")]
-    [Role([UserRoleTypes.Admin])]
     public DataReply<UserDto> Get(int id)
     {
+        var payload = HttpContext.GetJwtPayload();
+        if (!payload.Role.SplitToList().Any(x => x == UserRoleTypes.Admin) && payload.UserId != id) throw new Exception("no auth");
         var user = context.Users.Find(id) ?? throw new Exception("User not found");
         return DataReply.Succeed(user.Adapt<UserDto>());
     }
@@ -150,13 +152,14 @@ public class UsersController(FrameworkDbContext context, TokenService tokenServi
     /// <param name="request">更新用户请求</param>
     /// <returns>操作结果</returns>
     [HttpPut("{id}")]
-    [Role([UserRoleTypes.Admin])]
     public EmptyReply Update(int id, [FromBody] UpdateUserRequest request)
     {
         if (request.Name.IsNullOrWhiteSpace()) throw new Exception("用户名不能为空");
         if (request.Role.IsNullOrWhiteSpace()) throw new Exception("角色不能为空");
         var user = context.Users.Find(id) ?? throw new Exception("data not found");
-        if (id == HttpContext.GetJwtPayload().UserId && request.Role != user.Role) throw new Exception("不能修改自己的角色");
+        var payload = HttpContext.GetJwtPayload();
+        if (id == payload.UserId && request.Role != user.Role) throw new Exception("不能修改自己的角色");
+        if (!payload.Role.SplitToList().Any(x => x == UserRoleTypes.Admin) && payload.UserId != id) throw new Exception("no auth");
         if (context.Users.Any(u => u.Name == request.Name && u.Id != id && !u.IsDeleted)) throw new Exception("用户名已存在");
         if (request.Password.NotNullOrWhiteSpace())
         {

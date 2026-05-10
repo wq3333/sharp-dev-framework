@@ -44,6 +44,7 @@
     "HubUrl": "/hubs/notifications",
     "RequestSizeLimit": 10737418240,
     "JwtExpirationMinutes": 120,
+    "JwtSpecialExpirationHours": 24,
     "Cors": {
       "IsEnabled": true,
       "PolicyName": "DefaultCorsPolicy",

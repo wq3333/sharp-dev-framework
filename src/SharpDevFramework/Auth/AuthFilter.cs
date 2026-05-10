@@ -45,6 +45,17 @@ internal class AuthFilter(TokenService tokenService) : IAuthorizationFilter
             var payload = tokenService.VerifyToken(token);
             context.HttpContext.Items["payload"] = payload;
 
+            // Special Token 只能访问标记了 [SpecialToken] 的接口
+            if (payload.Type == "special")
+            {
+                var hasSpecialAttr = context.ActionDescriptor.EndpointMetadata.Any(m => m is SpecialTokenAttribute);
+                if (!hasSpecialAttr)
+                {
+                    UnAuthenticated(context);
+                    return;
+                }
+            }
+
             var roles = context.ActionDescriptor.EndpointMetadata.Where(m => m is RoleAttribute).SelectMany(m => (m as RoleAttribute)!.Roles);
             if (roles.Any())
             {

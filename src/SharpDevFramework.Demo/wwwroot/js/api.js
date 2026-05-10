@@ -87,6 +87,7 @@ export const api = {
     users: {
         login: async (username, password, onerror = null) => {
             const result = await request('POST', '/users/login', { username, password }, null, onerror);
+            localStorage.removeItem('speical-token');
             return result.data;
         },
         page: async (name, role, page = 1, size = 20, onerror = null) => {
@@ -108,9 +109,12 @@ export const api = {
         delete: async (id, onerror = null) => {
             await request('DELETE', `/users/${id}`, null, null, onerror);
         },
-        token: async (onerror = null) => {
-            const result = await request('POST', '/users/token', null, null, onerror);
-            return "Bearer "+result.data;
+        specialToken: async (onerror = null) => {
+            const token = localStorage.getItem('speical-token');
+            if (token) return token;
+            const result = await request('POST', '/users/special-token', null, null, onerror);
+            localStorage.setItem('speical-token', result.data);
+            return result.data;
         },
     },
     

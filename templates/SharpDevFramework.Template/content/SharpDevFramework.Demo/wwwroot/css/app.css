@@ -224,6 +224,41 @@ html,body,#app {
     color: var(--accent);
 }
 
+/* Sidebar nav group (system menu) */
+.sidebar-nav-group {
+  margin-bottom: 8px;
+}
+
+.sidebar-nav-item--clickable {
+  user-select: none;
+}
+
+.sidebar-nav-chevron {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+.sidebar-nav-submenu {
+  padding-left: 20px;
+  margin-top: 4px;
+}
+
+.sidebar-nav-item--sub {
+  padding: 8px 12px;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.sidebar-nav-icon--settings {
+  color: #64748b;
+}
+
+.sidebar-nav-item--active .sidebar-nav-icon--settings {
+  color: var(--accent);
+}
+
 /* Dropdown teleport animation */
 .f-dropdown--enter {
   opacity: 0;
@@ -339,6 +374,62 @@ html,body,#app {
 }
 .login-card .f-button--primary:active {
   transform: translateY(0);
+}
+
+/* Dark mode login */
+[data-theme="dark"] .login-bg {
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+}
+
+[data-theme="dark"] .login-orb--1 {
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.25), transparent 70%);
+}
+
+[data-theme="dark"] .login-orb--2 {
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.2), transparent 70%);
+}
+
+[data-theme="dark"] .login-orb--3 {
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.15), transparent 70%);
+}
+
+[data-theme="dark"] .login-grid {
+  background-image: linear-gradient(rgba(99, 102, 241, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99, 102, 241, 0.08) 1px, transparent 1px);
+}
+
+[data-theme="dark"] .login-card {
+  background: rgba(17, 24, 39, 0.95);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  box-shadow: 0 8px 40px rgba(99, 102, 241, 0.15), 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .login-card::before {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.35), rgba(139, 92, 246, 0.25), transparent 0.5);
+}
+
+[data-theme="dark"] .login-card .f-input {
+  background: rgba(30, 41, 59, 0.8);
+  border-color: rgba(99, 102, 241, 0.25);
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .login-card .f-input::placeholder {
+  color: #64748b;
+}
+
+[data-theme="dark"] .login-card .f-input:focus {
+  border-color: rgba(99, 102, 241, 0.5);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+[data-theme="dark"] .login-card .f-button--primary {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+}
+
+[data-theme="dark"] .login-card .f-button--primary:hover {
+  box-shadow: 0 6px 24px rgba(99, 102, 241, 0.4);
 }
 
 /* Sidebar */

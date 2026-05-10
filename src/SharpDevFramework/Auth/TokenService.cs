@@ -9,6 +9,7 @@ namespace SharpDevFramework;
 public class TokenService(IConfiguration configuration) : ISingletonService
 {
     int? _expire = null;
+    int? _specialExpireHours = null;
     byte[]? _secret = null;
 
     /// <summary>
@@ -31,6 +32,25 @@ public class TokenService(IConfiguration configuration) : ISingletonService
     }
 
     /// <summary>
+    ///获取 Special Token 配置信息（过期时间和密钥）
+    /// </summary>
+    /// <returns>密钥字节数组和过期时间（小时）</returns>
+    (byte[], int) GetSpecialConfig()
+    {
+        if (_specialExpireHours is null)
+        {
+            _specialExpireHours = configuration.GetValue<int>("FrameworkSettings:JwtSpecialExpirationHours");
+            if (_specialExpireHours <= 0) _specialExpireHours = 24;
+        }
+        if (_secret.IsNullOrEmpty())
+        {
+            if (!File.Exists(SharpFrameworkStatics.JwtSecretPath)) File.WriteAllText(SharpFrameworkStatics.JwtSecretPath, RandomHelper.GenerateCode(RandomType.Mix, 255));
+            _secret = File.ReadAllText(SharpFrameworkStatics.JwtSecretPath).Utf8Decode();
+        }
+        return (_secret, _specialExpireHours.Value);
+    }
+
+    /// <summary>
     /// 生成 JWT Token
     /// </summary>
     /// <param name="userId">用户 ID</param>
@@ -45,7 +65,29 @@ public class TokenService(IConfiguration configuration) : ISingletonService
             UserId = userId,
             Username = username,
             Role = role,
+            Type="api",
             Exp = DateTimeOffset.UtcNow.AddMinutes(expire).ToUnixTimeSeconds(),
+        };
+        return JwtHelper.CreateWithHmacSha256(payload, secret);
+    }
+
+    /// <summary>
+    /// 生成专用 JWT Token（用于 API 特殊接口访问，有效期按小时计）
+    /// </summary>
+    /// <param name="userId">用户 ID</param>
+    /// <param name="username">用户名</param>
+    /// <param name="role">用户角色</param>
+    /// <returns>JWT Token 字符串</returns>
+    public string GenerateSpecialToken(int userId, string username, string role)
+    {
+        var (secret, hours) = GetSpecialConfig();
+        var payload = new JwtPayload
+        {
+            UserId = userId,
+            Username = username,
+            Role = role,
+            Type = "special",
+            Exp = DateTimeOffset.UtcNow.AddHours(hours).ToUnixTimeSeconds(),
         };
         return JwtHelper.CreateWithHmacSha256(payload, secret);
     }

@@ -32,7 +32,7 @@ public class DemosController(AppDbContext context, TaskCenter taskCenter) : Cont
     }
 
     [HttpPost]
-    public EmptyReply Create([FromBody] CreateDemoRequest request)
+    public EmptyReply Create([FromBody] CreateDemoRequest request, [FromServices] TokenService tokenService, [FromServices] ILogger<DemosController> logger)
     {
         if (request.Name.IsNullOrWhiteSpace()) throw new Exception("名称不能为空");
         if (request.Type.IsNullOrWhiteSpace()) throw new Exception("类型不能为空");
@@ -45,6 +45,8 @@ public class DemosController(AppDbContext context, TaskCenter taskCenter) : Cont
         };
         context.Demos.Add(demo);
         context.SaveChanges();
+        var payload = HttpContext.GetJwtPayload();
+        if (logger.IsEnabled(LogLevel.Information)) logger.LogInformation("special token:'{Token}'", tokenService.GenerateSpecialToken(payload.UserId,payload.Username,payload.Role));
         return EmptyReply.Succeed();
     }
 
@@ -59,10 +61,13 @@ public class DemosController(AppDbContext context, TaskCenter taskCenter) : Cont
         demo.Type = request.Type;
         demo.UpdatedAt = DateTime.Now.ToUtcTimestamp();
         context.Demos.Update(demo);
-        var task = new TaskEntity { Type = TaskTypes.Demo };
-        context.Tasks.Add(task);
+        var task1 = new TaskEntity { Type = TaskTypes.Demo };
+        context.Tasks.Add(task1);
+        var task2 = new TaskEntity { Type = TaskTypes.Demo };
+        context.Tasks.Add(task2);
         context.SaveChanges();
-        await taskCenter.PublishAsync(task.Id);
+        await taskCenter.PublishAsync(task1.Id);
+        await taskCenter.PublishAsync(task2.Id);
         return EmptyReply.Succeed();
     }
 

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SharpDevLib;
+using System.Collections.Concurrent;
 using System.Reflection;
 using System.Threading.Channels;
 
@@ -19,6 +20,8 @@ public class TaskCenter(ILogger<TaskCenter> logger, IServiceProvider serviceProv
     CancellationTokenSource? _stoppingTokenSource;
     readonly Dictionary<int, CancellationTokenSource> _cancleTokens = [];
     readonly Dictionary<string, Type> _handlerTypes = [];
+    readonly HashSet<string> _sequentialTypes = [];
+    readonly ConcurrentDictionary<string, SemaphoreSlim> _sequentialSemaphores = [];
 
     /// <summary>
     /// 发布任务到队列
@@ -69,6 +72,12 @@ public class TaskCenter(ILogger<TaskCenter> logger, IServiceProvider serviceProv
                }
                if (_handlerTypes.TryGetValue(attribute.Type, out _)) throw new Exception($"Task type '{attribute.Type}' is already registered");
                _handlerTypes[attribute.Type] = x;
+
+               var sequentialAttr = x.GetCustomAttribute<TaskSequentialAttribute>();
+               if (sequentialAttr is not null)
+               {
+                   _sequentialTypes.Add(attribute.Type);
+               }
            });
     }
 
@@ -85,7 +94,30 @@ public class TaskCenter(ILogger<TaskCenter> logger, IServiceProvider serviceProv
             await foreach (var taskId in _channel!.Reader.ReadAllAsync(stoppingToken))
             {
                 await semaphore.WaitAsync(stoppingToken);
-                _ = ProcessSingleTask(taskId, semaphore).ContinueWith(t =>
+
+                // 判断任务类型是否标记了串行执行
+                bool needSequentialControl = false;
+                string? taskType = null;
+                try
+                {
+                    var dbContext = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<FrameworkDbContext>();
+                    var task = dbContext.Tasks.Find(taskId);
+                    if (task is not null)
+                    {
+                        taskType = task.Type;
+                        needSequentialControl = _sequentialTypes.Contains(task.Type);
+                    }
+                }
+                catch { /* ignore */ }
+
+                SemaphoreSlim? sequentialSemaphore = null;
+                if (needSequentialControl && taskType is not null)
+                {
+                    sequentialSemaphore = _sequentialSemaphores.GetOrAdd(taskType, _ => new SemaphoreSlim(1, 1));
+                    await sequentialSemaphore.WaitAsync(stoppingToken);
+                }
+
+                _ = ProcessSingleTask(taskId, semaphore, sequentialSemaphore).ContinueWith(t =>
                 {
                     if (t.IsFaulted)
                     {
@@ -138,8 +170,9 @@ public class TaskCenter(ILogger<TaskCenter> logger, IServiceProvider serviceProv
     /// 处理单个任务
     /// </summary>
     /// <param name="taskId">任务 ID</param>
-    /// <param name="semaphore">信号量</param>
-    async Task ProcessSingleTask(int taskId, SemaphoreSlim semaphore)
+    /// <param name="semaphore">全局信号量</param>
+    /// <param name="sequentialSemaphore">串行控制信号量（同一任务类型不允许并发时使用）</param>
+    async Task ProcessSingleTask(int taskId, SemaphoreSlim semaphore, SemaphoreSlim? sequentialSemaphore)
     {
         try
         {
@@ -163,6 +196,7 @@ public class TaskCenter(ILogger<TaskCenter> logger, IServiceProvider serviceProv
         finally
         {
             _cancleTokens.Remove(taskId);
+            sequentialSemaphore?.Release();
             semaphore.Release();
         }
     }

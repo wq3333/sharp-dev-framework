@@ -1,5 +1,5 @@
 import { FButton, FDropdown, FDropdownItem } from './index.js';
-import { IconMenu, IconClose, IconTasks, IconUsers, IconDemos, IconLogs, IconSun, IconMoon, IconLogo, IconUser, IconRole, IconLogout } from './icon.js';
+import { IconMenu, IconClose, IconTasks, IconUsers, IconDemos, IconLogs, IconSun, IconMoon, IconLogo, IconUser, IconRole, IconLogout, IconRefresh, IconSettings, IconChevronDown } from './icon.js';
 import { clearAuth } from '../auth.js';
 import { stopSignalR } from '../signalr.js';
 import { getEnumName } from '../enums.js';
@@ -9,7 +9,7 @@ const { computed, inject, ref, onMounted, onBeforeUnmount } = Vue;
 
 export const LayoutComponent = {
     name: 'LayoutComponent',
-    components: { FButton, FDropdown, FDropdownItem, IconMenu, IconClose, IconTasks, IconUsers, IconDemos, IconLogs, IconSun, IconMoon, IconLogo, IconUser, IconRole, IconLogout },
+    components: { FButton, FDropdown, FDropdownItem, IconMenu, IconClose, IconTasks, IconUsers, IconDemos, IconLogs, IconSun, IconMoon, IconLogo, IconUser, IconRole, IconLogout, IconRefresh, IconSettings, IconChevronDown },
     template: `
     <div class="flex h-full overflow-hidden">
         <div v-if="mobileOpen && isMobile" class="fixed inset-0 bg-black/40 z-40 transition-opacity duration-200" :class="mobileOpen ? 'opacity-100' : 'opacity-0'" @click="mobileOpen = false"></div>
@@ -37,24 +37,35 @@ export const LayoutComponent = {
                     <span class="sidebar-nav-icon sidebar-nav-icon--tasks"><IconTasks /></span>
                     <span class="whitespace-nowrap">任务管理</span>
                 </router-link>
-                <router-link v-if="isAdmin" to="/users" class="sidebar-nav-item"
-                    :class="{ 'sidebar-nav-item--active': $route.path === '/users' }"
-                    @click="onNavClick">
-                    <span class="sidebar-nav-icon sidebar-nav-icon--users"><IconUsers /></span>
-                    <span class="whitespace-nowrap">用户管理</span>
-                </router-link>
                 <router-link to="/demos" class="sidebar-nav-item"
                     :class="{ 'sidebar-nav-item--active': $route.path === '/demos' }"
                     @click="onNavClick">
                     <span class="sidebar-nav-icon sidebar-nav-icon--demos"><IconDemos /></span>
                     <span class="whitespace-nowrap">Demo管理</span>
                 </router-link>
-                <router-link v-if="isAdmin" to="/logs" class="sidebar-nav-item"
-                    :class="{ 'sidebar-nav-item--active': $route.path === '/logs' }"
-                    @click="onNavClick">
-                    <span class="sidebar-nav-icon sidebar-nav-icon--logs"><IconLogs /></span>
-                    <span class="whitespace-nowrap">操作日志</span>
-                </router-link>
+                <div class="sidebar-nav-group">
+                    <div class="sidebar-nav-item sidebar-nav-item--clickable"
+                        :class="{ 'sidebar-nav-item--active': isSystemMenuActive }"
+                        @click="systemMenuOpen = !systemMenuOpen">
+                        <span class="sidebar-nav-icon sidebar-nav-icon--settings"><IconSettings /></span>
+                        <span class="flex-1 whitespace-nowrap">系统管理</span>
+                        <IconChevronDown class="sidebar-nav-chevron transition-transform duration-200" :class="{ 'rotate-180': systemMenuOpen }" />
+                    </div>
+                    <div v-show="systemMenuOpen" class="sidebar-nav-submenu">
+                        <router-link v-if="isAdmin" to="/users" class="sidebar-nav-item sidebar-nav-item--sub"
+                            :class="{ 'sidebar-nav-item--active': $route.path === '/users' }"
+                            @click="onNavClick">
+                            <span class="sidebar-nav-icon sidebar-nav-icon--users"><IconUsers /></span>
+                            <span class="whitespace-nowrap">用户管理</span>
+                        </router-link>
+                        <router-link v-if="isAdmin" to="/logs" class="sidebar-nav-item sidebar-nav-item--sub"
+                            :class="{ 'sidebar-nav-item--active': $route.path === '/logs' }"
+                            @click="onNavClick">
+                            <span class="sidebar-nav-icon sidebar-nav-icon--logs"><IconLogs /></span>
+                            <span class="whitespace-nowrap">操作日志</span>
+                        </router-link>
+                    </div>
+                </div>
             </nav>
         </aside>
         <div class="flex-1 overflow-hidden flex flex-col min-w-0">
@@ -71,6 +82,9 @@ export const LayoutComponent = {
                         <template v-else-if="$route.path.startsWith('/demos')">Demo管理</template>
                         <template v-else-if="$route.path.startsWith('/logs')">操作日志</template>
                     </h1>
+                    <button @click="refreshPage" class="inline-flex items-center justify-center w-7 h-7 rounded text-[var(--text-tertiary)] cursor-pointer transition-all duration-150 ease-out hover:bg-[var(--bg-hover)] hover:text-[var(--text-secondary)]" title="刷新">
+                        <IconRefresh :size="16"/>
+                    </button>
                 </div>
                 <div class="flex items-center gap-2 sm:gap-4">
                     <button class="inline-flex items-center justify-center w-8 h-8 rounded border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-secondary)] cursor-pointer text-sm transition-all duration-150 ease-out hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)]" @click="toggleTheme" title="切换主题">
@@ -96,7 +110,7 @@ export const LayoutComponent = {
             </header>
             <main class="flex-1 p-4 sm:p-6 overflow-y-auto">
                 <router-view v-slot="{ Component }">
-                    <keep-alive><component :is="Component" /></keep-alive>
+                    <keep-alive><component :is="Component" ref="currentViewRef"/></keep-alive>
                 </router-view>
             </main>
         </div>
@@ -106,6 +120,13 @@ export const LayoutComponent = {
         const sidebarOpen = ref(true);
         const mobileOpen = ref(false);
         const isMobile = ref(window.innerWidth < 1024);
+        const systemMenuOpen = ref(true);
+        const currentViewRef = ref(null);
+
+        const isSystemMenuActive = computed(() => {
+            const path = router?.currentRoute?.value?.path || '';
+            return path === '/users' || path === '/logs';
+        });
 
         const updateIsMobile = () => {
             isMobile.value = window.innerWidth < 1024;
@@ -152,6 +173,14 @@ export const LayoutComponent = {
             window.location.hash = '#/login'; 
         };
 
-        return { sidebarOpen, mobileOpen, isMobile, closeSidebar, openSidebar, onNavClick, username, role, isAdmin, handleLogout, isDark, toggleTheme };
+        const refreshPage = async () => {
+            if (!currentViewRef) return;
+            const instance = currentViewRef.value;
+            if (instance && typeof instance.refresh === 'function') {
+                instance.refresh();
+            }
+        };
+
+        return { sidebarOpen, mobileOpen, isMobile, systemMenuOpen, isSystemMenuActive, currentViewRef, closeSidebar, openSidebar, onNavClick, username, role, isAdmin, handleLogout, isDark, toggleTheme, refreshPage };
     }
 };

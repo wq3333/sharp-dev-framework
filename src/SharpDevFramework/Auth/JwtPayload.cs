@@ -24,4 +24,9 @@ public class JwtPayload
     /// 用户角色
     /// </summary>
     public string Role { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Token 类型（空字符串为普通 token，"special" 为专用 token）
+    /// </summary>
+    public string Type { get; set; } = string.Empty;
 }

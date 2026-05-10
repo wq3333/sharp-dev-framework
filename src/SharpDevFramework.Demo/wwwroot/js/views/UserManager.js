@@ -3,7 +3,7 @@ import { enums, getEnumName } from '../enums.js';
 import { FButton, FInput, FMultiSelect, FCheckbox, FModal, FTable, IconRefresh, IconPlus } from '../components/index.js';
 import { formatDate } from '../utils.js';
 
-const { ref, onMounted, computed, watch } = Vue;
+const { ref, onMounted, computed } = Vue;
 
 export const UserManagerView = {
     components: { FButton, FInput, FMultiSelect, FCheckbox, FModal, FTable, IconRefresh, IconPlus },
@@ -59,7 +59,6 @@ export const UserManagerView = {
         const form = ref({ name: '', password: '', roleList: [], isActive: true });
         const editingUserId = ref(null);
         const currentUserId = computed(() => parseInt(localStorage.getItem('userId') || '0'));
-        const isAdmin = computed(() => localStorage.getItem('role')?.split(',').filter(x => x === 'Admin').length > 0) || false;
         const currentPage = ref(1);
         const pageSize = ref(10);
         const totalCount = ref(0);
@@ -134,10 +133,7 @@ export const UserManagerView = {
         };
 
         onMounted(async () => {
-            if (!isAdmin.value) {
-                window.location.hash = '/';
-                return;
-            } await loadUsers();
+            await loadUsers();
         });
         return { users, columns, currentUserId, nameFilter, roleFilter, showCreateModal, showEditModal, showModal, form, roleOptions, editUser, saveUser, deleteUser, closeModal, getEnumName, currentPage, pageSize, totalCount, pageCount, goToPage, formatDate, loading, loadUsers };
     }
