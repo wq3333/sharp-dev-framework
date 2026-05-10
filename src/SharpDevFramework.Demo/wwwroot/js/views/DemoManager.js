@@ -135,6 +135,11 @@ export const DemoManagerView = {
         onMounted(() => {
             loadDemos();
         });
-        return { demos, columns, nameFilter, typeFilter, demoTypeOptions, currentPage, totalCount, pageCount, pageSize, loading, saving, deletingId, modalVisible, isEditing, formData, loadDemos, goToPage, openCreateModal, openEditModal, saveDemo, deleteDemo, formatDate, getEnumName };
+
+        const refresh = () => {
+            loadDemos();
+        };
+
+        return { refresh, demos, columns, nameFilter, typeFilter, demoTypeOptions, currentPage, totalCount, pageCount, pageSize, loading, saving, deletingId, modalVisible, isEditing, formData, loadDemos, goToPage, openCreateModal, openEditModal, saveDemo, deleteDemo, formatDate, getEnumName };
     }
 };

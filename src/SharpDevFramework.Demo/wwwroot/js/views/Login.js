@@ -51,7 +51,6 @@ export const LoginView = {
                 });
                 setAuth(data);
                 initSignalR();
-                window.clearPageCache();
                 window.location.hash = '/';
             } finally {
                 loading.value = false;

@@ -135,6 +135,11 @@ export const UserManagerView = {
         onMounted(async () => {
             await loadUsers();
         });
-        return { users, columns, currentUserId, nameFilter, roleFilter, showCreateModal, showEditModal, showModal, form, roleOptions, editUser, saveUser, deleteUser, closeModal, getEnumName, currentPage, pageSize, totalCount, pageCount, goToPage, formatDate, loading, loadUsers };
+
+        const refresh = () => {
+            loadLogs();
+        };
+
+        return { refresh, users, columns, currentUserId, nameFilter, roleFilter, showCreateModal, showEditModal, showModal, form, roleOptions, editUser, saveUser, deleteUser, closeModal, getEnumName, currentPage, pageSize, totalCount, pageCount, goToPage, formatDate, loading, loadUsers };
     }
 };

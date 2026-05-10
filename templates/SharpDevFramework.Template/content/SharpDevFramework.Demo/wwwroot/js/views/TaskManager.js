@@ -96,10 +96,6 @@ export const TaskManagerView = {
             loading.value = false;
         };
 
-        const refresh = () => {
-            loadTasks();
-        };
-
         const goToPage = ({ page, pageSize: newSize }) => {
             currentPage.value = page;
             pageSize.value = newSize;
@@ -145,6 +141,10 @@ export const TaskManagerView = {
             onTaskUpdated(handleTaskUpdated);
         });
 
-        return { tasks, columns, statusFilter, typeFilter, taskStateOptions, taskTypeOptions, taskStatusClass: getTaskStatusClass, getEnumName, loadTasks, refresh, retryTask, cancelTask, deleteTask, cleanDb, formatDate, currentPage, pageSize, totalCount, pageCount, goToPage, loading, cleaning, isAdmin, detailModalVisible, currentTask, viewDetail };
+        const refresh = () => {
+            loadTasks();
+        };
+
+        return { refresh, tasks, columns, statusFilter, typeFilter, taskStateOptions, taskTypeOptions, taskStatusClass: getTaskStatusClass, getEnumName, loadTasks, retryTask, cancelTask, deleteTask, cleanDb, formatDate, currentPage, pageSize, totalCount, pageCount, goToPage, loading, cleaning, isAdmin, detailModalVisible, currentTask, viewDetail };
     }
 };

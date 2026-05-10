@@ -9,7 +9,7 @@
 		<Copyright>yibei333</Copyright>
 		<RepositoryUrl>https://github.com/yibei333/sharp-dev-framework</RepositoryUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<Version>1.0.2</Version>
+		<Version>1.0.3</Version>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">

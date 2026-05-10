@@ -176,6 +176,11 @@ export const OperationLogManagerView = {
             initDateFilters();
             loadLogs();
         });
-        return { logs, columns, usernameFilter, operationTypeFilter, isSuccessFilter, isSuccessOptions, startDateFilter, endDateFilter, operationTypeOptions, currentPage, pageSize, totalCount, pageCount, loading, loadLogs, goToPage, formatDate, formatDuration, showDetail, detailVisible, currentDetail, getOperationTypeLabel, getOperationTypeClass };
+
+        const refresh = () => {
+            loadLogs();
+        };
+
+        return { refresh, logs, columns, usernameFilter, operationTypeFilter, isSuccessFilter, isSuccessOptions, startDateFilter, endDateFilter, operationTypeOptions, currentPage, pageSize, totalCount, pageCount, loading, loadLogs, goToPage, formatDate, formatDuration, showDetail, detailVisible, currentDetail, getOperationTypeLabel, getOperationTypeClass };
     }
 };
