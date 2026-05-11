@@ -57,7 +57,7 @@ public class DataCleanupTask(IServiceProvider serviceProvider) : BaseTask(servic
         try
         {
             var sqlHelper = new SqlHelper(SqliteFactory.Instance, $"Data Source={SharpFrameworkStatics.DatabasePath}");
-            var deletedCount = await sqlHelper.ExecuteNonQueryAsync(cancellationToken, $"DELETE FROM {tableName} WHERE CreatedAt < {cutoffTimestamp}");
+            var deletedCount = await sqlHelper.ExecuteNonQueryAsync($"DELETE FROM {tableName} WHERE CreatedAt < {cutoffTimestamp}", cancellationToken: cancellationToken);
             if (_logger.IsEnabled(LogLevel.Information)) _logger.LogInformation("数据清理完成: 表={TableName}, 删除记录数={DeletedCount}", tableName, deletedCount);
         }
         catch (Exception ex)
