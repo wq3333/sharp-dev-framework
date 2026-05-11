@@ -45,16 +45,15 @@ export const LoginView = {
         const handleLogin = async () => {
             loading.value = true;
             error.value = '';
-            try {
-                const data = await api.users.login(username.value, password.value, (e) => {
-                    error.value = e.message || '登录失败，请检查用户名和密码';
-                });
-                setAuth(data);
-                initSignalR();
-                window.location.hash = '/';
-            } finally {
+            const data = await api.users.login(username.value, password.value, (e) => {
+                error.value = e.message || '登录失败，请检查用户名和密码';
                 loading.value = false;
-            }
+            });
+            setAuth(data);
+            initSignalR();
+            window.location.hash = '/';
+            loading.value = false;
+            window.location.reload();
         };
 
         return { username, password, loading, error, handleLogin };

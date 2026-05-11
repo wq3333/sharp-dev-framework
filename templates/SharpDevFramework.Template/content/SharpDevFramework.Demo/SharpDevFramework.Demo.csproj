@@ -20,7 +20,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.7" />
-		<PackageReference Include="SharpDevFramework" Version="1.0.2" />
+		<PackageReference Include="SharpDevFramework" Version="1.0.5" />
 	</ItemGroup>
 
 	<ItemGroup>
