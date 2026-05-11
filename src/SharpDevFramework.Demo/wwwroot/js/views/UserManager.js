@@ -137,7 +137,7 @@ export const UserManagerView = {
         });
 
         const refresh = () => {
-            loadLogs();
+            loadUsers();
         };
 
         return { refresh, users, columns, currentUserId, nameFilter, roleFilter, showCreateModal, showEditModal, showModal, form, roleOptions, editUser, saveUser, deleteUser, closeModal, getEnumName, currentPage, pageSize, totalCount, pageCount, goToPage, formatDate, loading, loadUsers };

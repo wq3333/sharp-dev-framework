@@ -1,7 +1,6 @@
 import { FButton, FDropdown, FDropdownItem } from './index.js';
 import { IconMenu, IconClose, IconTasks, IconUsers, IconDemos, IconLogs, IconSun, IconMoon, IconLogo, IconUser, IconRole, IconLogout, IconRefresh, IconSettings, IconChevronDown } from './icon.js';
 import { clearAuth } from '../auth.js';
-import { stopSignalR } from '../signalr.js';
 import { getEnumName } from '../enums.js';
 import { ThemeSymbol } from '../app.js';
 import { router } from '../router.js';
@@ -140,7 +139,7 @@ export const LayoutComponent = {
             }
         };
 
-        onMounted(() => window.addEventListener('resize', updateIsMobile));
+        onMounted(() => { window.addEventListener('resize', updateIsMobile) });
         onBeforeUnmount(() => window.removeEventListener('resize', updateIsMobile));
 
         const closeSidebar = () => {
