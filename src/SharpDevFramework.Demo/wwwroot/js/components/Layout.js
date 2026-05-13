@@ -14,7 +14,7 @@ export const LayoutComponent = {
     <router-view v-if="$route.meta.useLayout===false"/>
     <div v-else class="flex h-full overflow-hidden">
         <div v-if="mobileOpen && isMobile" class="fixed inset-0 bg-black/40 z-40 transition-opacity duration-200" :class="mobileOpen ? 'opacity-100' : 'opacity-0'" @click="mobileOpen = false"></div>
-        <aside class="sidebar bg-[var(--bg-surface)] border-r border-[var(--border-subtle)] flex flex-col shrink-0 z-50"
+        <aside class="sidebar bg-[var(--bg-surface)] border-r border-[var(--border-subtle)] flex flex-col shrink-0 z-3000"
             :class="{
                 'sidebar--open': sidebarOpen && !isMobile,
                 'sidebar--closed': !sidebarOpen && !isMobile,
@@ -83,7 +83,7 @@ export const LayoutComponent = {
                         <template v-else-if="$route.path.startsWith('/demos')">Demo管理</template>
                         <template v-else-if="$route.path.startsWith('/logs')">操作日志</template>
                     </h1>
-                    <button @click="refreshPage" class="inline-flex items-center justify-center w-7 h-7 rounded text-[var(--text-tertiary)] cursor-pointer transition-all duration-150 ease-out hover:bg-[var(--bg-hover)] hover:text-[var(--text-secondary)]" title="刷新">
+                    <button @click="refreshPage" class="inline-flex items-center justify-center w-7 h-7 rounded text-[var(--text-tertiary)] cursor-pointer transition-all duration-150 ease-out hover:bg-[var(--bg-hover)] hover:text-[var(--text-secondary)] active:bg-[var(--accent)] active:text-white" title="刷新">
                         <IconRefresh :size="16"/>
                     </button>
                 </div>
@@ -109,9 +109,11 @@ export const LayoutComponent = {
                     </FDropdown>
                 </div>
             </header>
-            <main class="flex-1 p-4 sm:p-6 overflow-y-auto">
+            <main class="flex-1 overflow-y-auto">
                 <router-view v-slot="{ Component }">
-                    <keep-alive><component :is="Component" ref="currentViewRef"/></keep-alive>
+                    <keep-alive>
+                        <component :is="Component" ref="currentViewRef" class="relative p-4 sm:p-6" />
+                    </keep-alive>
                 </router-view>
             </main>
         </div>
