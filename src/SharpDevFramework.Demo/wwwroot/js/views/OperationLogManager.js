@@ -42,7 +42,7 @@ export const OperationLogManagerView = {
                 </template>
             </FTable>
         </div>
-        <FModal v-model="detailVisible" title="操作日志详情" width="700px">
+        <FModal v-model="detailVisible" title="操作日志详情" size="large">
             <div v-if="currentDetail" class="space-y-3">
                 <div class="grid grid-cols-2 gap-3">
                     <div><label class="block text-[12px] text-[var(--text-tertiary)] mb-1">日志ID</label><div class="text-sm">{{ currentDetail.id }}</div></div>
