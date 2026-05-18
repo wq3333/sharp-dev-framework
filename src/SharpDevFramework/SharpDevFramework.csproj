@@ -21,6 +21,14 @@
 		<PackageReadmeFile>nuget.md</PackageReadmeFile>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
+		<PublishIISAssets>false</PublishIISAssets>
+		<IsWebConfigTransformDisabled>true</IsWebConfigTransformDisabled>
+		<DebugType>none</DebugType>
+		<DebugSymbols>false</DebugSymbols>
+		<SatelliteResourceLanguages>zh-CN</SatelliteResourceLanguages>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<None Include="../../assets/c-sharp.png" Link="Assets\c-sharp.png">
 			<Pack>True</Pack>
