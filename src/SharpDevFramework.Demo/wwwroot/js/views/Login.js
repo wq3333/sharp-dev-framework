@@ -8,7 +8,7 @@ const { ref } = Vue;
 export const LoginView = {
     components: { FButton, FInput, IconLogo },
     template: `
-    <div class="login-page">
+    <div class="login-page h-[100dvh]">
         <div class="login-bg">
             <div class="login-orb login-orb--1"></div>
             <div class="login-orb login-orb--2"></div>
@@ -37,7 +37,7 @@ export const LoginView = {
     </div>
     `,
     setup() {
-        const username = ref('admin');
+        const username = ref('');
         const password = ref('');
         const loading = ref(false);
         const error = ref('');

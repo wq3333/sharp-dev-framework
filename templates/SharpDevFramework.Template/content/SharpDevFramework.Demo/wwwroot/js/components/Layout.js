@@ -12,7 +12,7 @@ export const LayoutComponent = {
     components: { FButton, FDropdown, FDropdownItem, IconMenu, IconClose, IconTasks, IconUsers, IconDemos, IconLogs, IconSun, IconMoon, IconLogo, IconUser, IconRole, IconLogout, IconRefresh, IconSettings, IconChevronDown },
     template: `
     <router-view v-if="$route.meta.useLayout===false"/>
-    <div v-else class="flex h-full overflow-hidden">
+    <div v-else class="flex h-[100dvh] overflow-hidden">
         <div v-if="mobileOpen && isMobile" class="fixed inset-0 bg-black/40 z-40 transition-opacity duration-200" :class="mobileOpen ? 'opacity-100' : 'opacity-0'" @click="mobileOpen = false"></div>
         <aside class="sidebar bg-[var(--bg-surface)] border-r border-[var(--border-subtle)] flex flex-col shrink-0 z-3000"
             :class="{
