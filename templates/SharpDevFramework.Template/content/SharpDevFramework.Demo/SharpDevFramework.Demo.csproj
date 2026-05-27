@@ -19,8 +19,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.7" />
-		<PackageReference Include="SharpDevFramework" Version="1.0.5" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8" />
+		<PackageReference Include="SharpDevFramework" Version="1.0.6" />
 	</ItemGroup>
 
 	<ItemGroup>
