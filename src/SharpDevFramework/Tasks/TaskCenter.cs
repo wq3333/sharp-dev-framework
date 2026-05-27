@@ -143,7 +143,11 @@ public class TaskCenter(ILogger<TaskCenter> logger, IServiceProvider serviceProv
     /// <returns>Task</returns>
     public async Task CancelTaskAsync(int taskId)
     {
-        if (_cancleTokens.TryGetValue(taskId, out var cts)) await cts.CancelAsync();
+        await ChangeTaskState(taskId, TaskStates.Failed, "cancled");
+        if (_cancleTokens.TryGetValue(taskId, out var cts))
+        {
+            await cts.CancelAsync();
+        }
     }
 
     /// <summary>
