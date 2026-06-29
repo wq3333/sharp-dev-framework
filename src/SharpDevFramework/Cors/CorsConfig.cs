@@ -1,4 +1,4 @@
-﻿namespace SharpDevFramework;
+namespace SharpDevFramework;
 
 /// <summary>
 /// CORS 跨域配置

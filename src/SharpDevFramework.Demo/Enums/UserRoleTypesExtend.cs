@@ -1,4 +1,4 @@
-﻿namespace SharpDevFramework.Demo.Enums;
+namespace SharpDevFramework.Demo.Enums;
 
 [MockEnum("UserRoleTypes")]
 public class UserRoleTypesExtend

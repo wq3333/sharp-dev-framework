@@ -1,4 +1,4 @@
-﻿namespace SharpDevFramework;
+namespace SharpDevFramework;
 
 /// <summary>
 /// 任务注册特性，用于标记任务处理器类

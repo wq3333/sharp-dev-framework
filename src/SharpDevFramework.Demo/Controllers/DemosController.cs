@@ -1,4 +1,4 @@
-﻿using SharpDevFramework.Demo.Data;
+using SharpDevFramework.Demo.Data;
 using SharpDevFramework.Demo.Data.Entities;
 using SharpDevFramework.Demo.Enums;
 

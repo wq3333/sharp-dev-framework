@@ -1,4 +1,4 @@
-﻿# SharpDevFramework 使用指南
+# SharpDevFramework 使用指南
 
 ## 目录
 

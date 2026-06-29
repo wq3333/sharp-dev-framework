@@ -1,4 +1,4 @@
-﻿namespace SharpDevFramework;
+namespace SharpDevFramework;
 
 /// <summary>
 /// 模拟枚举特性，用于将类标记为模拟枚举

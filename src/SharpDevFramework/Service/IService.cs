@@ -1,4 +1,4 @@
-﻿namespace SharpDevFramework;
+namespace SharpDevFramework;
 
 /// <summary>
 /// 作用域服务标记接口

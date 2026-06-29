@@ -1,4 +1,4 @@
-﻿namespace SharpDevFramework;
+namespace SharpDevFramework;
 
 /// <summary>
 /// 指定角色权限

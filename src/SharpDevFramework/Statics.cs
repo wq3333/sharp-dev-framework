@@ -1,4 +1,4 @@
-﻿using SharpDevLib;
+using SharpDevLib;
 
 namespace SharpDevFramework;
 
