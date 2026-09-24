@@ -23,11 +23,11 @@ public class UsersController(FrameworkDbContext context, TokenService tokenServi
     [AllowAnonymous]
     public async Task<DataReply<LoginResponse>> Login([FromBody] LoginRequest request)
     {
-        if (request.Username.IsNullOrWhiteSpace()) throw new Exception("username required");
-        if (request.Password.IsNullOrWhiteSpace()) throw new Exception("password required");
+        if (request.Username.IsNullOrWhiteSpace()) throw new KnownException("username required");
+        if (request.Password.IsNullOrWhiteSpace()) throw new KnownException("password required");
 
-        var user = context.Users.FirstOrDefault(u => u.Name == request.Username) ?? throw new Exception("用户名或密码错误");
-        if (!user.IsActive) throw new Exception("账户已禁用");
+        var user = context.Users.FirstOrDefault(u => u.Name == request.Username) ?? throw new KnownException("用户名或密码错误");
+        if (!user.IsActive) throw new KnownException("账户已禁用");
 
         var now = DateTime.Now.ToUtcTimestamp();
 
@@ -35,7 +35,7 @@ public class UsersController(FrameworkDbContext context, TokenService tokenServi
         if (user.LockoutUntil.HasValue && user.LockoutUntil.Value > now)
         {
             var remainingTime = user.LockoutUntil.Value - now;
-            throw new Exception($"账户已锁定，请{TimeSpan.FromMilliseconds(remainingTime).TotalSeconds:F0}秒后重试");
+            throw new KnownException($"账户已锁定，请{TimeSpan.FromMilliseconds(remainingTime).TotalSeconds:F0}秒后重试");
         }
 
         var result = new PasswordHasher<UserEntity>().VerifyHashedPassword(user, user.PasswordHash, request.Password);
@@ -57,7 +57,7 @@ public class UsersController(FrameworkDbContext context, TokenService tokenServi
                 user.LockoutUntil = DateTime.Now.AddMinutes(lockMinutes).ToUtcTimestamp();
             }
             context.SaveChanges();
-            throw new Exception("用户名或密码错误");
+            throw new KnownException("用户名或密码错误");
         }
 
         user.FailedLoginAttempts = 0;
@@ -115,8 +115,8 @@ public class UsersController(FrameworkDbContext context, TokenService tokenServi
     public DataReply<UserDto> Get(int id)
     {
         var payload = HttpContext.GetJwtPayload();
-        if (!payload.Role.SplitToList().Any(x => x == UserRoleTypes.Admin) && payload.UserId != id) throw new Exception("no auth");
-        var user = context.Users.Find(id) ?? throw new Exception("User not found");
+        if (!payload.Role.SplitToList().Any(x => x == UserRoleTypes.Admin) && payload.UserId != id) throw new KnownException("no auth");
+        var user = context.Users.Find(id) ?? throw new KnownException("User not found");
         return DataReply.Succeed(user.Adapt<UserDto>());
     }
 
@@ -129,10 +129,10 @@ public class UsersController(FrameworkDbContext context, TokenService tokenServi
     [Role([UserRoleTypes.Admin])]
     public EmptyReply Create([FromBody] CreateUserRequest request)
     {
-        if (request.Name.IsNullOrWhiteSpace()) throw new Exception("用户名不能为空");
-        if (request.Password.IsNullOrWhiteSpace()) throw new Exception("密码不能为空");
-        if (request.Role.IsNullOrWhiteSpace()) throw new Exception("角色不能为空");
-        if (context.Users.Any(u => u.Name == request.Name && !u.IsDeleted)) throw new Exception("用户名已存在");
+        if (request.Name.IsNullOrWhiteSpace()) throw new KnownException("用户名不能为空");
+        if (request.Password.IsNullOrWhiteSpace()) throw new KnownException("密码不能为空");
+        if (request.Role.IsNullOrWhiteSpace()) throw new KnownException("角色不能为空");
+        if (context.Users.Any(u => u.Name == request.Name && !u.IsDeleted)) throw new KnownException("用户名已存在");
 
         var user = new UserEntity
         {
@@ -154,13 +154,13 @@ public class UsersController(FrameworkDbContext context, TokenService tokenServi
     [HttpPut("{id}")]
     public EmptyReply Update(int id, [FromBody] UpdateUserRequest request)
     {
-        if (request.Name.IsNullOrWhiteSpace()) throw new Exception("用户名不能为空");
-        if (request.Role.IsNullOrWhiteSpace()) throw new Exception("角色不能为空");
-        var user = context.Users.Find(id) ?? throw new Exception("data not found");
+        if (request.Name.IsNullOrWhiteSpace()) throw new KnownException("用户名不能为空");
+        if (request.Role.IsNullOrWhiteSpace()) throw new KnownException("角色不能为空");
+        var user = context.Users.Find(id) ?? throw new KnownException("data not found");
         var payload = HttpContext.GetJwtPayload();
-        if (id == payload.UserId && request.Role != user.Role) throw new Exception("不能修改自己的角色");
-        if (!payload.Role.SplitToList().Any(x => x == UserRoleTypes.Admin) && payload.UserId != id) throw new Exception("no auth");
-        if (context.Users.Any(u => u.Name == request.Name && u.Id != id && !u.IsDeleted)) throw new Exception("用户名已存在");
+        if (id == payload.UserId && request.Role != user.Role) throw new KnownException("不能修改自己的角色");
+        if (!payload.Role.SplitToList().Any(x => x == UserRoleTypes.Admin) && payload.UserId != id) throw new KnownException("no auth");
+        if (context.Users.Any(u => u.Name == request.Name && u.Id != id && !u.IsDeleted)) throw new KnownException("用户名已存在");
         if (request.Password.NotNullOrWhiteSpace())
         {
             user.PasswordHash = new PasswordHasher<UserEntity>().HashPassword(user, request.Password);
@@ -182,8 +182,8 @@ public class UsersController(FrameworkDbContext context, TokenService tokenServi
     [Role([UserRoleTypes.Admin])]
     public EmptyReply Delete(int id)
     {
-        if (id == HttpContext.GetJwtPayload().UserId) throw new Exception("不能删除自己");
-        var user = context.Users.Find(id) ?? throw new Exception("data not found");
+        if (id == HttpContext.GetJwtPayload().UserId) throw new KnownException("不能删除自己");
+        var user = context.Users.Find(id) ?? throw new KnownException("data not found");
         user.IsDeleted = true;
         context.Users.Update(user);
         context.SaveChanges();

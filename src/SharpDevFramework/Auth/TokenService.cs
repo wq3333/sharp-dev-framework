@@ -102,10 +102,10 @@ public class TokenService(IConfiguration configuration) : ISingletonService
     {
         var (_, secret) = GetConfig();
         var result = JwtHelper.VerifyWithHmacSha256(token, secret);
-        if (!result.IsVerified) throw new Exception("token is invalid");
-        var payload = result.Payload?.DeSerialize<JwtPayload>() ?? throw new Exception("token is invalid");
+        if (!result.IsVerified) throw new KnownException("token is invalid");
+        var payload = result.Payload?.DeSerialize<JwtPayload>() ?? throw new KnownException("token is invalid");
         var expTime = DateTimeOffset.FromUnixTimeSeconds(payload.Exp);
-        if (expTime < DateTimeOffset.UtcNow) throw new Exception("token is invalid");
+        if (expTime < DateTimeOffset.UtcNow) throw new KnownException("token is invalid");
         return payload;
     }
 }

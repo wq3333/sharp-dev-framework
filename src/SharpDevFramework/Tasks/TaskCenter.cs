@@ -28,7 +28,7 @@ public class TaskCenter(ILogger<TaskCenter> logger, IServiceProvider serviceProv
     /// <param name="taskId">任务 ID</param>
     public async Task PublishAsync(int taskId)
     {
-        if (!_started || _channel is null) throw new Exception($"{nameof(TaskCenter)} not started");
+        if (!_started || _channel is null) throw new KnownException($"{nameof(TaskCenter)} not started");
         await _channel.Writer.WriteAsync(taskId);
     }
 
@@ -69,7 +69,7 @@ public class TaskCenter(ILogger<TaskCenter> logger, IServiceProvider serviceProv
                    if (logger.IsEnabled(LogLevel.Warning)) logger.LogWarning("type '{Type}' missing TaskRegisterAttribute", x.FullName);
                    return;
                }
-               if (_handlerTypes.TryGetValue(attribute.Type, out _)) throw new Exception($"Task type '{attribute.Type}' is already registered");
+               if (_handlerTypes.TryGetValue(attribute.Type, out _)) throw new KnownException($"Task type '{attribute.Type}' is already registered");
                _handlerTypes[attribute.Type] = x;
 
                var sequentialAttr = x.GetCustomAttribute<TaskSequentialAttribute>();
@@ -188,7 +188,7 @@ public class TaskCenter(ILogger<TaskCenter> logger, IServiceProvider serviceProv
                 if (logger.IsEnabled(LogLevel.Warning)) logger.LogWarning("{Message} ignored", task.Type);
                 return;
             }
-            var handler = serviceProvider.CreateScope().ServiceProvider.GetRequiredService(handlerType) as BaseTask ?? throw new Exception($"Task type '{handlerType.FullName}' must inherit from {nameof(BaseTask)}");
+            var handler = serviceProvider.CreateScope().ServiceProvider.GetRequiredService(handlerType) as BaseTask ?? throw new KnownException($"Task type '{handlerType.FullName}' must inherit from {nameof(BaseTask)}");
             _cancleTokens[taskId] = new CancellationTokenSource();
             await handler.HandleAsync(taskId, _cancleTokens[taskId].Token);
         }

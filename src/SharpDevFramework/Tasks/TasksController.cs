@@ -44,7 +44,7 @@ public class TasksController(FrameworkDbContext context, TaskCenter taskCenter) 
     [HttpGet("{id}")]
     public DataReply<TaskDto> Get(int id)
     {
-        var task = context.Tasks.FirstOrDefault(x => x.Id == id) ?? throw new Exception("任务不存在");
+        var task = context.Tasks.FirstOrDefault(x => x.Id == id) ?? throw new KnownException("任务不存在");
         return DataReply.Succeed(task.Adapt<TaskDto>());
     }
 
@@ -57,7 +57,7 @@ public class TasksController(FrameworkDbContext context, TaskCenter taskCenter) 
     [Role([UserRoleTypes.Admin])]
     public EmptyReply Delete(int id)
     {
-        var task = context.Tasks.FirstOrDefault(x => x.Id == id) ?? throw new Exception("任务不存在");
+        var task = context.Tasks.FirstOrDefault(x => x.Id == id) ?? throw new KnownException("任务不存在");
         context.Tasks.Remove(task);
         context.SaveChanges();
         return EmptyReply.Succeed();
@@ -71,8 +71,8 @@ public class TasksController(FrameworkDbContext context, TaskCenter taskCenter) 
     [HttpPost("{id}/retry")]
     public async Task<EmptyReply> Retry(int id)
     {
-        var task = context.Tasks.Find(id) ?? throw new Exception("任务不存在");
-        if (task.Status == TaskStates.Processing) throw new Exception("任务正在执行中，无法重试");
+        var task = context.Tasks.Find(id) ?? throw new KnownException("任务不存在");
+        if (task.Status == TaskStates.Processing) throw new KnownException("任务正在执行中，无法重试");
 
         task.Status = TaskStates.Pending;
         task.ErrorMessage = null;
@@ -90,8 +90,8 @@ public class TasksController(FrameworkDbContext context, TaskCenter taskCenter) 
     [HttpPost("{id}/cancel")]
     public async Task<EmptyReply> Cancel(int id)
     {
-        var task = context.Tasks.Find(id) ?? throw new Exception("任务不存在");
-        if (task.Status != TaskStates.Processing) throw new Exception("任务无法取消");
+        var task = context.Tasks.Find(id) ?? throw new KnownException("任务不存在");
+        if (task.Status != TaskStates.Processing) throw new KnownException("任务无法取消");
         await taskCenter.CancelTaskAsync(id);
         return EmptyReply.Succeed();
     }

@@ -53,7 +53,7 @@ public abstract class BaseTask : IScopedService
     /// <param name="cancellationToken">取消令牌</param>
     public async Task HandleAsync(int taskId, CancellationToken cancellationToken)
     {
-        var task = _dbContext.Tasks.Find(taskId) ?? throw new Exception($"task not found with id:{taskId}");
+        var task = _dbContext.Tasks.Find(taskId) ?? throw new KnownException($"task not found with id:{taskId}");
         if (task.Status == TaskStates.Completed) return;
 
         try

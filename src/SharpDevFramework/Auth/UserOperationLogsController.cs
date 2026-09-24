@@ -50,7 +50,7 @@ public class UserOperationLogsController(FrameworkDbContext dbContext) : Control
     public async Task<DataReply<UserOperationLogEntity>> Get(int id)
     {
         var log = await dbContext.UserOperationLogs.FindAsync(id);
-        return log == null ? throw new Exception("日志不存在") : DataReply.Succeed(log);
+        return log == null ? throw new KnownException("日志不存在") : DataReply.Succeed(log);
     }
 }
 

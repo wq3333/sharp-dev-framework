@@ -17,18 +17,42 @@ internal class ExceptionFilter : IExceptionFilter
     /// <param name="context">异常上下文</param>
     public void OnException(ExceptionContext context)
     {
-        var logger = context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger<ExceptionFilter>();
-        logger.LogError(context.Exception, "处理请求失败:{Message},{Trace}", context.Exception?.Message, context.Exception?.StackTrace);
+        var originException= context.Exception;
+        try
+        {
+            if (context.Exception is KnownException knownException)
+            {
+                context.HttpContext.Response.StatusCode = 500;
+                context.Result = new JsonResult(EmptyReply.Failed(knownException.Message));
+            }
+            else
+            {
+                if (context.Exception is UnauthorizedAccessException)
+                {
+                    context.HttpContext.Response.StatusCode = 403;
+                    context.Result = new JsonResult(EmptyReply.Failed(context.Exception?.InnerException?.Message ?? context.Exception?.Message));
+                }
+                else
+                {
+                    var logger = context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger<ExceptionFilter>();
+                    logger.LogError(context.Exception, "处理请求失败:{Message},{Trace}", context.Exception?.Message, context.Exception?.StackTrace);
 
-        if (context.Exception is UnauthorizedAccessException)
-        {
-            context.HttpContext.Response.StatusCode = 403;
-            context.Result = new JsonResult(EmptyReply.Failed(context.Exception?.InnerException?.Message ?? context.Exception?.Message));
+                    context.HttpContext.Response.StatusCode = 500;
+                    context.Result = new JsonResult(EmptyReply.Failed(context.Exception?.InnerException?.Message ?? context.Exception?.Message));
+                }
+            }
         }
-        else
+        catch
         {
-            context.HttpContext.Response.StatusCode = 500;
-            context.Result = new JsonResult(EmptyReply.Failed(context.Exception?.InnerException?.Message ?? context.Exception?.Message));
+            throw originException;
         }
     }
+}
+
+/// <summary>
+/// 已知异常
+/// </summary>
+/// <param name="message"></param>
+public class KnownException(string message) : Exception(message)
+{
 }
